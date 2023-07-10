@@ -1,7 +1,9 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[1]:
+# In[69]:
+
+
 
 
 import os
@@ -35,64 +37,72 @@ print("Today's date:",date.today())
 print(str(datetime.now()))
 
 
-# In[127]:
-
-
-# parser = argparse.ArgumentParser(description='Parameters for pair model.')
-
-# # Add a optional argument
-# parser.add_argument('--code', type=str, help='the CLAnO directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO')
-# parser.add_argument('--bcr',type = str, help = 'the input files for BCRs',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/Jun_bcr.csv')
-# parser.add_argument('--antigen',type = str, help = 'the fasta file of antigens to input',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/Jun_bcr.csv')
-# # parser.add_argument('--mode', type=str, default='binary', choices=['binary', 'continuous'], help='Your choice: binary or continuous. Default is binary.')
-# parser.add_argument('--continuous', action='store_true', help='swtich the mode from binary to continuous, default mode is binary.')
-# parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
-# # parser.add_argument('--cut_off', type=int, help='the maximum of length of sequencing, over which will be deleted. default is 1800',default = 1800)
-# parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
-# parser.add_argument('--Limit', type = float, help = 'the size limit for the antigens in gpu.',default = 5)
-# parser.add_argument('--max_num', type = float, help = 'the size limit for the antigens in gpu.',default = 10)
-# parser.add_argument('--group_size', type = int, help = 'the leap to change the antigen unless there are not enough entries.',default = 50)
-# parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
-
-# args = parser.parse_args()
-
-# CLANO_DIR = args.code
-# BCR_INPUT = args.bcr
-# ANTIGEN_INPUT = args.antigen
-# CUTOFF = args.cut_off
-# SEED = args.seed
-# LIMIT = args.Limit
-# Max_num = args.max_num
-# GROUP_SIZE = args.group_size
-# VERBOSE = args.verbose
-# CONT = args.continuous
-# MATCHING_SPECIES = args.species
+# In[ ]:
 
 
 
-# In[2]:
+
+parser = argparse.ArgumentParser(description='Parameters for pair model.')
+
+# Add a optional argument
+parser.add_argument('--code', type=str, help='the CLAnO directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO')
+#parser.add_argument('--input',type = str, help = 'the input files for BCRs',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/intermediates/processed_input.csv')
+parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example')
+parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
+parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
+parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
+parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
+parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
+
+args = parser.parse_args()
+
+CODE_DIR = args.code
+#INPUT = args.input
+OUT_DIR = args.out
+MATCHING_SPECIES = args.species
+SEED = args.seed
+SUBSAMPLE = args.subsample
+BOTTOMLINE = args.bottomline
+VERBOSE = args.verbose
 
 
-CLANO_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO'
-ANTIGEN_INPUT = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/cleaned.antigen.Jun.fasta"
-BCR_INPUT = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/Jun_bcr.csv"
+# In[171]:
+
+
+
+
+CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO'
 #CUTOFF = 1800
 SEED = 1
-GROUP_SIZE = 50
-LIMIT = 5
-Max_num = 10
 VERBOSE = False
-CONT = False
 MATCHING_SPECIES = False
+SUBSAMPLE = 100
+BOTTOMLINE = 10000
+OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example'
 
 
-# In[3]:
+# In[172]:
 
 
-os.chdir(CLANO_DIR)
-BACKGROUND = 'data/background/backgroundBCR.csv'
+if BOTTOMLINE >1000000:
+    print('The bottomline cannot be larger than 1,000,000.')
+    exit()
+
+
+# In[71]:
+
+
+os.chdir(CODE_DIR)
+
+
+# In[72]:
+
+
+
+BACKGROUND = 'data/background/backgroundBCR.csv.gz'
 NPY_DIR = 'data/intermediates/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
 MODEL = 'models/binary_model.pth'
+INPUT = 'data/intermediates/processed_input.csv'
 
 from wrapV.Vwrap import embedV ##input needs to be list of strings
 from wrapCDR3.CDR3wrap import embedCDR3 ##input needs to be list of strings
@@ -105,7 +115,7 @@ LAMBDA = 0
 w = 100
 
 
-# In[4]:
+# In[73]:
 
 
 print('system version:',sys.version)
@@ -114,43 +124,7 @@ print('device:',device)
 torch.set_printoptions(precision=10)
 
 
-# In[5]:
-
-
-if CONT:
-    MODE = 'continuous'
-    print('mode switching ...')
-else:
-    MODE = 'binary'
-print('Entering',MODE,'mode now...')
-
-
-# In[6]:
-
-
-target_bcr_file = pd.read_csv(BCR_INPUT) # required columns 'Vh','CDR3h', optional 'species'
-background = pd.read_csv(BACKGROUND) # with columns 'Vh','CDR3h','file','species'
-
-
-# In[7]:
-
-
-if 'BCR_species' in target_bcr_file.columns:
-    unique_values = target_bcr_file['BCR_species'].dropna().unique()
-    if len(unique_values) == 1 and unique_values[0] in {'human', 'mouse'}:
-        species = unique_values[0]
-        print('The species is:',species)
-        if MATCHING_SPECIES:
-            print('matching the background species...')
-            backgroud_bcr_file = backgroud_bcr_file[backgroud_bcr_file['species']==species]
-    else:
-        print('The target species are not unique or not in the background species.')
-else:
-    print('No species are specified!')
-
-
-# In[8]:
-
+# In[76]:
 
 
 # def get_now():
@@ -171,7 +145,7 @@ def check_bad_bcr(seq):
     return not any(char not in allowed_letters for char in uppercase_string)
 
 def filter_bad_bcr(df):
-    substrings = ['Vh', 'CDR3h', 'Antigen']
+    substrings = ['Vh', 'CDR3h', 'Antigen_seq']
     some_columns = [col for col in df.columns if any(sub in col for sub in substrings)]
     for col in some_columns:
         df[col] = df[col].apply(lambda x: x.replace(' ', ''))
@@ -181,10 +155,8 @@ def filter_bad_bcr(df):
 
 def preprocess(df):
     df = filter_bad_bcr(df)
-#     if 'Antigen' in df.columns:
-#         df = filter_big_antigens(df,cutoff)
-#         df = df.assign(antigen_index = df['Project'] + '/' + df['id'].astype(str))
-#     df = df.sort_values('antigen_index',)
+#    df = filter_big_antigens(df,cutoff)
+    df = df.sort_values('Antigen_id')
     df = df.assign(record_id = ['record_' + str(s) for s in range(df.shape[0])])
     return df
 
@@ -214,91 +186,177 @@ def build_BCR_dict(dataset,colname,precise = False):
         i += 1
     return(mydict)
 
-# def predict_size(len,datatype = 'float32'):
-#     # Define the shape of the tensor
-#     shape = [1, len, len, 318]
-#     element_size = np.dtype(datatype).itemsize
-#     num_elements = math.prod(shape)
-#     tensor_size = num_elements * element_size
-# #    size_gb = tensor_size/(1024**3)
-# #    print(f"The tensor takes up {size_gb:.2f} GB of memory.")
-# #    size_gb = tensor_size/(1024*1024*1024)
-# #    print(f"Tensor size: {size_gb:.2f} GB")
-#     return tensor_size
+def predict_size(len,datatype = 'float32'):
+    # Define the shape of the tensor
+    shape = [1, len, len, 318]
+    element_size = np.dtype(datatype).itemsize
+    num_elements = math.prod(shape)
+    tensor_size = num_elements * element_size
+#    size_gb = tensor_size/(1024**3)
+#    print(f"The tensor takes up {size_gb:.2f} GB of memory.")
+#    size_gb = tensor_size/(1024*1024*1024)
+#    print(f"Tensor size: {size_gb:.2f} GB")
+    return tensor_size
+
+def get_antigen_dict(df):
+    antigen_pool = df['Antigen_id'].unique()
+    antigen_dict = {}
+    for antigen in antigen_pool:
+        antigen_dict[antigen] = np.load(NPY_DIR+'/'+antigen+'.pair.npy')/w
+    return antigen_dict
 
 
-# In[108]:
+# In[81]:
 
 
-#backgroud = preprocess(backgroud_bcr_file,CUTOFF)
-
-
-# In[112]:
-
-
-#backgroud.to_csv(BACKGROUND,index=False)
-
-
-# In[131]:
-
-
-# 100 background BCR.
-# Sample 1% of the rows
-
-
-# In[9]:
-
-
-if SEED == 1:
-    with open('data/background/default100_V_dict.pkl','rb') as f:
-        Vh_dict = pickle.load(f)
-    with open('data/background//default100_CDR3_dict.pkl','rb') as f:
-        CDR3h_dict = pickle.load(f)
-else:
-    back100 = background.sample(frac=1/10000, random_state=SEED)
-    Vh_dict = build_BCR_dict(subsample,'Vh',precise = True)
-    CDR3h_dict = build_BCR_dict(subsample,'CDR3h',precise = True)
-# with open('data/background/default100_V_dict.pkl','wb') as f:
-#     pickle.dump(Vh_dict, f)
-# with open('data/background//default100_CDR3_dict.pkl','wb') as f:
-#     pickle.dump(CDR3h_dict, f)
-
-
-# In[10]:
-
-
-antigen_dict = {}
-with open(ANTIGEN_INPUT, "r") as handle:
-    for record in SeqIO.parse(handle, "fasta"):
-        # Access the ID and sequence of each record
-        antigen_dict[record.id] = str(record.seq)
-print(antigen_dict.keys())
-
-
-# In[ ]:
-
-
-##MARK HERE###
-
-
-# In[11]:
-
-
-#import torch
-#from torch.utils.data import Dataset
-#import numpy as np
-class rankDataset(Dataset):
-    def __init__(self, antigen, dataframe, antigen_dict, cdr3_dict, v_dict, antigen_fpath_dict,subsample_ratio=1/10000,seed=SEED):
-        self.seed = seed
+class checkDataset(Dataset):
+    def __init__(self, dataframe, antigen_dict, antigen_fpath_dict,len_dict):
+        self.dataframe = dataframe
+#        self.group_ids = self.generate_group_index(group_size=GROUP_SIZE)  # Adjust the group_size as needed
+        self.your_data_list = self.get_my_data_list()
         self.antigen_fpath_dict = antigen_fpath_dict
+#        self.bcr_pool = self.data[['BCR_id','BCR_Vh','BCR_CDR3h']].to_dict(orient='records')
         self.antigen_dict = antigen_dict
+        self.cdr3_dict = {}
+        self.v_dict = {}
+        self.lens_dict = len_dict
+        self.antigen_in = {}
+
+    def __getitem__(self, idx):
+        your_dict = self.your_data_list[idx]
+#         self.antigen_feat = self.extract_antigen(antigen)[0].to(device)
+#         self.lengthen = len(self.antigen_dict[antigen])     
+#         bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True)
+#         pair_feat = self.__comb_embed_gpu(bcr_feat)
+#         return pair_feat,index_key
+        antigen_key = your_dict['Antigen_id']
+#        print(antigen_key)
+        aalens_key = self.lens_dict[antigen_key]
+        cdr3_key = your_dict['BCR_CDR3h']
+        v_key = your_dict['BCR_Vh']
+        bcr_key = your_dict['BCR_id']
+        index_key = your_dict['record_id']
+        bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True) #MARK HERE: EDIT the embedding_BCR function using a dictionary of bcr_id:bcr_embedding
+        if antigen_key not in self.antigen_in.keys():
+            self.__get_antigen_in(antigen_key)
+#            print(self.antigen_in)
+#        print('antigen shape',self.antigen_in[antigen_key].shape)
+        pair_feat = self.__comb_embed_gpu(self.antigen_in[antigen_key],bcr_feat)
+        return pair_feat, index_key, antigen_key, bcr_key#better_feat, worse_feat,
+
+    def get_my_data_list(self,selected_cols = 'BCR|BCR|Antigen|record_id|'):
+        ds_to_dict = self.dataframe.filter(regex=selected_cols)
+    #ds_to_dict = dataset[selected_cols].set_index('record_id')
+        my_data_list = ds_to_dict.to_dict(orient='records')
+        return my_data_list
+
+    def __comb_embed_gpu(self,antigen_feat,BCR_feat):
+#        print('antigen to comb:',antigen_name)
+        lengthen = CHANNEL_ANTIGEN
+        #rint('The current antigen is: ',antigen_name)
+#        print('length get from dict_len:',lengthen)
+        single_antigen_g = antigen_feat[0]
+#        single_antigen_g = F.normalize(single_antigen_g, p=2, dim=3)
+#        print('shape of antigen from antigen dict:',single_antigen_g.shape)
+#        single_antigen_g = torch.from_numpy(single_antigen).to(device)
+        single_BCR_g = torch.from_numpy(BCR_feat).to(device)
+#        print('single BCR shape:',single_BCR_g.shape)
+#        single_BCR_g = torch.from_numpy(BCR_feat).half().to(device)
+        BCR_t = torch.tile(single_BCR_g,(lengthen,lengthen,1))
+#        print('tiled bcr shape',BCR_t.shape)
+#        print('shape of BCR_tiled:',BCR_t.shape)#empty
+        pair_feat_g = torch.cat((single_antigen_g,BCR_t),dim=2)
+        del single_BCR_g,BCR_t
+        torch.cuda.empty_cache()
+        return pair_feat_g#.half()
+
+
+    def __get_antigen_in(self,antigen_name):
+        #print('Next antigen:',antigen_name)
+#        if not antigen_name in self.antigen_in:
+        self.antigen_in.clear()
+        if not antigen_name in self.antigen_dict:
+            antigen_to_in = self.extract_antigen(antigen_name)
+        else:
+            antigen_to_in = self.antigen_dict[antigen_name]
+        try:
+            antigen_tensor = torch.from_numpy(antigen_to_in)
+            self.antigen_in[antigen_name] = self.pool_antigen(antigen_tensor,CHANNEL_ANTIGEN).to(device) ###ON CPU
+
+        except RuntimeError as e:
+            if "CUDA out of memory" in str(e):
+                print("CUDA out of memory. Clearing cache and trying again...")
+                torch.cuda.empty_cache()
+                try:
+                    self.antigen_in[antigen_name] = self.pool_antigen(torch.from_numpy(antigen_to_in),CHANNEL_ANTIGEN).to(device) 
+                except RuntimeError as e:
+                    if "CUDA out of memory" in str(e):
+                        print("Still out of memory after clearing cache.")
+                    else:
+                        raise
+            else:
+                raise
+
+    def pool_antigen(self,antigen_input,out_n_channel):
+#        lengthen = antigen_input.shape[1]
+        pooling_layer = nn.AdaptiveAvgPool2d((out_n_channel,out_n_channel))
+        output = pooling_layer(antigen_input.permute(0,3,1,2)).permute(0,2,3,1)
+        return output
+
+    def extract_antigen(self,antigen_name,verbose=False):
+        try:
+            antigen_import = np.load(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy')/w
+            if not antigen_import.shape[1] == self.lens_dict[antigen_name]:
+                print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding '+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
+                exit()
+#             single_antigen = antigen_import
+            self.antigen_dict[antigen_name] = antigen_import
+
+        except ValueError:
+            print('The embedding of antigen %s cannot be found!' % antigen_name)
+
+        return single_antigen
+
+    def __embedding_BCR(self,cdr3_seq,v_seq,precise = False):
+        if cdr3_seq not in self.cdr3_dict:
+#            print('CDR3 not in dictionary!!')
+#            df1 = pd.DataFrame()
+            cdr3_feat,*_ = embedCDR3([cdr3_seq],precise = precise)
+            cdr3_feat = cdr3_feat[0]
+            self.cdr3_dict[cdr3_seq]=cdr3_feat
+        else:
+#            print('CDR3 in dictionary!!')
+            cdr3_feat = self.cdr3_dict[cdr3_seq]
+        if v_seq not in self.v_dict:
+#            print('V not in dictionary!!')
+#            df2 = pd.DataFrame([v_seq])
+            v_feat,*_ = embedV([v_seq],precise = precise)
+            v_feat = v_feat[0]
+            self.v_dict[v_seq]=v_feat
+        else:
+#            print('V in dictionary!!')
+            v_feat = self.v_dict[v_seq]
+        bcr_feat = np.concatenate((cdr3_feat,v_feat))
+        return bcr_feat
+
+    def __len__(self):
+        return len(self.your_data_list)
+
+
+# In[83]:
+
+
+class rankDataset(Dataset):
+    def __init__(self, dataframe, antigen, cdr3_dict, v_dict,subsample_ratio=1/10000,seed=SEED):
+        self.seed = seed
+#         self.antigen_fpath_dict = antigen_fpath_dict
+        self.antigen_feat = antigen
         self.cdr3_dict = cdr3_dict
         self.v_dict = v_dict
         self.background = self.subsample_data(dataframe, subsample_ratio=subsample_ratio)
         self.bcr_pool = self.background[['Vh','CDR3h']].to_dict(orient='records')
 #        print(len(self.bcr_pool))
-        self.antigen_feat = self.extract_antigen(antigen)[0].to(device)
-        self.lengthen = len(self.antigen_dict[antigen])
+#         self.lengthen = len(self.antigen_dict[antigen])
 #        print(self.lengthen)
 
     def subsample_data(self, dataframe, subsample_ratio):
@@ -319,11 +377,12 @@ class rankDataset(Dataset):
         return pair_feat
 
     def __comb_embed_gpu(self,bcr_feat):
-        if MODE == 'binary':
-            lengthen = CHANNEL_ANTIGEN
-        else:
-            lengthen = self.lengthen
-        single_antigen_g = self.antigen_feat  
+#         if MODE == 'binary':
+        lengthen = CHANNEL_ANTIGEN
+#         else:
+#             lengthen = self.lengthen
+        antigen_tensor =  torch.from_numpy(self.antigen_feat).float()
+        single_antigen_g = self.pool_antigen(antigen_tensor,CHANNEL_ANTIGEN)[0].to(device) 
         single_BCR_g = torch.from_numpy(bcr_feat).to(device)
         BCR_t = torch.tile(single_BCR_g,(lengthen,lengthen,1))
         pair_feat_g = torch.cat((single_antigen_g,BCR_t),dim=2)
@@ -331,18 +390,18 @@ class rankDataset(Dataset):
         torch.cuda.empty_cache()
         return pair_feat_g
 
-    def extract_antigen(self,antigen_name):
-        try:
-            antigen_import = np.load(str(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy'))/w
-#             if not antigen_import.shape[1] == self.lengthen:
-#                 print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding'+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
-#                 exit()            
-            single_antigen = torch.from_numpy(antigen_import).float()
-            if MODE == 'binary':
-                single_antigen = self.pool_antigen(single_antigen,CHANNEL_ANTIGEN) ###ON CPU
-        except ValueError:
-            print('The embedding of antigen %s cannot be found!' % antigen_name)        
-        return single_antigen
+#     def extract_antigen(self,antigen_name):
+#         try:
+#             antigen_import = np.load(str(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy'))/w
+# #             if not antigen_import.shape[1] == self.lengthen:
+# #                 print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding'+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
+# #                 exit()            
+#             single_antigen = torch.from_numpy(antigen_import).float()
+# #             if MODE == 'binary':
+#             single_antigen = self.pool_antigen(single_antigen,CHANNEL_ANTIGEN) ###ON CPU
+#         except ValueError:
+#             print('The embedding of antigen %s cannot be found!' % antigen_name)        
+#         return single_antigen
 
     def __embedding_BCR(self,cdr3_seq,v_seq,precise = True):
         if cdr3_seq not in self.cdr3_dict:
@@ -370,80 +429,9 @@ class rankDataset(Dataset):
         return len(self.bcr_pool)
 
 
-# In[12]:
+# In[86]:
 
 
-class checkDataset(Dataset):
-    def __init__(self, antigen, dataframe, antigen_dict, antigen_fpath_dict):
-        self.antigen_fpath_dict = antigen_fpath_dict
-        self.antigen_dict = antigen_dict
-        self.data = dataframe
-        self.bcr_pool = self.data[['ID','Vh','CDR3h']].to_dict(orient='records')
-        self.antigen_feat = self.extract_antigen(antigen)[0].to(device)
-        self.lengthen = len(self.antigen_dict[antigen])
-
-    def __getitem__(self, idx):
-        bcr_dict = self.bcr_pool[idx]
-        index_key = bcr_dict['ID']
-        v_key = bcr_dict['Vh']
-        cdr3_key = bcr_dict['CDR3h']        
-        bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True)
-        pair_feat = self.__comb_embed_gpu(bcr_feat)
-        return pair_feat,index_key
-
-    def __comb_embed_gpu(self,bcr_feat):
-        if MODE == 'binary':
-            lengthen = CHANNEL_ANTIGEN
-        else:
-            lengthen = self.lengthen
-        single_antigen_g = self.antigen_feat  
-        single_BCR_g = torch.from_numpy(bcr_feat).to(device)
-        BCR_t = torch.tile(single_BCR_g,(lengthen,lengthen,1))
-        pair_feat_g = torch.cat((single_antigen_g,BCR_t),dim=2)
-        del single_BCR_g,BCR_t
-        torch.cuda.empty_cache()
-        return pair_feat_g
-
-    def extract_antigen(self,antigen_name):
-        try:
-            antigen_import = np.load(str(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy'))/w
-#             if not antigen_import.shape[1] == self.lengthen:
-#                 print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding'+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
-#                 exit()            
-            single_antigen = torch.from_numpy(antigen_import).float()
-            if MODE == 'binary':
-                single_antigen = self.pool_antigen(single_antigen,CHANNEL_ANTIGEN) ###ON CPU
-        except ValueError:
-            print('The embedding of antigen %s cannot be found!' % antigen_name)        
-        return single_antigen
-
-    def __embedding_BCR(self,cdr3_seq,v_seq,precise = True):
-#         if cdr3_seq not in self.cdr3_dict:
-        cdr3_feat,*_ = embedCDR3([cdr3_seq],precise = precise)
-        cdr3_feat = cdr3_feat[0]
-#             self.cdr3_dict[cdr3_seq]=cdr3_feat
-#         else:
-#             cdr3_feat = self.cdr3_dict[cdr3_seq]
-#         if v_seq not in self.v_dict:
-        v_feat,*_ = embedV([v_seq],precise = precise)
-        v_feat = v_feat[0]
-#             self.v_dict[v_seq]=v_feat
-#         else:
-#             v_feat = self.v_dict[v_seq]
-        bcr_feat = np.concatenate((cdr3_feat,v_feat))
-        return bcr_feat
-    
-    def pool_antigen(self,antigen_tensor,out_n_channel):
-#        lengthen = antigen_input.shape[1]
-        pooling_layer = nn.AdaptiveAvgPool2d((out_n_channel,out_n_channel))
-        output = pooling_layer(antigen_tensor.permute(0,3,1,2)).permute(0,2,3,1)
-        return output
-
-    def __len__(self):
-        return len(self.bcr_pool)
-
-
-# In[13]:
 
 
 class SelfAttentionPooling(nn.Module):
@@ -477,43 +465,45 @@ class SelfAttentionPooling(nn.Module):
         return utter_rep
 
 
-# In[14]:
+# In[90]:
+
+
 
 
 class mix_model(nn.Module):
-    def __init__(self,mode='binary'):
+    def __init__(self):
         super(mix_model,self).__init__()
-        if mode =='binary':
-            self.model1 = nn.Sequential(
-                nn.Linear(318,40),#.to(torch.float64),
-                # in (1,len,len,318)
-                # out (1,len,len.50)
-                nn.LeakyReLU(0.1),
-                nn.Linear(40,30),#.to(torch.float64),
-                nn.LeakyReLU(0.1),
-                nn.Linear(30,20),#.to(torch.float64),
-                # out (1,len,len,20)
-                nn.LeakyReLU(0.1)
-            )
-        else:
-            self.model10 = nn.Sequential(
-                nn.Linear(318,40),#.to(torch.float64),
-                # in (1,len,len,318)
-                # out (1,len,len.50)
-                nn.LeakyReLU(0.1),
-            )
+#         if mode =='binary':
+        self.model1 = nn.Sequential(
+            nn.Linear(318,40),#.to(torch.float64),
+            # in (1,len,len,318)
+            # out (1,len,len.50)
+            nn.LeakyReLU(0.1),
+            nn.Linear(40,30),#.to(torch.float64),
+            nn.LeakyReLU(0.1),
+            nn.Linear(30,20),#.to(torch.float64),
+            # out (1,len,len,20)
+            nn.LeakyReLU(0.1)
+        )
+#         else:
+#             self.model10 = nn.Sequential(
+#                 nn.Linear(318,40),#.to(torch.float64),
+#                 # in (1,len,len,318)
+#                 # out (1,len,len.50)
+#                 nn.LeakyReLU(0.1),
+#             )
 
-            self.model11 = nn.Sequential(
-                nn.AdaptiveAvgPool2d((CHANNEL_ANTIGEN,CHANNEL_ANTIGEN))
-            )
+#             self.model11 = nn.Sequential(
+#                 nn.AdaptiveAvgPool2d((CHANNEL_ANTIGEN,CHANNEL_ANTIGEN))
+#             )
 
-            self.model12 = nn.Sequential(
-                nn.Linear(40,30),#.to(torch.float64),
-                nn.LeakyReLU(0.1),
-                nn.Linear(30,20),#.to(torch.float64),
-                # out (1,len,len,20)
-                nn.LeakyReLU(0.1)
-            )
+#             self.model12 = nn.Sequential(
+#                 nn.Linear(40,30),#.to(torch.float64),
+#                 nn.LeakyReLU(0.1),
+#                 nn.Linear(30,20),#.to(torch.float64),
+#                 # out (1,len,len,20)
+#                 nn.LeakyReLU(0.1)
+#             )
         self.model2 = SelfAttentionPooling(input_dim=20,hidden_dim=30)
         self.model2_1 = SelfAttentionPooling(input_dim=20,hidden_dim=30)
         # input_dim = hidden size (number of channels)
@@ -534,24 +524,24 @@ class mix_model(nn.Module):
 #         print('after permute',x.shape)
         x0 = torch.empty(0)
         x0 = x0.to(device)
-        if mode=='binary':
-            x = self.model1(x)
-            for i in range(len(x)):
-                k = x[i]
-                k = self.model2(k).unsqueeze(0)
-                k = self.model2_1(k)
-                x0 = torch.cat((x0, k), dim=0)
-        else:
-            x = self.model10(x)
-            for i in range(len(x)):
-                k = x[i]
-                k=k.permute(2,0,1)
-                k=self.model11(k)
-                k=k.permute(1,2,0)
-                k=self.model12(k)
-                k = self.model2(k).unsqueeze(0)
-                k = self.model2_1(k)
-                x0 = torch.cat((x0, k), dim=0)
+#         if mode=='binary':
+        x = self.model1(x)
+        for i in range(len(x)):
+            k = x[i]
+            k = self.model2(k).unsqueeze(0)
+            k = self.model2_1(k)
+            x0 = torch.cat((x0, k), dim=0)
+#         else:
+#             x = self.model10(x)
+#             for i in range(len(x)):
+#                 k = x[i]
+#                 k=k.permute(2,0,1)
+#                 k=self.model11(k)
+#                 k=k.permute(1,2,0)
+#                 k=self.model12(k)
+#                 k = self.model2(k).unsqueeze(0)
+#                 k = self.model2_1(k)
+#                 x0 = torch.cat((x0, k), dim=0)
         x0 = F.normalize(x0)
         x0 = self.model3(x0).squeeze()
 #        if binary:
@@ -559,7 +549,7 @@ class mix_model(nn.Module):
         return(out)
 
 
-# In[15]:
+# In[111]:
 
 
 def background_scores(dataloader,model):
@@ -570,15 +560,26 @@ def background_scores(dataloader,model):
         score_ls.append(score.item())
     return score_ls
 
-def check_scores(dataloader,model):
-    score_dict = {}
+
+# In[125]:
+
+
+def check_score(dataloader,model):
+    res = pd.DataFrame(columns=['record_id', 'Antigen', 'BCR_id','Score'])
+#    print(zip(index_idx,antigen_index))
+#    print(b_pair.shape,w_pair.shape)
     model.eval()
-    for batch, index in dataloader:
-        score_dict[index] = model(batch).item()
-    return score_dict 
+    for batch in dataloader:
+        pair, index_idx, antigen_key, bcr_key =batch ##Change the InLoader, when binary is False, w_pair = score
+        out = model(pair)
+    #    if binary:
+        score = out.cpu().detach().tolist()
+        df = pd.DataFrame({'record_id':index_idx,'Antigen':antigen_key,'BCR_id':bcr_key,'Score':score})
+        res = pd.concat([res,df],axis=0,ignore_index=True)
+    return(res)
 
 
-# In[16]:
+# In[128]:
 
 
 def locate_rank(number, my_list):
@@ -598,10 +599,93 @@ def locate_rank(number, my_list):
     return percentage_rank
 
 
-# In[17]:
+# In[141]:
 
 
-model_mix = mix_model(mode=MODE)
+def generate_score_dict(df,score_dict,antigen_dict,cdr3_dict,v_dict,model,subsample=1/10000,seed =SEED):
+    for antigen_id, antigen in antigen_dict.items():
+        background_loader = DataLoader(rankDataset(df, antigen, cdr3_dict, v_dict,subsample_ratio=subsample,seed=seed),1)
+        score_background = background_scores(background_loader,model)
+        score_dict[antigen_id]=score_background
+    return(score_dict)
+
+
+# In[143]:
+
+
+def calculate_rank(df,score_dict,antigen_dict,len_dict,model):
+    check_loader = DataLoader(checkDataset(df, antigen_dict, NPY_DIR,len_dict),1)
+    res_check = check_score(check_loader,model)
+    res_check['Rank'] = res_check.apply(lambda row: locate_rank(row['Score'], score_dict[row['Antigen']]), axis=1)
+    return(res_check)
+
+
+# In[74]:
+
+
+target_file = pd.read_csv(INPUT) # required columns 'Vh','CDR3h', optional 'species'
+background = pd.read_csv(BACKGROUND,compression='gzip') # with columns 'Vh','CDR3h','file','species'
+
+
+# In[75]:
+
+
+if 'BCR_species' in target_file.columns:
+    unique_values = target_file['BCR_species'].dropna().unique()
+    if len(unique_values) == 1 and unique_values[0] in {'human', 'mouse'}:
+        species = unique_values[0]
+        print('The species is:',species)
+        if MATCHING_SPECIES:
+            print('matching the background species...')
+            background = background[background['species']==species]
+    else:
+        print('The target species are not unique or not in the background species.')
+else:
+    print('No species are specified!')
+
+
+# In[178]:
+
+
+target = preprocess(target_file)
+
+
+# In[79]:
+
+
+antigen_dict = get_antigen_dict(target)
+for key,value in antigen_dict.items():
+    print(key,value.shape)
+
+
+# In[77]:
+
+
+if SEED == 1:
+    with open('data/background/default100_V_dict.pkl','rb') as f:
+        Vh_dict = pickle.load(f)
+    with open('data/background//default100_CDR3_dict.pkl','rb') as f:
+        CDR3h_dict = pickle.load(f)
+else:
+    back100 = background.sample(frac=1/10000, random_state=SEED)
+    Vh_dict = build_BCR_dict(back100,'Vh',precise = True)
+    CDR3h_dict = build_BCR_dict(back100,'CDR3h',precise = True)
+# with open('data/background/default100_V_dict.pkl','wb') as f:
+#     pickle.dump(Vh_dict, f)
+# with open('data/background//default100_CDR3_dict.pkl','wb') as f:
+#     pickle.dump(CDR3h_dict, f)
+
+
+# In[80]:
+
+
+len_dict = target.drop_duplicates(subset='Antigen_id').set_index('Antigen_id')['Antigen_seq'].map(len).to_dict()
+
+
+# In[92]:
+
+
+model_mix = mix_model()
 checkpoint = torch.load(MODEL)
 model_mix.load_state_dict(checkpoint)
 model_mix.to(device)
@@ -609,66 +693,72 @@ optimizer = torch.optim.Adam(model_mix.parameters(),lr=LR)
 scheduler = ReduceLROnPlateau(optimizer,mode = 'min',factor=0.1,patience =10,verbose=False,threshold_mode='rel',threshold=1e-5)
 
 
-# In[257]:
+# In[144]:
 
 
-# MARK HERE: Is it Possible to remove the alpha1 beta1 alpha2 beta2 from checkpoint?
-# REMEMBER to write if 1%, expand the subsample...
+# score_dict = generate_score_dict(background,score_dict,antigen_dict,CDR3h_dict,Vh_dict,model_mix)
+# res = calculate_rank(target,score_dict,antigen_dict,len_dict,model_mix)
+# for antigen_id, antigen in antigen_dict.items():
+#     background_loader = DataLoader(rankDataset(background, antigen, CDR3h_dict, Vh_dict,subsample_ratio=1/10000,seed=SEED),1)
+#     score_background = background_scores(background_loader,model_mix)
+#     score_dict[antigen_id]=score_background
 
 
-# In[195]:
+# In[126]:
 
 
-# # Remove the parameters you don't want
-# del checkpoint['alpha1']
-# del checkpoint['alpha2']
-# del checkpoint['beta1']
-# del checkpoint['beta2']
-
-# # Save the modified checkpoint
-# torch.save(checkpoint,MODEL)
+# target_dataset = checkDataset(target, antigen_dict, NPY_DIR,len_dict)
+# check_loader = DataLoader(target_dataset,1)
+# res_check = check_score(check_loader,model_mix)
+# res_check['Rank'] = res_check.apply(lambda row: locate_rank(row['Score'], score_dict[row['Antigen']]), axis=1)
 
 
-# In[25]:
+# In[134]:
 
 
+# df_cutoffs = pd.DataFrame({'backsample': [100, 1000, 10000, 100000], 
+#                            'cutoffs': [0.2, 0.1, 0.05, 0.01]})
+# df_cutoffs.to_csv('data/intermediates/cutoff_table.txt', sep='\t', index=False)
+
+
+# In[183]:
+
+
+df = pd.read_csv('data/intermediates/cutoff_table.txt', sep='\t')
+cutoffs_dict = df.set_index('backsample')['cutoffs'].to_dict()
+cutoffs_dict
+
+
+# In[164]:
+
+
+# subratio=1/10000
+# filtered_df = res[res['Rank']<cutoffs_dict[subratio*1000000]]
+# filtered_antigen_dict = {k: v for k, v in antigen_dict.items() if k in filtered_df['Antigen'].values}
+# filtered_target = target[target['record_id'].isin(filtered_df['record_id'])]
+
+
+# In[184]:
+
+
+score_dict = {}
+subsample = SUBSAMPLE
+s_target =  target
+f_antigens = antigen_dict
 output = pd.DataFrame()
-for antigen in antigen_dict.keys():
-#    print('For antigen:',antigen)
-#     background_loader =rankDataset(antigen, background, antigen_dict, CDR3h_dict, Vh_dict,NPY_DIR,subsample_ratio=1/10000,seed=1)
-    background_dataset =rankDataset(antigen, background, antigen_dict, CDR3h_dict, Vh_dict,NPY_DIR,subsample_ratio=1/10000,seed=1)
-    background_loader = DataLoader(background_dataset, 1)
-    back_scores = background_scores(background_loader,model_mix)
-    target_dataset =checkDataset(antigen, target_bcr_file, antigen_dict, NPY_DIR)
-    target_loader =DataLoader(target_dataset, 1)
-    target_score = check_scores(target_loader,model_mix)
-    #print('the binding score of the tested bcr is:',target_score)
-    rank = {}
-    for bcr, score in target_score.items():
-        rank[bcr[0]]= locate_rank(score,back_scores)
-    temp_df = pd.DataFrame(list(rank.items()), columns=['BCR', 'Score'])
-    # Add a column for the loop name
-    temp_df['Antigen'] = antigen
-    # Append temp_df to df
-    output = pd.concat([output,temp_df], ignore_index=True)
-#    print('the binding rank of the tested bcr is:',rank)
-output.head()
+while len(s_target)>0 and subsample<=BOTTOMLINE:
+    print('Ranking for ',s_target['record_id'].to_list(),'...')
+    score_dict = generate_score_dict(background,score_dict,f_antigens,CDR3h_dict,Vh_dict,model_mix,subsample=subsample/1000000,seed=SEED)
+    res = calculate_rank(s_target,score_dict,f_antigens,len_dict,model_mix)
+    output = pd.concat([output,res[res['Rank']>=cutoffs_dict[subsample]]],axis =0)
+    f_res = res[res['Rank']<cutoffs_dict[subsample]]
+    f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
+    s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
+    subsample = subsample*10
 
 
-# In[24]:
+# In[187]:
 
 
-output.to_csv('data/example/compare_results.csv')
-
-
-# In[ ]:
-
-
-
-
-
-# In[ ]:
-
-
-#mark here to export
+output.to_csv(OUT_DIR+'/binding_results.csv')
 
