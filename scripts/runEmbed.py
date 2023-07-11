@@ -2,8 +2,8 @@ import os
 from glob import iglob
 
 from config import Conf, config
-from scripts.Preprocess import preprocess
-from scripts.NPZtoPair import exPair
+from Preprocess import preprocess
+from NPZtoPair import exPair
 from rfscripts.rfpd import run_msa
 from rfscripts.rfpd import run_rfpd
 #from rfscripts.config import Conf, config

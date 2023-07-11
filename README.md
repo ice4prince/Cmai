@@ -1,9 +1,11 @@
 ## README
-#  install DeLAnO environment
+#  install multiple environment
 	cd /path/to/Cmai
 	git clone git@github.com:ice4prince/Cmai.git
-	conda env create -f runEmbed.yml
-	cd DeLAnO/rfscripts
+	conda env create -f models/runEmbed.yml
+	conda env create -f models/torch_a100.yml
+	cd scripts/rfscripts
+	rm -r RoseTTAFold
 #  Install RoseTTAFold
 Clone the package  
 
@@ -39,6 +41,8 @@ Download sequence and structure databases
 	# for CASP14 benchmarks, we used this one:https://files.ipd.uw.edu/pub/RoseTTAFold/pdb100_2020Mar11.tar.gz`
 
 
+## Pipeline
+	python Cmai.py ....
 ## Usage
 	usage: runEmbed.py [-h] [--fasta FASTA] [--verbose VERBOSE] [--cpu CPU] [--mem MEM] [--use_cpu USE_CPU]
 			   [--skip_gen_msa SKIP_GEN_MSA] [--skip_run_rf SKIP_RUN_RF] [--skip_preprocess SKIP_PREPROCESS]
@@ -47,7 +51,7 @@ Download sequence and structure databases
 			   [--exe.hhblits EXE.HHBLITS] [--exe.hhfilter EXE.HHFILTER] [--exe.psipred EXE.PSIPRED]
 			   [--exe.psipass2 EXE.PSIPASS2]
 
-	Config for DeLAnO script.
+	Config for runEmbed script.
 
 	options:
 	  -h, --help            show this help message and exit
