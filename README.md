@@ -3,7 +3,7 @@
 	cd /path/to/Cmai
 	git clone git@github.com:ice4prince/Cmai.git
 	conda env create -f models/runEmbed.yml
-	conda env create -f models/torch_a100.yml
+	conda env create -f models/runBC.yml
 	cd scripts/rfscripts
 	rm -r RoseTTAFold
 #  Install RoseTTAFold

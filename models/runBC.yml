@@ -1,4 +1,4 @@
-name: Cmai
+name: runBC.yml
 channels:
   - pytorch
   - nvidia
