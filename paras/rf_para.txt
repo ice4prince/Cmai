@@ -1,0 +1,9 @@
+para	arg
+cpu	32
+mem	128
+use_cpu	cpu
+hhsearch	rfscripts/bin/hhsearch
+hhblits	rfscripts/bin/hhblits
+hhfilter	rfscripts/bin/hhfilter
+psipred	psipred
+psipass2	psipass2
