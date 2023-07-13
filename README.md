@@ -42,6 +42,7 @@ Download sequence and structure databases
 
 
 ## Pipeline
+	conda activate runBC
 	python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database' 
 ## Usage
 	usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--rf_data RF_DATA]
