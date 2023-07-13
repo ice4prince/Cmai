@@ -46,7 +46,7 @@ parser = argparse.ArgumentParser(description='Parameters for pair model.')
 
 # Add a optional argument
 parser.add_argument('--code', type=str, help='the CLAnO directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO')
-#parser.add_argument('--input',type = str, help = 'the input files for BCRs',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/intermediates/processed_input.csv')
+parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = 'data/intermediates')
 parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example')
 parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
@@ -57,7 +57,7 @@ parser.add_argument('--verbose', action='store_true', help='Enable verbose outpu
 args = parser.parse_args()
 
 CODE_DIR = args.code
-#INPUT = args.input
+INPUT_DIR = args.input
 OUT_DIR = args.out
 MATCHING_SPECIES = args.species
 SEED = args.seed
@@ -71,14 +71,14 @@ VERBOSE = args.verbose
 
 
 
-CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO'
-#CUTOFF = 1800
-SEED = 1
-VERBOSE = False
-MATCHING_SPECIES = False
-SUBSAMPLE = 100
-BOTTOMLINE = 10000
-OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example'
+# CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO'
+# #CUTOFF = 1800
+# SEED = 1
+# VERBOSE = False
+# MATCHING_SPECIES = False
+# SUBSAMPLE = 100
+# BOTTOMLINE = 10000
+# OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example'
 
 
 # In[172]:
@@ -100,9 +100,9 @@ os.chdir(CODE_DIR)
 
 
 BACKGROUND = 'data/background/backgroundBCR.csv.gz'
-NPY_DIR = 'data/intermediates/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
+NPY_DIR = INPUT_DIR+'/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
 MODEL = 'models/binary_model.pth'
-INPUT = 'data/intermediates/processed_input.csv'
+INPUT = INPUT_DIR+'/processed_input.csv'
 
 from wrapV.Vwrap import embedV ##input needs to be list of strings
 from wrapCDR3.CDR3wrap import embedCDR3 ##input needs to be list of strings
@@ -225,7 +225,7 @@ class checkDataset(Dataset):
     def __getitem__(self, idx):
         your_dict = self.your_data_list[idx]
 #         self.antigen_feat = self.extract_antigen(antigen)[0].to(device)
-#         self.lengthen = len(self.antigen_dict[antigen])     
+#         self.lengthen = len(self.antigen_dict[antigen])
 #         bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True)
 #         pair_feat = self.__comb_embed_gpu(bcr_feat)
 #         return pair_feat,index_key
@@ -288,7 +288,7 @@ class checkDataset(Dataset):
                 print("CUDA out of memory. Clearing cache and trying again...")
                 torch.cuda.empty_cache()
                 try:
-                    self.antigen_in[antigen_name] = self.pool_antigen(torch.from_numpy(antigen_to_in),CHANNEL_ANTIGEN).to(device) 
+                    self.antigen_in[antigen_name] = self.pool_antigen(torch.from_numpy(antigen_to_in),CHANNEL_ANTIGEN).to(device)
                 except RuntimeError as e:
                     if "CUDA out of memory" in str(e):
                         print("Still out of memory after clearing cache.")
@@ -365,13 +365,13 @@ class rankDataset(Dataset):
                 self.seed = None
             return dataframe.sample(frac=subsample_ratio,random_state=self.seed)
         else:
-            return dataframe    
+            return dataframe
 
     def __getitem__(self, idx):
         bcr_dict = self.bcr_pool[idx]
 #        index_key = bcr_dict['ID']
         v_key = bcr_dict['Vh']
-        cdr3_key = bcr_dict['CDR3h']        
+        cdr3_key = bcr_dict['CDR3h']
         bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True)
         pair_feat = self.__comb_embed_gpu(bcr_feat)
         return pair_feat
@@ -382,7 +382,7 @@ class rankDataset(Dataset):
 #         else:
 #             lengthen = self.lengthen
         antigen_tensor =  torch.from_numpy(self.antigen_feat).float()
-        single_antigen_g = self.pool_antigen(antigen_tensor,CHANNEL_ANTIGEN)[0].to(device) 
+        single_antigen_g = self.pool_antigen(antigen_tensor,CHANNEL_ANTIGEN)[0].to(device)
         single_BCR_g = torch.from_numpy(bcr_feat).to(device)
         BCR_t = torch.tile(single_BCR_g,(lengthen,lengthen,1))
         pair_feat_g = torch.cat((single_antigen_g,BCR_t),dim=2)
@@ -395,12 +395,12 @@ class rankDataset(Dataset):
 #             antigen_import = np.load(str(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy'))/w
 # #             if not antigen_import.shape[1] == self.lengthen:
 # #                 print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding'+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
-# #                 exit()            
+# #                 exit()
 #             single_antigen = torch.from_numpy(antigen_import).float()
 # #             if MODE == 'binary':
 #             single_antigen = self.pool_antigen(single_antigen,CHANNEL_ANTIGEN) ###ON CPU
 #         except ValueError:
-#             print('The embedding of antigen %s cannot be found!' % antigen_name)        
+#             print('The embedding of antigen %s cannot be found!' % antigen_name)
 #         return single_antigen
 
     def __embedding_BCR(self,cdr3_seq,v_seq,precise = True):
@@ -418,13 +418,13 @@ class rankDataset(Dataset):
             v_feat = self.v_dict[v_seq]
         bcr_feat = np.concatenate((cdr3_feat,v_feat))
         return bcr_feat
-    
+
     def pool_antigen(self,antigen_tensor,out_n_channel):
 #        lengthen = antigen_input.shape[1]
         pooling_layer = nn.AdaptiveAvgPool2d((out_n_channel,out_n_channel))
         output = pooling_layer(antigen_tensor.permute(0,3,1,2)).permute(0,2,3,1)
         return output
-    
+
     def __len__(self):
         return len(self.bcr_pool)
 
@@ -716,17 +716,17 @@ scheduler = ReduceLROnPlateau(optimizer,mode = 'min',factor=0.1,patience =10,ver
 # In[134]:
 
 
-# df_cutoffs = pd.DataFrame({'backsample': [100, 1000, 10000, 100000], 
+# df_cutoffs = pd.DataFrame({'backsample': [100, 1000, 10000, 100000],
 #                            'cutoffs': [0.2, 0.1, 0.05, 0.01]})
-# df_cutoffs.to_csv('data/intermediates/cutoff_table.txt', sep='\t', index=False)
+# df_cutoffs.to_csv('data/intermediates/able.txt', sep='\t', index=False)
 
 
 # In[183]:
 
 
-df = pd.read_csv('data/intermediates/cutoff_table.txt', sep='\t')
+df = pd.read_csv('paras/cutoff_table.txt', sep='\t')
 cutoffs_dict = df.set_index('backsample')['cutoffs'].to_dict()
-cutoffs_dict
+print('threshold to enter the next level of ranking:',cutoffs_dict)
 
 
 # In[164]:
@@ -761,4 +761,3 @@ while len(s_target)>0 and subsample<=BOTTOMLINE:
 
 
 output.to_csv(OUT_DIR+'/binding_results.csv')
-

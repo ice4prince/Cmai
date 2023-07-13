@@ -38,7 +38,7 @@ class Path:
 
     rf: Annotated[str, "RosettaFold folder."] = "rfscripts/RoseTTAFold"
 
-    out: Annotated[str, "Output folder."] = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/RFoutputs"
+    out: Annotated[str, "Output folder."] = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/output/RFoutputs"
 
     logs: Annotated[str, "Logs folder."] = "logs"
 
@@ -73,10 +73,10 @@ class Conf:
     verbose: Annotated[bool,"Print verbose messages or not."] = False
     cpu: Annotated[str, "Max CPUs."] = "32"
     mem: Annotated[str, "Max Memory (in GB)."] = "64"
-    use_cpu: Annotated[str, "cpu|gpu"] = "cpu"
+    use_cpu: Annotated[str, "cpu|gpu"] = "gpu"
 
-    skip_gen_msa: Annotated[bool, "Skip generate_msa"] = False
-    skip_run_rf: Annotated[bool, "Skip run_rf"] = False
+    gen_msa: Annotated[bool, "run generate_msa and exit"] = False
+    run_rf: Annotated[bool, "Skip generate_msa and run RoseTTAFold"] = False
     skip_preprocess: Annotated[bool,"Skip preprocess"] = False
     skip_extract: Annotated[bool,"Skip extraction"] = False
 

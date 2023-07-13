@@ -1,7 +1,7 @@
 para	arg
 cpu	32
 mem	128
-use_cpu	cpu
+use_cpu	gpu
 hhsearch	rfscripts/bin/hhsearch
 hhblits	rfscripts/bin/hhblits
 hhfilter	rfscripts/bin/hhfilter

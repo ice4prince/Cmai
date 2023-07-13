@@ -42,53 +42,48 @@ Download sequence and structure databases
 
 
 ## Pipeline
-	python Cmai.py ....
+	python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database' 
 ## Usage
-	usage: runEmbed.py [-h] [--fasta FASTA] [--verbose VERBOSE] [--cpu CPU] [--mem MEM] [--use_cpu USE_CPU]
-			   [--skip_gen_msa SKIP_GEN_MSA] [--skip_run_rf SKIP_RUN_RF] [--skip_preprocess SKIP_PREPROCESS]
-			   [--skip_extract SKIP_EXTRACT] [--path.data PATH.DATA] [--path.scripts PATH.SCRIPTS]
-			   [--path.rf PATH.RF] [--path.out PATH.OUT] [--path.logs PATH.LOGS] [--exe.hhsearch EXE.HHSEARCH]
-			   [--exe.hhblits EXE.HHBLITS] [--exe.hhfilter EXE.HHFILTER] [--exe.psipred EXE.PSIPRED]
-			   [--exe.psipass2 EXE.PSIPASS2]
+	usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--rf_data RF_DATA]
+               [--fasta FASTA] [--pre_dir PRE_DIR] [--seed SEED]
+               [--subsample SUBSAMPLE] [--bottomline BOTTOMLINE] [--continuous]
+               [--rf_para] [--gen_msa] [--run_rf] [--skip_preprocess]
+               [--skip_extract] [--runEmbed] [--runBC] [--species] [--verbose]
 
-	Config for runEmbed script.
+Parameters for the interface script.
 
-	options:
-	  -h, --help            show this help message and exit
-	  --fasta FASTA         Input fasta files. (default:
-				/project/DPDS/Wang_lab/shared/BCR_antigen/code/DeLAnO/example/input.fa)
-	  --verbose VERBOSE     Print verbose messages or not. (default: False)
-	  --cpu CPU             Max CPUs. (default: 32)
-	  --mem MEM             Max Memory (in GB). (default: 128)
-	  --use_cpu USE_CPU     cpu|gpu (default: cpu)
-	  --skip_gen_msa SKIP_GEN_MSA
-				Skip generate_msa (default: False)
-	  --skip_run_rf SKIP_RUN_RF
-				Skip run_rf (default: False)
-	  --skip_preprocess SKIP_PREPROCESS
-				Skip preprocess (default: False)
-	  --skip_extract SKIP_EXTRACT
-				Skip extraction (default: False)
-
-	path:
-	  --path.data PATH.DATA
-				Data base folder. (default: /project/DPDS/Wang_lab/shared/BCR_antigen/data)
-	  --path.scripts PATH.SCRIPTS
-				Scripts folder. (default: /project/DPDS/Wang_lab/shared/BCR_antigen/code/DeLAnO)
-	  --path.rf PATH.RF     RosettaFold folder. (default: rfscripts/RoseTTAFold)
-	  --path.out PATH.OUT   Output folder. (default:
-				/project/DPDS/Wang_lab/shared/BCR_antigen/code/DeLAnO/example/outputs)
-	  --path.logs PATH.LOGS
-				Logs folder. (default: logs)
-
-	exe:
-	  --exe.hhsearch EXE.HHSEARCH
-				HHsearch executable. (default: rfscripts/bin/hhsearch)
-	  --exe.hhblits EXE.HHBLITS
-				HHblits executable. (default: rfscripts/bin/hhblits)
-	  --exe.hhfilter EXE.HHFILTER
-				HHfilter executable. (default: rfscripts/bin/hhfilter)
-	  --exe.psipred EXE.PSIPRED
-				PSIPRED executable. (default: psipred)
-	  --exe.psipass2 EXE.PSIPASS2
-				PSIPASS2 executable. (default: psipass2)
+optional arguments:
+  -h, --help            show this help message and exit
+  --code CODE           the CLAnO directory
+  --input INPUT         the input files in csv which should include
+                        Antigen_id,BCR_Vh,BCR_CDR3h
+  --out OUT             the directory for output files
+  --rf_data RF_DATA     the database folder for RoseTTAFold
+  --fasta FASTA         The fasta file entering runEbed. When no sequence included
+                        in the input, the seperate fasta file of antigens is
+                        required
+  --pre_dir PRE_DIR     the directory to save the preprocessed data.
+  --seed SEED           the seed for the first 100 background BCRs. To use the
+                        prepared embeded 100 BCRs, keep the seed to default 1
+  --subsample SUBSAMPLE
+                        the initial sample size of background BCRs. The default is
+                        100
+  --bottomline BOTTOMLINE
+                        the maximum size for subsample of background BCRs, which
+                        should no more than 1000000. The deafult is 10000
+  --continuous          swtich the mode from binary to continuous, default mode is
+                        binary.
+  --rf_para             use the parameters from paras/rf_para.txt for antigen
+                        embedding. Default is False
+  --gen_msa             only run generating msa and exit. Default is False
+  --run_rf              skip generating msa and running RoseTTAFold. Default is
+                        False
+  --skip_preprocess     skip preprocess of antigen_embedding. Default is False
+  --skip_extract        skip extracting NPY for antigen embedding. Default is
+                        False
+  --runEmbed            only run antigen embedding. Default is False
+  --runBC               only run binding or comparing. Default is False
+  --species             match the species of background BCR to the target BCR.
+                        NOTE: the species MUST BE specified and unique in the
+                        target BCR input.
+  --verbose             Enable verbose output, default is False.

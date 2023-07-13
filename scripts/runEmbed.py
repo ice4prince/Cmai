@@ -31,14 +31,18 @@ def runEmbed(conf: Conf) -> None:
         os.mkdir(conf.path.out)
         print('results directory is created!')
     print(conf)
-    if conf.skip_gen_msa:
-        print('skipping generating msa...')
-    else:
+    if conf.gen_msa and not conf.run_rf:
+        print('only generating msa...')
         run_msa(conf)
-    if conf.skip_run_rf:
-        print('skipping RoseTTAFold...')
-    else:
+        exit()
+    if not conf.gen_msa and conf.run_rf:
+        print('only running RoseTTAFold..')
         run_rfpd(conf)
+        return
+    run_msa(conf)
+    run_rfpd(conf)
+    return
+
 
 def extract(conf: Conf) -> None:
     print('Extracting...')

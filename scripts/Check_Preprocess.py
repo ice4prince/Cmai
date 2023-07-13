@@ -8,6 +8,7 @@ import pandas as pd
 import numpy as np
 from Bio import SeqIO
 import os
+import argparse
 
 
 # In[ ]:
@@ -47,10 +48,10 @@ PRE_DIR = args.pre_dir
 os.chdir(CODE_DIR)
 if CONT:
     MODE = 'continuous'
-    print('mode switching ...')
+#    print('mode switching ...')
 else:
     MODE = 'binary'
-print('Entering',MODE,'mode now...')
+#print('Entering',MODE,'mode now...')
 
 
 # In[69]:
@@ -99,7 +100,7 @@ def add_BCR_id(df):
 
 def check_input(df,fastaname=None):
     global MODE
-    print('Checking the columns...')    
+    print('Checking the columns...')
     if MODE == 'continuous':
         required_cols = ['Antigen_id', 'BetterBCR_Vh', 'BetterBCR_CDR3h','WorseBCR_Vh','WorseBCR_CDR3h']
     else:
@@ -107,11 +108,11 @@ def check_input(df,fastaname=None):
     for col in required_cols:
         if col not in df.columns:
             print(f"{col} is missing.")
-            exit() 
+            exit()
     print('All required columns are included.')# This exits the function. If you want to exit the script completely, use `exit()`
     if 'Antigen_seq' in df.columns:
         write_fasta(df,PRE_DIR+'/antigens.fasta')
-        print('Write antigen sequence to intermediates folder.')
+        print('Write antigen sequence from input file to intermediates folder.')
     else:
         fasta_dict = parse_fasta(fastaname)
         df['Antigen_seq'] = df['Antigen_id'].map(fasta_dict)
@@ -145,4 +146,3 @@ input_checked = check_input(input_file)
 
 
 input_checked.to_csv(PRE_DIR+'/processed_input.csv')
-
