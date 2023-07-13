@@ -5,7 +5,6 @@
 	conda env create -f models/runEmbed.yml
 	conda env create -f models/runBC.yml
 	cd scripts/rfscripts
-	rm -r RoseTTAFold
 #  Install RoseTTAFold
 Clone the package  
 
