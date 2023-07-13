@@ -2,5 +2,5 @@ data/example/output/RFoutputs
 archive
 data/intermediates/NPY
 scripts/wrapCDR3
-scripts/wrapV
-.ipynb_checkpoints
+scripts/wrapV/__pycache__
+.ipynb_checkpoints/__pycache__
