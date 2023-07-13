@@ -3,3 +3,4 @@ archive
 data/intermediates/NPY
 scripts/wrapCDR3
 scripts/wrapV
+.ipynb_checkpoints
