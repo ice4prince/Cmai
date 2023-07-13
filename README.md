@@ -61,7 +61,7 @@ optional arguments:
                         Antigen_id,BCR_Vh,BCR_CDR3h
 	--out OUT             the directory for output files
 	--rf_data RF_DATA     the database folder for RoseTTAFold
-	--fasta FASTA         The fasta file entering runEbed. When no sequence included
+	--fasta FASTA         The fasta file entering runEbed. When no sequence is included
                         in the input, the separate fasta file of antigens is
                         required
 	--pre_dir PRE_DIR     the directory to save the preprocessed data.
@@ -71,9 +71,9 @@ optional arguments:
                         the initial sample size of background BCRs. The default is
                         100
 	--bottomline BOTTOMLINE
-                        the maximum size for subsample of background BCRs, which
+                        the maximum size for a subsample of background BCRs, which
                         should no more than 1000000. The default is 10000
-	--continuous          swtich the mode from binary to continuous, default mode is
+	--continuous          switch the mode from binary to continuous, the default mode is
                         binary.
 	--rf_para             use the parameters from paras/rf_para.txt for antigen
                         embedding. Default is False
@@ -88,8 +88,5 @@ optional arguments:
 	--species             match the species of background BCR to the target BCR.
                         NOTE: the species MUST BE specified and unique in the
                         target BCR input.
-<<<<<<< HEAD
 	--verbose             Enable verbose output, default is False.
-=======
-  --verbose             Enable verbose output, default is False.
 ```
