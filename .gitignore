@@ -1,5 +1,6 @@
-data/example/output
+data/example/output/RFoutputs
 archive
-data/intermediates/preprocess
-data/intermediates/results
 data/intermediates/NPY
+scripts/wrapCDR3
+scripts/wrapV
+.ipynb_checkpoints
