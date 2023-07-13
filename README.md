@@ -53,6 +53,7 @@ Download sequence and structure databases
 
 Parameters for the interface script.
 
+```
 optional arguments:
   -h, --help            show this help message and exit
   --code CODE           the CLAnO directory
@@ -88,3 +89,4 @@ optional arguments:
                         NOTE: the species MUST BE specified and unique in the
                         target BCR input.
   --verbose             Enable verbose output, default is False.
+```
