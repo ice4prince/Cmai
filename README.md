@@ -53,6 +53,7 @@ Download sequence and structure databases
 
 Parameters for the interface script.
 
+```
 optional arguments:
 	-h, --help            show this help message and exit
 	--code CODE           the CLAnO directory
@@ -71,7 +72,7 @@ optional arguments:
                         100
 	--bottomline BOTTOMLINE
                         the maximum size for subsample of background BCRs, which
-                        should no more than 1000000. The deafult is 10000
+                        should no more than 1000000. The default is 10000
 	--continuous          swtich the mode from binary to continuous, default mode is
                         binary.
 	--rf_para             use the parameters from paras/rf_para.txt for antigen
@@ -87,4 +88,8 @@ optional arguments:
 	--species             match the species of background BCR to the target BCR.
                         NOTE: the species MUST BE specified and unique in the
                         target BCR input.
+<<<<<<< HEAD
 	--verbose             Enable verbose output, default is False.
+=======
+  --verbose             Enable verbose output, default is False.
+```
