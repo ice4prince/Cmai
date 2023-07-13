@@ -1,5 +1,5 @@
 data/example/output/RFoutputs
 archive
 data/intermediates/NPY
-scripts/wrapCDR3/__pycache__/CDR3wrap.cpython-38.pyc
-scripts/wrapV/__pycache__/Vwrap.cpython-38.pyc
+scripts/wrapCDR3
+scripts/wrapV
