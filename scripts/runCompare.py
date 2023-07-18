@@ -41,9 +41,9 @@ print(str(datetime.now()))
 # parser = argparse.ArgumentParser(description='Parameters for pair model.')
 
 # # Add a optional argument
-# parser.add_argument('--code', type=str, help='the CLAnO directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO')
-# parser.add_argument('--bcr',type = str, help = 'the input files for BCRs',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/Jun_bcr.csv')
-# parser.add_argument('--antigen',type = str, help = 'the fasta file of antigens to input',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/Jun_bcr.csv')
+# parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
+# parser.add_argument('--bcr',type = str, help = 'the input files for BCRs',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/Jun_bcr.csv')
+# parser.add_argument('--antigen',type = str, help = 'the fasta file of antigens to input',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/Jun_bcr.csv')
 # # parser.add_argument('--mode', type=str, default='binary', choices=['binary', 'continuous'], help='Your choice: binary or continuous. Default is binary.')
 # parser.add_argument('--continuous', action='store_true', help='swtich the mode from binary to continuous, default mode is binary.')
 # parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
@@ -56,7 +56,7 @@ print(str(datetime.now()))
 
 # args = parser.parse_args()
 
-# CLANO_DIR = args.code
+# Cmai_DIR = args.code
 # BCR_INPUT = args.bcr
 # ANTIGEN_INPUT = args.antigen
 # CUTOFF = args.cut_off
@@ -73,9 +73,9 @@ print(str(datetime.now()))
 # In[2]:
 
 
-CLANO_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO'
-ANTIGEN_INPUT = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/cleaned.antigen.Jun.fasta"
-BCR_INPUT = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/Jun_bcr.csv"
+Cmai_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai'
+ANTIGEN_INPUT = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/cleaned.antigen.Jun.fasta"
+BCR_INPUT = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/Jun_bcr.csv"
 #CUTOFF = 1800
 SEED = 1
 GROUP_SIZE = 50
@@ -89,7 +89,7 @@ MATCHING_SPECIES = False
 # In[3]:
 
 
-os.chdir(CLANO_DIR)
+os.chdir(Cmai_DIR)
 BACKGROUND = 'data/background/backgroundBCR.csv'
 NPY_DIR = 'data/intermediates/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
 MODEL = 'models/binary_model.pth'
@@ -307,13 +307,13 @@ class rankDataset(Dataset):
                 self.seed = None
             return dataframe.sample(frac=subsample_ratio,random_state=self.seed)
         else:
-            return dataframe    
+            return dataframe
 
     def __getitem__(self, idx):
         bcr_dict = self.bcr_pool[idx]
 #        index_key = bcr_dict['ID']
         v_key = bcr_dict['Vh']
-        cdr3_key = bcr_dict['CDR3h']        
+        cdr3_key = bcr_dict['CDR3h']
         bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True)
         pair_feat = self.__comb_embed_gpu(bcr_feat)
         return pair_feat
@@ -323,7 +323,7 @@ class rankDataset(Dataset):
             lengthen = CHANNEL_ANTIGEN
         else:
             lengthen = self.lengthen
-        single_antigen_g = self.antigen_feat  
+        single_antigen_g = self.antigen_feat
         single_BCR_g = torch.from_numpy(bcr_feat).to(device)
         BCR_t = torch.tile(single_BCR_g,(lengthen,lengthen,1))
         pair_feat_g = torch.cat((single_antigen_g,BCR_t),dim=2)
@@ -336,12 +336,12 @@ class rankDataset(Dataset):
             antigen_import = np.load(str(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy'))/w
 #             if not antigen_import.shape[1] == self.lengthen:
 #                 print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding'+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
-#                 exit()            
+#                 exit()
             single_antigen = torch.from_numpy(antigen_import).float()
             if MODE == 'binary':
                 single_antigen = self.pool_antigen(single_antigen,CHANNEL_ANTIGEN) ###ON CPU
         except ValueError:
-            print('The embedding of antigen %s cannot be found!' % antigen_name)        
+            print('The embedding of antigen %s cannot be found!' % antigen_name)
         return single_antigen
 
     def __embedding_BCR(self,cdr3_seq,v_seq,precise = True):
@@ -359,13 +359,13 @@ class rankDataset(Dataset):
             v_feat = self.v_dict[v_seq]
         bcr_feat = np.concatenate((cdr3_feat,v_feat))
         return bcr_feat
-    
+
     def pool_antigen(self,antigen_tensor,out_n_channel):
 #        lengthen = antigen_input.shape[1]
         pooling_layer = nn.AdaptiveAvgPool2d((out_n_channel,out_n_channel))
         output = pooling_layer(antigen_tensor.permute(0,3,1,2)).permute(0,2,3,1)
         return output
-    
+
     def __len__(self):
         return len(self.bcr_pool)
 
@@ -386,7 +386,7 @@ class checkDataset(Dataset):
         bcr_dict = self.bcr_pool[idx]
         index_key = bcr_dict['ID']
         v_key = bcr_dict['Vh']
-        cdr3_key = bcr_dict['CDR3h']        
+        cdr3_key = bcr_dict['CDR3h']
         bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True)
         pair_feat = self.__comb_embed_gpu(bcr_feat)
         return pair_feat,index_key
@@ -396,7 +396,7 @@ class checkDataset(Dataset):
             lengthen = CHANNEL_ANTIGEN
         else:
             lengthen = self.lengthen
-        single_antigen_g = self.antigen_feat  
+        single_antigen_g = self.antigen_feat
         single_BCR_g = torch.from_numpy(bcr_feat).to(device)
         BCR_t = torch.tile(single_BCR_g,(lengthen,lengthen,1))
         pair_feat_g = torch.cat((single_antigen_g,BCR_t),dim=2)
@@ -409,12 +409,12 @@ class checkDataset(Dataset):
             antigen_import = np.load(str(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy'))/w
 #             if not antigen_import.shape[1] == self.lengthen:
 #                 print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding'+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
-#                 exit()            
+#                 exit()
             single_antigen = torch.from_numpy(antigen_import).float()
             if MODE == 'binary':
                 single_antigen = self.pool_antigen(single_antigen,CHANNEL_ANTIGEN) ###ON CPU
         except ValueError:
-            print('The embedding of antigen %s cannot be found!' % antigen_name)        
+            print('The embedding of antigen %s cannot be found!' % antigen_name)
         return single_antigen
 
     def __embedding_BCR(self,cdr3_seq,v_seq,precise = True):
@@ -432,7 +432,7 @@ class checkDataset(Dataset):
 #             v_feat = self.v_dict[v_seq]
         bcr_feat = np.concatenate((cdr3_feat,v_feat))
         return bcr_feat
-    
+
     def pool_antigen(self,antigen_tensor,out_n_channel):
 #        lengthen = antigen_input.shape[1]
         pooling_layer = nn.AdaptiveAvgPool2d((out_n_channel,out_n_channel))
@@ -575,7 +575,7 @@ def check_scores(dataloader,model):
     model.eval()
     for batch, index in dataloader:
         score_dict[index] = model(batch).item()
-    return score_dict 
+    return score_dict
 
 
 # In[16]:
@@ -671,4 +671,3 @@ output.to_csv('data/example/compare_results.csv')
 
 
 #mark here to export
-

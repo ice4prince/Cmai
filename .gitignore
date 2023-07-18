@@ -6,6 +6,7 @@ scripts/rfscripts/pdm.lock
 scripts/rfscripts/readme.md
 scripts/rfscripts/*gz
 scripts/rfscripts/RoseTTAFold
+scripts/rfscripts/LICENSE
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks
 
