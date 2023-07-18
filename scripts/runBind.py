@@ -45,9 +45,9 @@ print(str(datetime.now()))
 parser = argparse.ArgumentParser(description='Parameters for pair model.')
 
 # Add a optional argument
-parser.add_argument('--code', type=str, help='the CLAnO directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO')
+parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
 parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = 'data/intermediates')
-parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example')
+parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example')
 parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
 parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
@@ -71,14 +71,14 @@ VERBOSE = args.verbose
 
 
 
-# CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO'
+# CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai'
 # #CUTOFF = 1800
 # SEED = 1
 # VERBOSE = False
 # MATCHING_SPECIES = False
 # SUBSAMPLE = 100
 # BOTTOMLINE = 10000
-# OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example'
+# OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example'
 
 
 # In[172]:
