@@ -80,7 +80,7 @@ def run_script_in_outer_env(script, args):
 
 def run_embed(args,env):
     if args.fasta is None:
-        fasta_file = 'data/intermediates/antigens.fasta'
+        fasta_file = CODE_DIR+'/data/intermediates/antigens.fasta'
     else:
         fasta_file = args.fasta
     embed_args = ['--fasta', fasta_file, '--path.out', args.out+'/RFoutputs','--path.data',args.rf_data,'--path.scripts',CODE_DIR+'/scripts','--path.rf','rfscripts/RoseTTAFold','--path.logs','logs']
@@ -168,6 +168,6 @@ if not args.runEmbed and args.runBC:
     move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
     run_bc(args,MODE)
     exit(0)
-run_embed(args,'runEmbed')
+run_embed(args,runEmbed_env_path)
 move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
 run_bc(args,MODE)
