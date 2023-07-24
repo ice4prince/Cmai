@@ -1,0 +1,5 @@
+sphinx >= 4
+sphinx-rtd-theme
+sphinx-git
+sphinxcontrib-autoprogram
+sphinx-autodoc-typehints
