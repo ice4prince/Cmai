@@ -138,27 +138,27 @@ torch.set_printoptions(precision=10)
 #     data_filtered = dataset.loc[dataset['aalens']< cutoff]
 #     print('After removing antigens larger than '+str(cutoff)+', '+str(100*data_filtered.shape[0]/dataset.shape[0])+'% antigens remained.')
 #     return data_filtered
-
-def check_bad_bcr(seq):
-    allowed_letters = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
-    uppercase_string = seq.upper()
-    return not any(char not in allowed_letters for char in uppercase_string)
-
-def filter_bad_bcr(df):
-    substrings = ['Vh', 'CDR3h', 'Antigen_seq']
-    some_columns = [col for col in df.columns if any(sub in col for sub in substrings)]
-    for col in some_columns:
-        df[col] = df[col].apply(lambda x: x.replace(' ', ''))
-    mask = df[some_columns].applymap(check_bad_bcr)
-    filtered_df = df[mask.all(axis=1)]
-    return filtered_df
-
-def preprocess(df):
-    df = filter_bad_bcr(df)
-#    df = filter_big_antigens(df,cutoff)
-    df = df.sort_values('Antigen_id')
-    df = df.assign(record_id = ['record_' + str(s) for s in range(df.shape[0])])
-    return df
+#
+# def check_bad_bcr(seq):
+#     allowed_letters = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+#     uppercase_string = seq.upper()
+#     return not any(char not in allowed_letters for char in uppercase_string)
+#
+# def filter_bad_bcr(df):
+#     substrings = ['Vh', 'CDR3h', 'Antigen_seq']
+#     some_columns = [col for col in df.columns if any(sub in col for sub in substrings)]
+#     for col in some_columns:
+#         df[col] = df[col].apply(lambda x: x.replace(' ', ''))
+#     mask = df[some_columns].applymap(check_bad_bcr)
+#     filtered_df = df[mask.all(axis=1)]
+#     return filtered_df
+#
+# def preprocess(df):
+#     df = filter_bad_bcr(df)
+# #    df = filter_big_antigens(df,cutoff)
+#     df = df.sort_values('Antigen_id')
+#     df = df.assign(record_id = ['record_' + str(s) for s in range(df.shape[0])])
+#     return df
 
 # def has_space(string):
 #     return " " in string
@@ -646,9 +646,9 @@ else:
 
 # In[178]:
 
-
-target = preprocess(target_file)
-
+target = target_file
+# target = preprocess(target_file)
+# target.to_csv(INPUT_DIR+'/filtered_input.csv')
 
 # In[79]:
 
