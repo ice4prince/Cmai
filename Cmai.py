@@ -142,6 +142,8 @@ def run_binding(args):
 def move_npy(source_dir,des_dir):
     for source_file in glob.glob(source_dir + '/*.pair.npy'):
         des_file = re.sub(r'_\d+', '', source_file.split('/')[-1])
+        if not os.path.exists(des_dir):
+            os.makedirs(des_dir)
     # Use shutil.move to move the file
         shutil.copy2(source_file, des_dir+'/'+des_file)
 
@@ -167,9 +169,9 @@ if not args.skip_check:
 
 if args.runEmbed and not args.runBind:
     run_embed(args,runEmbed_env_path)
+    move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
     exit(0)
 if not args.runEmbed and args.runBind:
-    move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
     run_binding(args)
     exit(0)
 run_embed(args,runEmbed_env_path)
