@@ -10,6 +10,7 @@ import pandas as pd
 import argparse
 import shutil
 import glob
+import re
 
 
 from Bio import SeqIO #NOTE: proprocess need some prerequiste
@@ -140,8 +141,9 @@ def run_binding(args):
 
 def move_npy(source_dir,des_dir):
     for source_file in glob.glob(source_dir + '/*.pair.npy'):
+        des_file = re.sub(r'_\d+', '', source_file.split('/')[-1])
     # Use shutil.move to move the file
-        shutil.copy2(source_file, des_dir)
+        shutil.copy2(source_file, des_dir+'/'+des_file)
 
 
 if not os.path.exists(OUT):
