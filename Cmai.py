@@ -120,7 +120,7 @@ def run_embed(args,env):
     run_script_in_conda_env(env, 'runEmbed.py', embed_args, 'scripts')
 
 # Switch to conda env2
-def run_binding(args,mode):
+def run_binding(args):
     # if mode == 'binary':
     bind_args = ['--code',CODE_DIR,'--input',args.pre_dir,'--out',OUT,'--seed',str(args.seed),'--subsample',str(args.subsample),'--bottomline',str(args.bottomline)]
     if args.species:
@@ -168,8 +168,8 @@ if args.runEmbed and not args.runBind:
     exit(0)
 if not args.runEmbed and args.runBind:
     move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
-    run_binding(args,MODE)
+    run_binding(args)
     exit(0)
 run_embed(args,runEmbed_env_path)
 move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
-run_binding(args,MODE)
+run_binding(args)

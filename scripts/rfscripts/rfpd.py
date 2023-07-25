@@ -60,9 +60,9 @@ def generate_msa(conf: Conf) -> None:
             print(f"Processing:\n{seq}")
             os.makedirs(f"{conf.path.data}/temp/", exist_ok=True)
             path = f"{conf.path.data}/temp/{key}"
-           if ps := len(list(iglob(f"{path}*"))):
-               path = f"{path}_{ps:03}"
-               key = f"{key}_{ps:03}"
+            if ps := len(list(iglob(f"{path}*"))):
+                path = f"{path}_{ps:03}"
+                key = f"{key}_{ps:03}"
             SeqIO.write(seq, path, "fasta")
             script_dir = os.path.dirname(os.path.realpath(__file__))
             print(
