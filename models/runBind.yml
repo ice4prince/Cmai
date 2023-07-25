@@ -1,4 +1,4 @@
-name: runBC
+name: runBind
 channels:
   - pytorch
   - nvidia
@@ -181,4 +181,4 @@ dependencies:
     - pyyaml==6.0
     - toml==0.10.2
     - uuid==1.30
-prefix: /project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/models
+prefix: /project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/models

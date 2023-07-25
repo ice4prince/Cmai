@@ -10,7 +10,6 @@ which python >paras/runEmbed_path #save your path of runEmbed env
 conda deactivate
 conda env create -f models/runBC.yml
 cd scripts/rfscripts
-rm -r RoseTTAFold
 #  Install RoseTTAFold from RoseTTAFold's git.
 git clone git@github.com:RosettaCommons/RoseTTAFold.git
 # Follow the README in RoseTTAFold OR go through
@@ -23,28 +22,28 @@ git clone git@github.com:RosettaCommons/RoseTTAFold.git
 
 ## Pipeline
 ```sh
-conda activate runBC
-python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'
+conda activate runBind
+python Cmai.py --code '/path/to/Cmai' --input 'data/example/input.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'
 ```
 ## Step-by-step Pipeline
 
 ```sh
-conda activate runBC
+conda activate runBind
 
 python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --runEmbed --gen_msa --use_cpu 'cpu'
 
 python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --runEmbed --run_rf --use_cpu 'gpu'
 
-python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check --runBC
+python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check --runBind
 ```
 
 ## Usage
 
 ```sh
 usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PATH] [--rf_data RF_DATA]
-               [--fasta FASTA] [--pre_dir PRE_DIR] [--seed SEED] [--subsample SUBSAMPLE] [--bottomline BOTTOMLINE]
-               [--continuous] [--rf_para] [--gen_msa] [--run_rf] [--skip_preprocess] [--skip_extract] [--runEmbed]
-               [--runBC] [--species] [--verbose]
+               [--fasta FASTA] [--pre_dir PRE_DIR] [--cpu CPU] [--mem MEM] [--use_cpu USE_CPU] [--seed SEED]
+               [--subsample SUBSAMPLE] [--bottomline BOTTOMLINE] [--rf_para] [--gen_msa] [--run_rf]
+               [--skip_preprocess] [--skip_extract] [--runEmbed] [--runBind] [--skip_check] [--species] [--verbose]
 ```
 
 Parameters for the interface script.
@@ -60,6 +59,10 @@ optional arguments:
   --fasta FASTA         The fasta file entering runEbed. When no sequence included in the input, the separate fasta
                         file of antigens is required
   --pre_dir PRE_DIR     the directory to save the preprocessed data.
+  --cpu CPU             the maximum of cpus for antigen embedding. If not defined, use the value of paras/rf_para.txt
+  --mem MEM             the maximum of memory in GB for antigen embedding. If not defined, use the value of
+                        paras/rf_para.txt
+  --use_cpu USE_CPU     the option to use cpu or gpu. If not defined, use the value of paras/rf_para.txt
   --seed SEED           the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the
                         seed to default 1
   --subsample SUBSAMPLE
@@ -67,14 +70,15 @@ optional arguments:
   --bottomline BOTTOMLINE
                         the maximum size for subsample of background BCRs, which should no more than 1000000. The
                         default is 10000
-  --continuous          swtich the mode from binary to continuous, default mode is binary.
   --rf_para             use the parameters from paras/rf_para.txt for antigen embedding. Default is False
   --gen_msa             only run generating msa and exit. Default is False
   --run_rf              skip generating msa and running RoseTTAFold. Default is False
   --skip_preprocess     skip preprocess of antigen_embedding. Default is False
   --skip_extract        skip extracting NPY for antigen embedding. Default is False
   --runEmbed            only run antigen embedding. Default is False
-  --runBC               only run binding or comparing. Default is False
+  --runBind             only run binding or comparing. Default is False
+  --skip_check          skip check and preprocess of input data, only use when it has been done before. Default is
+                        False
   --species             match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and
                         unique in the target BCR input.
   --verbose             Enable verbose output, default is False.
