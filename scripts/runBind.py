@@ -101,7 +101,7 @@ os.chdir(CODE_DIR)
 
 BACKGROUND = 'data/background/backgroundBCR.csv.gz'
 NPY_DIR = INPUT_DIR+'/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
-MODEL = 'models/binary_model.pth'
+MODEL = 'models/model.pth'
 INPUT = INPUT_DIR+'/processed_input.csv'
 
 from wrapV.Vwrap import embedV ##input needs to be list of strings
@@ -517,7 +517,7 @@ class mix_model(nn.Module):
 #         self.beta1 = nn.Parameter(torch.randn(1))
 #         self.alpha2 = nn.Parameter(torch.randn(1))
 #         self.beta2 = nn.Parameter(torch.randn(1))
-    def forward(self,x,mode='binary'): ###because in getitem, return is .cuda(), now input is on gpu
+    def forward(self,x): ###because in getitem, return is .cuda(), now input is on gpu
 #         x = torch.empty(0)
 #         x = x.to(device)
 #        x = x.permute(0,2,1,3)

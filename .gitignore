@@ -1,4 +1,5 @@
 data/example/output/RFoutputs
+data/example/archive
 archive
 data/intermediates/NPY
 scripts/rfscripts/typings
@@ -7,6 +8,7 @@ scripts/rfscripts/readme.md
 scripts/rfscripts/*gz
 scripts/rfscripts/RoseTTAFold
 scripts/rfscripts/LICENSE
+scripts/cache_mutex
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks
 
