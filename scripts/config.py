@@ -34,11 +34,11 @@ class Path:
     # pdb: str = "pdb100_2021Mar03"
     # msa: str = "UniRef30_2020_06"
 
-    scripts: Annotated[str, "Scripts folder."] = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/scripts"
+    scripts: Annotated[str, "Scripts folder."] = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/scripts"
 
     rf: Annotated[str, "RosettaFold folder."] = "rfscripts/RoseTTAFold"
 
-    out: Annotated[str, "Output folder."] = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example/output/RFoutputs"
+    out: Annotated[str, "Output folder."] = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output/RFoutputs"
 
     logs: Annotated[str, "Logs folder."] = "logs"
 
@@ -68,7 +68,7 @@ class Exe:
 class Conf:
     """Config for DeLAnO script."""
 
-    fasta: Annotated[str, "Input fasta files."] = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/intermediates/antigens.fasta"
+    fasta: Annotated[str, "Input fasta files."] = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/intermediates/antigens.fasta"
 
     verbose: Annotated[bool,"Print verbose messages or not."] = False
     cpu: Annotated[str, "Max CPUs."] = "32"

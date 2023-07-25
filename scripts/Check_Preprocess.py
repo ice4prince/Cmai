@@ -17,7 +17,7 @@ import argparse
 parser = argparse.ArgumentParser(description='Parameters for pair model.')
 
 # Add a optional argument
-parser.add_argument('--code', type=str, help='the CLAnO directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO')
+parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
 parser.add_argument('--input',type = str, help = 'the input files in csv which should include Antigen_id,BCR_Vh,BCR_CDR3h',default = 'data/example/binary_example.csv')
 parser.add_argument('--fasta',type = str, help = 'if no sequence included in the input, the seperate fasta file of antigens is required',default =None)
 parser.add_argument('--continuous', action='store_true', help='swtich the mode from binary to continuous, default mode is binary.')
@@ -35,7 +35,7 @@ PRE_DIR = args.pre_dir
 # In[103]:
 
 
-# CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO'
+# CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai'
 # INPUT = "data/example/binary_example.csv"
 # FASTA = "data/example/binary_antigens.fasta"
 # CONT = False
