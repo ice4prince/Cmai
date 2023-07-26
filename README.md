@@ -75,11 +75,15 @@ optional arguments:
   --run_rf              skip generating msa and running RoseTTAFold. Default is False
   --skip_preprocess     skip preprocess of antigen_embedding. Default is False
   --skip_extract        skip extracting NPY for antigen embedding. Default is False
-  --runEmbed            only run antigen embedding. Default is False
-  --runBind             only run binding or comparing. Default is False
-  --skip_check          skip check and preprocess of input data, only use when it has been done before. Default is
+  --runEmbed            only run antigen embedding including moving. Default is
                         False
-  --species             match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and
-                        unique in the target BCR input.
+  --runBind             only run binding or comparing. Default is False
+  --skip_check          skip check and preprocess of input data, only use when it
+                        has been done before. Default is False
+  --move                Only run moving npy files to pre_dir. Usually moving is
+                        included in the runEmbed so default is False
+  --species             match the species of background BCR to the target BCR.
+                        NOTE: the species MUST BE specified and unique in the
+                        target BCR input.
   --verbose             Enable verbose output, default is False.
 ```
