@@ -4,3 +4,6 @@ data/intermediates/NPY
 scripts/wrapCDR3/__pycache__
 scripts/wrapV/__pycache__
 .ipynb_checkpoints
+
+# Documentation
+/docs/build
