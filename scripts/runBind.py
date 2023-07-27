@@ -47,6 +47,7 @@ parser = argparse.ArgumentParser(description='Parameters for pair model.')
 # Add a optional argument
 parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
 parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = 'data/intermediates')
+parser.add_argument('--npy_dir',type = str, help = 'the npy folder if different with input folder',default = None)
 parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example')
 parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
@@ -58,6 +59,7 @@ args = parser.parse_args()
 
 CODE_DIR = args.code
 INPUT_DIR = args.input
+
 OUT_DIR = args.out
 MATCHING_SPECIES = args.species
 SEED = args.seed
@@ -100,7 +102,10 @@ os.chdir(CODE_DIR)
 
 
 BACKGROUND = 'data/background/backgroundBCR.csv.gz'
-NPY_DIR = INPUT_DIR+'/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
+if args.npy_dir is not None:
+    NPY_DIR = args.npy_dir
+else:
+    NPY_DIR = INPUT_DIR+'/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
 MODEL = 'models/model.pth'
 INPUT = INPUT_DIR+'/processed_input.csv'
 
@@ -757,6 +762,7 @@ while len(s_target)>0 and subsample<BOTTOMLINE:
     f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
     s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
     subsample = subsample*10
+
 if len(s_target)>0:
     print('Ranking in',subsample,'background BCRs...')
     score_dict = generate_score_dict(background,score_dict,f_antigens,CDR3h_dict,Vh_dict,model_mix,subsample=subsample/1000000,seed=SEED)
@@ -764,7 +770,7 @@ if len(s_target)>0:
     output = pd.concat([output,res],axis =0)
     percentage_completed = output.shape[0] / target.shape[0] * 100
     print(f'Completed {percentage_completed:.2f}% of entries...')
-
+    
 # In[187]:
 
 
