@@ -11,7 +11,7 @@ to guess what we do!
 Bugs and Issues
 ******************
 
-If you do encounter an issue, please head to our  `GitHub Issues Page <https://github.com/kevin931/PythonTemplate/issues>`_
+If you do encounter an issue, please head to our  `GitHub Issues Page <https://github.com/ice4prince/Cmai/issues>`_
 and create an issue. There is a suggested template for **Bug Report**, which can be very helpful
 for everyone. Please be specific about the issue that you're having, and we will try our best to give
 guidence and potentially fix the issue.
@@ -25,10 +25,10 @@ Feature Request
 *******************
 
 Everyone can have great ideas, and this is a great opportunity to let us know how you would
-like to improve this project. Again, on our `GitHub Issues Page <https://github.com/kevin931/PythonTemplate/issues>`_
+like to improve this project. Again, on our `GitHub Issues Page <https://github.com/ice4prince/Cmai/issues>`_
 has a template for **Feature Request** that you can use to talk about your ideas! However,
 another great place to talk about ideas or just to get the conversations started is our
-new `Discussion Page <https://github.com/kevin931/PythonTemplate/discussions>`_.
+new `Discussion Page <https://github.com/ice4prince/Cmai/discussions>`_.
 
 ********************
 Pull Requests

@@ -25,7 +25,6 @@ repository is for your project (if you want your project to look like this!)
 
    change/contribution
    change/build
-   change/development
    change/index
    license
 
