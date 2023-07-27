@@ -746,16 +746,23 @@ subsample = SUBSAMPLE
 s_target =  target
 f_antigens = antigen_dict
 output = pd.DataFrame()
-while len(s_target)>0 and subsample<=BOTTOMLINE:
-    print('Ranking for ',s_target['record_id'].to_list(),'...')
+while len(s_target)>0 and subsample<BOTTOMLINE:
+    print('Ranking in',subsample,'background BCRs...')
     score_dict = generate_score_dict(background,score_dict,f_antigens,CDR3h_dict,Vh_dict,model_mix,subsample=subsample/1000000,seed=SEED)
     res = calculate_rank(s_target,score_dict,f_antigens,len_dict,model_mix)
     output = pd.concat([output,res[res['Rank']>=cutoffs_dict[subsample]]],axis =0)
+    percentage_completed = output.shape[0] / target.shape[0] * 100
+    print(f'Completed {percentage_completed:.2f}% of entries...')
     f_res = res[res['Rank']<cutoffs_dict[subsample]]
     f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
     s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
     subsample = subsample*10
-
+print('Ranking in',subsample,'background BCRs...')
+score_dict = generate_score_dict(background,score_dict,f_antigens,CDR3h_dict,Vh_dict,model_mix,subsample=subsample/1000000,seed=SEED)
+res = calculate_rank(s_target,score_dict,f_antigens,len_dict,model_mix)
+output = pd.concat([output,res],axis =0)
+percentage_completed = output.shape[0] / target.shape[0] * 100
+print(f'Completed {percentage_completed:.2f}% of entries...')
 
 # In[187]:
 
