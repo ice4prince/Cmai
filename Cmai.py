@@ -29,8 +29,9 @@ parser.add_argument('--env_path', help='the file saving the directory of the run
 parser.add_argument('--rf_data',type = str, help = 'the database folder for RoseTTAFold',default= '/project/DPDS/Wang_lab/shared/BCR_antigen/data')
 parser.add_argument('--fasta',type = str, help = 'The fasta file entering runEbed. When no sequence included in the input, the separate fasta file of antigens is required',default =None)
 parser.add_argument('--pre_dir',type = str, help='the directory to save the preprocessed data.',default = 'data/intermediates')
-parser.add_argument('--cpu',type = str, help = 'the maximum of cpus for antigen embedding. If not defined, use the value of paras/rf_para.txt',default = None)
-parser.add_argument('--mem',type = str, help = 'the maximum of memory in GB for antigen embedding. If not defined, use the value of paras/rf_para.txt',default = None)
+parser.add_argument('--npy_dir',type = str, help = 'the npy folder if different with preprocess folder',default = None)
+parser.add_argument('--cpu',type = int, help = 'the maximum of cpus for antigen embedding. If not defined, use the value of paras/rf_para.txt',default = None)
+parser.add_argument('--mem',type = int, help = 'the maximum of memory in GB for antigen embedding. If not defined, use the value of paras/rf_para.txt',default = None)
 parser.add_argument('--use_cpu',type = str, help = 'the option to use cpu or gpu. If not defined, use the value of paras/rf_para.txt',default = None)
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
 parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
@@ -41,10 +42,9 @@ parser.add_argument('--gen_msa',action = 'store_true',help = 'only run generatin
 parser.add_argument('--run_rf',action = 'store_true',help = 'skip generating msa and running RoseTTAFold. Default is False')
 parser.add_argument('--skip_preprocess',action = 'store_true',help = 'skip preprocess of antigen_embedding. Default is False')
 parser.add_argument('--skip_extract',action = 'store_true',help = 'skip extracting NPY for antigen embedding. Default is False')
-parser.add_argument('--runEmbed',action = 'store_true',help = 'only run antigen embedding including moving. Default is False')
+parser.add_argument('--runEmbed',action = 'store_true',help = 'only run antigen embedding. Default is False')
 parser.add_argument('--runBind',action = 'store_true',help = 'only run binding or comparing. Default is False')
 parser.add_argument('--skip_check',action = 'store_true',help = 'skip check and preprocess of input data, only use when it has been done before. Default is False')
-parser.add_argument('--move',action = 'store_true',help = 'Only run moving npy files to pre_dir. Usually moving is included in the runEmbed so default is False')
 parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 args = parser.parse_args()
@@ -125,6 +125,9 @@ def run_embed(args,env):
 def run_binding(args):
     # if mode == 'binary':
     bind_args = ['--code',CODE_DIR,'--input',args.pre_dir,'--out',OUT,'--seed',str(args.seed),'--subsample',str(args.subsample),'--bottomline',str(args.bottomline)]
+    if args.npy_dir is not None:
+        bind_args.append('--npy_dir')
+        bind_args.append(args.npy_dir)
     if args.species:
         bind_args.append('--species')
     if args.verbose:
@@ -141,10 +144,10 @@ def run_binding(args):
     #     run_script_in_outer_env('scripts/runCompare.py',cont_args)
 
 def move_npy(source_dir,des_dir):
-    if not os.path.exists(des_dir):
-        os.makedirs(des_dir)
     for source_file in glob.glob(source_dir + '/*.pair.npy'):
         des_file = re.sub(r'_\d+', '', source_file.split('/')[-1])
+        if not os.path.exists(des_dir):
+            os.makedirs(des_dir)
     # Use shutil.move to move the file
         shutil.copy2(source_file, des_dir+'/'+des_file)
 
@@ -172,16 +175,9 @@ if args.runEmbed and not args.runBind:
     run_embed(args,runEmbed_env_path)
     move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
     exit(0)
-if not args.runEmbed:
-    if args.move:
-        move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
-        if args.runBind:
-            run_binding(args)
-        exit(0)
-    elif args.runBind:
-        run_binding(args)
-        exit(0)
-
+if not args.runEmbed and args.runBind:
+    run_binding(args)
+    exit(0)
 run_embed(args,runEmbed_env_path)
 move_npy(args.out+'/RFoutputs/results/pred',args.pre_dir+'/NPY')
 run_binding(args)
