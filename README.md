@@ -41,9 +41,10 @@ python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check -
 
 ```sh
 usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PATH] [--rf_data RF_DATA]
-               [--fasta FASTA] [--pre_dir PRE_DIR] [--cpu CPU] [--mem MEM] [--use_cpu USE_CPU] [--seed SEED]
-               [--subsample SUBSAMPLE] [--bottomline BOTTOMLINE] [--rf_para] [--gen_msa] [--run_rf]
+               [--fasta FASTA] [--pre_dir PRE_DIR] [--npy_dir NPY_DIR] [--cpu CPU] [--mem MEM] [--use_cpu USE_CPU]
+               [--seed SEED] [--subsample SUBSAMPLE] [--bottomline BOTTOMLINE] [--rf_para] [--gen_msa] [--run_rf]
                [--skip_preprocess] [--skip_extract] [--runEmbed] [--runBind] [--skip_check] [--species] [--verbose]
+               [--merge]
 ```
 
 Parameters for the interface script.
@@ -59,6 +60,7 @@ optional arguments:
   --fasta FASTA         The fasta file entering runEbed. When no sequence included in the input, the separate fasta
                         file of antigens is required
   --pre_dir PRE_DIR     the directory to save the preprocessed data.
+  --npy_dir NPY_DIR     the npy folder if different with preprocess folder
   --cpu CPU             the maximum of cpus for antigen embedding. If not defined, use the value of paras/rf_para.txt
   --mem MEM             the maximum of memory in GB for antigen embedding. If not defined, use the value of
                         paras/rf_para.txt
@@ -82,4 +84,5 @@ optional arguments:
   --species             match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and
                         unique in the target BCR input.
   --verbose             Enable verbose output, default is False.
+  --merge               Enable merging output to input, default is False.
 ```
