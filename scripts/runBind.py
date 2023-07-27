@@ -54,6 +54,7 @@ parser.add_argument('--seed', type=int, help='the seed for the first 100 backgro
 parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
 parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
+parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
 
 args = parser.parse_args()
 
@@ -770,8 +771,12 @@ if len(s_target)>0:
     output = pd.concat([output,res],axis =0)
     percentage_completed = output.shape[0] / target.shape[0] * 100
     print(f'Completed {percentage_completed:.2f}% of entries...')
-    
+
 # In[187]:
 
 
 output.to_csv(OUT_DIR+'/binding_results.csv')
+
+if args.merge:
+    merged = target.merge(output, on='record_id', how='left')
+    merged.to_csv(OUT_DIR+'/merged_results.csv')
