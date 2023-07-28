@@ -42,7 +42,7 @@ print(str(datetime.now()))
 
 
 
-parser = argparse.ArgumentParser(description='Parameters for pair model.')
+parser = argparse.ArgumentParser(description='Parameters for the binding model.')
 
 # Add a optional argument
 parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')

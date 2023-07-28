@@ -68,7 +68,9 @@ def run_preprocess(args):
         preprocess_args.append(args.fasta)
     # if CONT:
     #     preprocess_args.append('--continuous')
-    print('Check_Proprocess ',preprocess_args)
+#        print('rinBind ',bind_args))
+
+    print('Check_Proprocess ',' '.join(preprocess_args))
     subprocess.check_call(['python', 'scripts/Check_Preprocess.py']+ preprocess_args)
 #     from Check_Proprocess import MODE,CODE_DIR # import the MODE after running the preprocess.py
 #     return MODE,CODE_DIR
