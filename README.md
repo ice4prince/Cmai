@@ -8,7 +8,7 @@ conda env create -f models/runEmbed.yml
 conda activate runEmbed
 which python >paras/runEmbed_path #save your path of runEmbed env
 conda deactivate
-conda env create -f models/runBC.yml
+conda env create -f models/runBind.yml
 cd scripts/rfscripts
 #  Install RoseTTAFold from RoseTTAFold's git.
 git clone git@github.com:RosettaCommons/RoseTTAFold.git
