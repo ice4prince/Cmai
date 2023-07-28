@@ -9,6 +9,7 @@ scripts/rfscripts/*gz
 scripts/rfscripts/RoseTTAFold
 scripts/rfscripts/LICENSE
 scripts/cache_mutex
+scripts/auroc.py
 .DS_Store
 ._*
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
