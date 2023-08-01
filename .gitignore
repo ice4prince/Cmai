@@ -1,6 +1,7 @@
 data/example/output/RFoutputs
 data/example/archive
 archive
+try.py
 data/intermediates/NPY
 scripts/rfscripts/typings
 scripts/rfscripts/pdm.lock
@@ -9,6 +10,9 @@ scripts/rfscripts/*gz
 scripts/rfscripts/RoseTTAFold
 scripts/rfscripts/LICENSE
 scripts/cache_mutex
+scripts/auroc.py
+.DS_Store
+._*
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
 # Edit at https://www.toptal.com/developers/gitignore?templates=python,jupyternotebooks
 

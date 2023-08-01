@@ -42,7 +42,7 @@ print(str(datetime.now()))
 
 
 
-parser = argparse.ArgumentParser(description='Parameters for pair model.')
+parser = argparse.ArgumentParser(description='Parameters for the binding model.')
 
 # Add a optional argument
 parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
@@ -367,8 +367,8 @@ class rankDataset(Dataset):
 
     def subsample_data(self, dataframe, subsample_ratio):
         if subsample_ratio < 1.0:
-            if not subsample_ratio == 1/10000:
-                self.seed = None
+            # if not subsample_ratio == 1/10000:
+            #     self.seed = None
             return dataframe.sample(frac=subsample_ratio,random_state=self.seed)
         else:
             return dataframe
