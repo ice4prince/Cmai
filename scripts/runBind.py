@@ -367,8 +367,8 @@ class rankDataset(Dataset):
 
     def subsample_data(self, dataframe, subsample_ratio):
         if subsample_ratio < 1.0:
-            if not subsample_ratio == 1/10000:
-                self.seed = None
+            # if not subsample_ratio == 1/10000:
+            #     self.seed = None
             return dataframe.sample(frac=subsample_ratio,random_state=self.seed)
         else:
             return dataframe
