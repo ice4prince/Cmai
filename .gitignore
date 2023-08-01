@@ -1,6 +1,7 @@
 data/example/output/RFoutputs
 data/example/archive
 archive
+try.py
 data/intermediates/NPY
 scripts/rfscripts/typings
 scripts/rfscripts/pdm.lock

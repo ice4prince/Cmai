@@ -11,9 +11,7 @@ import argparse
 import shutil
 import glob
 import re
-
-
-from Bio import SeqIO #NOTE: proprocess need some prerequiste
+# from Bio import SeqIO #NOTE: proprocess need some prerequiste
 # Define the function to run the preprocess.py
 # def run_preprocess():
 #     subprocess.check_call(['conda', 'activate', 'runBC', '&&', 'python', 'scripts/Check_Proprocess.py']+ args)
@@ -25,7 +23,7 @@ parser = argparse.ArgumentParser(description='Parameters for the interface scrip
 parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
 parser.add_argument('--input',type = str, help = 'the input files in csv which should include Antigen_id,BCR_Vh,BCR_CDR3h',default = 'data/example/input.csv')
 parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
-parser.add_argument('--env_path', help='the file saving the directory of the runEmbed Conda environment',default = 'paras/runEmbed_path')
+parser.add_argument('--env_path', help='the file saving the directory of the Conda environments- runEmbed and runBind in order.',default = 'paras/env_path')
 parser.add_argument('--rf_data',type = str, help = 'the database folder for RoseTTAFold',default= '/project/DPDS/Wang_lab/shared/BCR_antigen/data')
 parser.add_argument('--fasta',type = str, help = 'The fasta file entering runEbed. When no sequence included in the input, the separate fasta file of antigens is required',default =None)
 parser.add_argument('--pre_dir',type = str, help='the directory to save the preprocessed data.',default = 'data/intermediates')
@@ -61,7 +59,29 @@ else:
     NPY_DIR = args.pre_dir+'/NPY'
 # CONT = args.continuous
 
-def run_preprocess(args):
+
+#     from Check_Proprocess import MODE,CODE_DIR # import the MODE after running the preprocess.py
+#     return MODE,CODE_DIR
+
+# Define the function to activate a conda environment and run a script
+    # Note: you must have 'conda' in your PATH for this to work
+def run_script_in_conda_env(python_path, script, args, working_directory= os.path.dirname(os.path.abspath(__file__))):
+    subprocess.check_call([python_path, script] + args, cwd=working_directory)
+# #
+# def run_script_in_conda_env(conda_env_path, script, args):
+#     subprocess.check_call([conda_env_path, script] + args)
+# def run_script_in_conda_env(python_path, script, args, working_directory):
+#     subprocess.check_call([python_path, script] + args, cwd=working_directory)
+
+# def run_script_in_conda_env(conda_env, script, args, working_directory=CODE_DIR):
+#     subprocess.check_call(['conda', 'run', '-n', conda_env, 'python', script]+ args, cwd=working_directory)
+
+#     subprocess.check_call([python_path, script] + args, cwd=working_directory)
+#    subprocess.run(['conda', 'run', '-n', conda_env, 'python', script] + args, cwd=working_directory)
+#
+# def run_script_in_outer_env(script, args):
+#     subprocess.check_call(['python', script] + args)
+def run_preprocess(conda_env,args):
     preprocess_args = ['--code', args.code, '--input', args.input, '--pre_dir', args.pre_dir]
     if args.fasta is not None:
         preprocess_args.append('--fasta')
@@ -71,24 +91,9 @@ def run_preprocess(args):
 #        print('rinBind ',bind_args))
 
     print('Check_Proprocess ',' '.join(preprocess_args))
-    subprocess.check_call(['python', 'scripts/Check_Preprocess.py']+ preprocess_args)
-#     from Check_Proprocess import MODE,CODE_DIR # import the MODE after running the preprocess.py
-#     return MODE,CODE_DIR
+    run_script_in_conda_env(conda_env,'scripts/Check_Preprocess.py',preprocess_args)
 
-# Define the function to activate a conda environment and run a script
-    # Note: you must have 'conda' in your PATH for this to work
-# def run_script_in_conda_env(conda_env, script, args,working_directory):
-#     subprocess.check_call(['conda', 'activate', conda_env, '&&', 'python', script] + args, cwd=working_directory)
-# #
-# def run_script_in_conda_env(conda_env_path, script, args):
-#     subprocess.check_call([conda_env_path, script] + args)
-def run_script_in_conda_env(python_path, script, args, working_directory):
-    subprocess.check_call([python_path, script] + args, cwd=working_directory)
-
-def run_script_in_outer_env(script, args):
-    subprocess.check_call(['python', script] + args)
-
-def run_embed(args,env):
+def run_embed(conda_env,args):
     if args.fasta is None:
         fasta_file = CODE_DIR+'/data/intermediates/antigens.fasta'
     else:
@@ -127,10 +132,13 @@ def run_embed(args,env):
         embed_args.append('--skip_extract')
         embed_args.append('True')
     print('runEmbed',' '.join(embed_args))
-    run_script_in_conda_env(env, 'runEmbed.py', embed_args, 'scripts')
+    # subprocess.run(['conda', 'run', '-n', 'runEmbed', 'python', 'runEmbed.py']+ embed_args, cwd='scripts',capture_output=False)
+    run_script_in_conda_env(conda_env,'runEmbed.py',embed_args,working_directory='scripts')
+#    run_script_in_conda_env('runEmbed', 'runEmbed.py', embed_args, 'scripts')
+#    run_script_in_conda_env(env, 'runEmbed.py', embed_args, 'scripts')
 
 # Switch to conda env2
-def run_binding(args):
+def run_binding(conda_env,args):
     # if mode == 'binary':
     bind_args = ['--code',CODE_DIR,'--input',args.pre_dir,'--out',OUT,'--seed',str(args.seed),'--subsample',str(args.subsample),'--bottomline',str(args.bottomline)]
     if args.npy_dir is not None:
@@ -143,7 +151,13 @@ def run_binding(args):
     if args.merge:
         bind_args.append('--merge')
     print('rinBind ',' '.join(bind_args))
-    run_script_in_outer_env('scripts/runBind.py',bind_args)
+
+    # subprocess.run(['conda', 'run', '-n', 'runBind', 'python', 'scripts/runBind.py'] + bind_args,capture_output=False)
+#    subprocess.check_call(['conda', 'run', '-n', 'runBind', 'python', 'scripts/runBind.py']+ bind_args)
+#    run_script_in_outer_env('scripts/runBind.py',bind_args)
+#    run_script_in_conda_env('runBind','scripts/runBind.py',bind_args)
+    run_script_in_conda_env(conda_env,'scripts/runBind.py',bind_args)
+
     # elif mode == 'continuous':
     #     cont_args = ['--code',CODE_DIR,'--input',args.pre_dir,'--out',OUT,'--seed',str(args.seed),'--subsample',str(args.subsample),'--bottomline',str(args.bottomline)]
     #     if args.species:
@@ -176,18 +190,27 @@ if not os.path.exists(OUT):
 
 os.chdir(CODE_DIR)
 with open(args.env_path, 'r') as file:
-    runEmbed_env_path = file.read().replace('\n', '')
+    lines = file.readlines()
+# Strip any leading/trailing whitespace or newline characters
+path_embed = lines[0].strip()
+path_bind = lines[1].strip()
+
+print(f'path_embed: {path_embed}')
+print(f'path_bind: {path_bind}')
 # Run preprocess.py and get MODE
 if not args.skip_check:
-    run_preprocess(args)
+    run_preprocess(path_bind,args)
 
 if args.runEmbed and not args.runBind:
-    run_embed(args,runEmbed_env_path)
+    run_embed(path_embed,args)
     move_npy(args.out+'/RFoutputs/results/pred',NPY_DIR)
     exit(0)
 if not args.runEmbed and args.runBind:
-    run_binding(args)
+    run_binding(path_bind,args)
     exit(0)
-run_embed(args,runEmbed_env_path)
+# run_embed(args,runEmbed_env_path)
+# move_npy(args.out+'/RFoutputs/results/pred',NPY_DIR)
+# run_binding(args)
+run_embed(path_embed,args)
 move_npy(args.out+'/RFoutputs/results/pred',NPY_DIR)
-run_binding(args)
+run_binding(path_bind,args)

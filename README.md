@@ -5,12 +5,17 @@ README
 cd /path/to/Cmai
 git clone git@github.com:ice4prince/Cmai.git
 conda env create -f models/runEmbed.yml
-conda activate runEmbed
-which python >paras/runEmbed_path #save your path of runEmbed env
-conda deactivate
 conda env create -f models/runBind.yml
+#  Save the environment path to paras/env_path IN ORDER
+	conda activate runEmbed
+	which python >paras/env_path
+	conda deactivate runEmbed
+	conda activate runBind
+	which python >>paras/env_path
+	conda deactivate runBind
+	
+#  In the folder rfscripts, Install RoseTTAFold from RoseTTAFold's git.	
 cd scripts/rfscripts
-#  Install RoseTTAFold from RoseTTAFold's git.
 git clone git@github.com:RosettaCommons/RoseTTAFold.git
 # Follow the README in RoseTTAFold OR go through
 	# create the environment
@@ -22,18 +27,19 @@ git clone git@github.com:RosettaCommons/RoseTTAFold.git
 
 ## Pipeline
 ```sh
-conda activate runBind
 python Cmai.py --code '/path/to/Cmai' --input 'data/example/input.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'
 ```
 ## Step-by-step Pipeline
 
 ```sh
-conda activate runBind
-
-python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --runEmbed --gen_msa --use_cpu 'cpu'
-
-python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --runEmbed --run_rf --use_cpu 'gpu'
-
+# Antigen Embedding:
+# In 1-step:
+python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --runEmbed
+# In 2 steps:
+	python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --runEmbed --gen_msa --use_cpu 'cpu'
+	python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --runEmbed --run_rf --use_cpu 'gpu'
+	
+# Binding Predict:
 python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check --runBind
 ```
 
@@ -55,7 +61,7 @@ optional arguments:
   --code CODE           the Cmai directory
   --input INPUT         the input files in csv which should include Antigen_id,BCR_Vh,BCR_CDR3h
   --out OUT             the directory for output files
-  --env_path ENV_PATH   the file saving the directory of the runEmbed Conda environment
+  --env_path ENV_PATH   the file saving the directory of the Conda environments- runEmbed and runBind in order.
   --rf_data RF_DATA     the database folder for RoseTTAFold
   --fasta FASTA         The fasta file entering runEbed. When no sequence included in the input, the separate fasta
                         file of antigens is required
