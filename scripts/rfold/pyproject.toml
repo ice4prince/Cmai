@@ -152,6 +152,7 @@ authors = [
 dependencies = [
     "tyro>=0.5.5",
     "rich>=13.5.2",
+    "biopython>=1.81",
 ]
 requires-python = ">=3.10"
 readme = "README.md"
