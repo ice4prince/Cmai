@@ -9,6 +9,12 @@ pdm.lock
 runtime/
 data
 
+RoseTTAFold
+*chk
+*.fasta
+__types
+
+
 # Created by https://www.toptal.com/developers/gitignore/api/pytorch,python,emacs,macos,linux
 # Edit at https://www.toptal.com/developers/gitignore?templates=pytorch,python,emacs,macos,linux
 
