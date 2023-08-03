@@ -98,7 +98,7 @@ class RuntimeEnv:
 
     cpu: Annotated[int, "Max CPUs per process"] = 8
     processes: Annotated[int, "Max processes"] = 8
-    mem: Annotated[int, "Max memory"] = 16
+    mem: Annotated[int, "Max memory"] = 32
     use_cpu: Annotated[bool, "Use CPU or GPU"] = False
 
 
@@ -134,6 +134,8 @@ class DB:
 @dataclass
 class Conf:
     """Config."""
+
+    in_fasta: str = "./*.fasta"
 
     env: Env = field(default_factory=Env)
     runtime: RuntimeEnv = field(default_factory=RuntimeEnv)

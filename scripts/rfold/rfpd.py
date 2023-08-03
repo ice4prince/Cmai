@@ -54,6 +54,7 @@ def preprocess(env: Env) -> None:
     makedirs(join(runtime, "work"), exist_ok=True)
     makedirs(join(runtime, "data"), exist_ok=True)
     makedirs(join(runtime, "pred"), exist_ok=True)
+    makedirs(join(runtime, "temp.fasta"), exist_ok=True)
     makedirs(join(runtime, "work/logs"), exist_ok=True)
     makedirs(join(runtime, "work/temp"), exist_ok=True)
     makedirs(join(runtime, "work/hhblits"), exist_ok=True)
@@ -67,7 +68,8 @@ def hhblits(in_fasta: str, a3m_prefix: str, db: str, e: str, conf: Conf) -> list
         f"-realign_max 100000000 -maxseq 1000000 -maxmem {conf.runtime.mem} -n 4 "
         f"-i {in_fasta} -oa3m {a3m_prefix}.a3m -e {e} -v 0 -d {db}"
     )
-    conf.log(f"HHBLITS: {cmd}")
+    conf.log(f"HHBLITS cmds: {cmd}")
+    conf.log(" ".join(cmd))
     return cmd
 
 
@@ -77,7 +79,8 @@ def hhfilter(a3m_prefix: str, cov: int, conf: Conf) -> list[str]:
         f"{conf.exe.hhfilter} -id 90 -cov {cov} "
         f"-i {a3m_prefix}.a3m -o {a3m_prefix}.id90cov{cov}.a3m"
     )
-    conf.log(f"HHFILTER: {cmd}")
+    conf.log(f"HHFILTER cmds: {cmd}")
+    conf.log(" ".join(cmd))
     return cmd
 
 
@@ -176,6 +179,7 @@ def ss_cmd(name: str, cmd: str, conf: Conf, *, stdout: None | str = None) -> Non
         open(join(logs, "make_ss.stderr"), "ab") as stderr,
     ):
         conf.log(f"{name}: {cmds}")
+        conf.log(" ".join(cmds))
         res = subprocess.run(cmds, stdout=stdoutf, stderr=stderr)
         if res.returncode:
             raise RuntimeError(f"make_ss failed with {name}, {cmd=}")
@@ -271,6 +275,7 @@ def make_hhr_atab(a3m: str, ss2: str, conf: Conf) -> tuple[str, str]:
             f"-i {ss2a3m} -o {hhr} -atab {atab} -v 0"
         )
         conf.log(f"HHsearch: {hhcmd}")
+        conf.log(" ".join(hhcmd))
         res = subprocess.run(hhcmd, stdout=stdout, stderr=stderr)
         if res.returncode:
             raise RuntimeError(f"HHsearch failed with {a3m=},{ss2=}")
