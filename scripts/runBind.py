@@ -42,22 +42,25 @@ print(str(datetime.now()))
 
 
 
-parser = argparse.ArgumentParser(description='Parameters for pair model.')
+parser = argparse.ArgumentParser(description='Parameters for the binding model.')
 
 # Add a optional argument
-parser.add_argument('--code', type=str, help='the CLAnO directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO')
+parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
 parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = 'data/intermediates')
-parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example')
+parser.add_argument('--npy_dir',type = str, help = 'the npy folder if different with input folder',default = None)
+parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example')
 parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
 parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
 parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
+parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
 
 args = parser.parse_args()
 
 CODE_DIR = args.code
 INPUT_DIR = args.input
+
 OUT_DIR = args.out
 MATCHING_SPECIES = args.species
 SEED = args.seed
@@ -71,14 +74,14 @@ VERBOSE = args.verbose
 
 
 
-# CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO'
+# CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai'
 # #CUTOFF = 1800
 # SEED = 1
 # VERBOSE = False
 # MATCHING_SPECIES = False
 # SUBSAMPLE = 100
 # BOTTOMLINE = 10000
-# OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/data/example'
+# OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example'
 
 
 # In[172]:
@@ -100,8 +103,11 @@ os.chdir(CODE_DIR)
 
 
 BACKGROUND = 'data/background/backgroundBCR.csv.gz'
-NPY_DIR = INPUT_DIR+'/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
-MODEL = 'models/binary_model.pth'
+if args.npy_dir is not None:
+    NPY_DIR = args.npy_dir
+else:
+    NPY_DIR = INPUT_DIR+'/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
+MODEL = 'models/model.pth'
 INPUT = INPUT_DIR+'/processed_input.csv'
 
 from wrapV.Vwrap import embedV ##input needs to be list of strings
@@ -138,27 +144,27 @@ torch.set_printoptions(precision=10)
 #     data_filtered = dataset.loc[dataset['aalens']< cutoff]
 #     print('After removing antigens larger than '+str(cutoff)+', '+str(100*data_filtered.shape[0]/dataset.shape[0])+'% antigens remained.')
 #     return data_filtered
-
-def check_bad_bcr(seq):
-    allowed_letters = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
-    uppercase_string = seq.upper()
-    return not any(char not in allowed_letters for char in uppercase_string)
-
-def filter_bad_bcr(df):
-    substrings = ['Vh', 'CDR3h', 'Antigen_seq']
-    some_columns = [col for col in df.columns if any(sub in col for sub in substrings)]
-    for col in some_columns:
-        df[col] = df[col].apply(lambda x: x.replace(' ', ''))
-    mask = df[some_columns].applymap(check_bad_bcr)
-    filtered_df = df[mask.all(axis=1)]
-    return filtered_df
-
-def preprocess(df):
-    df = filter_bad_bcr(df)
-#    df = filter_big_antigens(df,cutoff)
-    df = df.sort_values('Antigen_id')
-    df = df.assign(record_id = ['record_' + str(s) for s in range(df.shape[0])])
-    return df
+#
+# def check_bad_bcr(seq):
+#     allowed_letters = ['A', 'C', 'D', 'E', 'F', 'G', 'H', 'I', 'K', 'L', 'M', 'N', 'P', 'Q', 'R', 'S', 'T', 'V', 'W', 'Y']
+#     uppercase_string = seq.upper()
+#     return not any(char not in allowed_letters for char in uppercase_string)
+#
+# def filter_bad_bcr(df):
+#     substrings = ['Vh', 'CDR3h', 'Antigen_seq']
+#     some_columns = [col for col in df.columns if any(sub in col for sub in substrings)]
+#     for col in some_columns:
+#         df[col] = df[col].apply(lambda x: x.replace(' ', ''))
+#     mask = df[some_columns].applymap(check_bad_bcr)
+#     filtered_df = df[mask.all(axis=1)]
+#     return filtered_df
+#
+# def preprocess(df):
+#     df = filter_bad_bcr(df)
+# #    df = filter_big_antigens(df,cutoff)
+#     df = df.sort_values('Antigen_id')
+#     df = df.assign(record_id = ['record_' + str(s) for s in range(df.shape[0])])
+#     return df
 
 # def has_space(string):
 #     return " " in string
@@ -361,8 +367,8 @@ class rankDataset(Dataset):
 
     def subsample_data(self, dataframe, subsample_ratio):
         if subsample_ratio < 1.0:
-            if not subsample_ratio == 1/10000:
-                self.seed = None
+            # if not subsample_ratio == 1/10000:
+            #     self.seed = None
             return dataframe.sample(frac=subsample_ratio,random_state=self.seed)
         else:
             return dataframe
@@ -517,7 +523,7 @@ class mix_model(nn.Module):
 #         self.beta1 = nn.Parameter(torch.randn(1))
 #         self.alpha2 = nn.Parameter(torch.randn(1))
 #         self.beta2 = nn.Parameter(torch.randn(1))
-    def forward(self,x,mode='binary'): ###because in getitem, return is .cuda(), now input is on gpu
+    def forward(self,x): ###because in getitem, return is .cuda(), now input is on gpu
 #         x = torch.empty(0)
 #         x = x.to(device)
 #        x = x.permute(0,2,1,3)
@@ -646,9 +652,9 @@ else:
 
 # In[178]:
 
-
-target = preprocess(target_file)
-
+target = target_file
+# target = preprocess(target_file)
+# target.to_csv(INPUT_DIR+'/filtered_input.csv')
 
 # In[79]:
 
@@ -746,18 +752,31 @@ subsample = SUBSAMPLE
 s_target =  target
 f_antigens = antigen_dict
 output = pd.DataFrame()
-while len(s_target)>0 and subsample<=BOTTOMLINE:
-    print('Ranking for ',s_target['record_id'].to_list(),'...')
+while len(s_target)>0 and subsample<BOTTOMLINE:
+    print('Ranking in',subsample,'background BCRs...')
     score_dict = generate_score_dict(background,score_dict,f_antigens,CDR3h_dict,Vh_dict,model_mix,subsample=subsample/1000000,seed=SEED)
     res = calculate_rank(s_target,score_dict,f_antigens,len_dict,model_mix)
     output = pd.concat([output,res[res['Rank']>=cutoffs_dict[subsample]]],axis =0)
+    percentage_completed = output.shape[0] / target.shape[0] * 100
+    print(f'Completed {percentage_completed:.2f}% of entries...')
     f_res = res[res['Rank']<cutoffs_dict[subsample]]
     f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
     s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
     subsample = subsample*10
 
+if len(s_target)>0:
+    print('Ranking in',subsample,'background BCRs...')
+    score_dict = generate_score_dict(background,score_dict,f_antigens,CDR3h_dict,Vh_dict,model_mix,subsample=subsample/1000000,seed=SEED)
+    res = calculate_rank(s_target,score_dict,f_antigens,len_dict,model_mix)
+    output = pd.concat([output,res],axis =0)
+    percentage_completed = output.shape[0] / target.shape[0] * 100
+    print(f'Completed {percentage_completed:.2f}% of entries...')
 
 # In[187]:
 
 
 output.to_csv(OUT_DIR+'/binding_results.csv')
+
+if args.merge:
+    merged = target.merge(output, on='record_id', how='left')
+    merged.to_csv(OUT_DIR+'/merged_results.csv')

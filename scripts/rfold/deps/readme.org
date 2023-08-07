@@ -1,0 +1,84 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:{} arch:headline
+#+options: author:t broken-links:mark c:nil creator:nil
+#+options: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:t
+#+options: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+options: timestamp:t title:t toc:t todo:t |:t
+#+title: Dependence
+#+date: <2023-01-04 Wed>
+#+author: Nasy
+#+email: nasyxx@gmail.com
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 30.0.50 (Org mode 9.6)
+#+cite_export:
+
+* HH Suite
+
+#+begin_src sh
+  git clone https://github.com/soedinglab/hh-suite.git
+  mkdir -p hh-suite/build && cd hh-suite/build
+
+  # linux
+  cmake -DCMAKE_INSTALL_PREFIX=. ..
+  make -j 4 && make install
+  export PATH="$(pwd)/bin:$(pwd)/scripts:$PATH"
+
+  # macos
+  CC=gcc CXX=g++ cmake -DCMAKE_INSTALL_PREFIX=. ..
+  make -j 4 && make install
+  export PATH="$(pwd)/bin:$(pwd)/scripts:$PATH"
+#+end_src
+
+* psipred
+
+See https://github.com/psipred/psipred
+
+#+begin_src sh
+  git clone https://github.com/psipred/psipred.git
+
+  cd psipred/src
+
+  make && make install
+
+  cd ..
+  export PATH="$(pwd)/bin:$PATH"
+#+end_src
+
+* BLAST-Legacy
+
+** macOS
+
+#+begin_src sh
+  wget https://anaconda.org/bioconda/blast-legacy/2.2.26/download/osx-64/blast-legacy-2.2.26-h527b516_3.tar.bz2
+
+  mkdir blast-legacy
+  cp blast-legacy-2.2.26-h527b516_3.tar.bz2 blast-legacy
+  cd blast-legacy
+  tar -xvf blast-legacy-2.2.26-h527b516_3.tar.bz2
+
+  cd ..
+  export PATH="$(pwd)/blast-legacy/bin:$PATH"
+#+end_src
+
+** Linux
+
+#+begin_src sh
+  wget https://anaconda.org/bioconda/blast-legacy/2.2.26/download/linux-64/blast-legacy-2.2.26-h9ee0642_3.tar.bz2
+
+  mkdir blast-legacy
+  cp blast-legacy-2.2.26-h9ee0642_3.tar.bz2 blast-legacy
+  cd blast-legacy
+  tar -xvf blast-legacy-2.2.26-h9ee0642_3.tar.bz2
+
+  cd ..
+  export PATH="$(pwd)/blast-legacy/bin:$PATH"
+#+end_src
+
+* csblast
+
+#+begin_src sh
+  ./install.sh
+
+  export PATH="$(pwd)/csblast-2.2.3/bin:$PATH"
+#+end_src
