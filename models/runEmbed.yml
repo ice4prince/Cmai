@@ -40,6 +40,7 @@ dependencies:
     - pygments==2.13.0
     - rich==12.6.0
     - smile-config==0.9.1
+    - tyro
     - tomlkit==0.11.6
     - typing-extensions==4.4.0
 prefix: /project/DPDS/Wang_lab/shared/BCR_antigen/code/CLAnO/models
