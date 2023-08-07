@@ -34,28 +34,37 @@ license  : GPL-3.0+
 
 Run rfpd.py
 """
-from config import Conf, config
-from rfpd import preprocess, make_msa, make_ss, make_hhr_atab, to_data_dir
-from glob import iglob
-from Bio import SeqIO, SeqRecord
+from rconfig import Conf, config
+from rfpd import make_hhr_atab, make_msa, make_ss, preprocess, to_data_dir
+
+# Standard Library
 import os
+from glob import iglob
+
+# Others
+from Bio import SeqIO, SeqRecord
 
 
-def make_temp_fasta(key: str, seq: SeqRecord.SeqRecord, conf: Conf) -> str:
+def make_temp_fasta(key: str, seq: SeqRecord.SeqRecord, conf: Conf) -> tuple[str, str]:
     """Make temp fasta file."""
-    fasta = os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta", f"{key}.fasta")
-    seq.seq = seq.seq.upper()  # type: ignore[attr-defined]
+    os.makedirs(fdir := os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta"), exist_ok=True)
+    fasta = os.path.join(fdir, f"{key}.fasta")
+    if conf.suffix:
+        length = len(list(iglob(fasta.replace(".fasta", ".*.fasta"))))
+        key = f"{key}.{length:03d}"
+        fasta = os.path.join(fdir, f"{key}.fasta")
+
     SeqIO.write(seq, fasta, "fasta")
-    return fasta
+    return key, fasta
 
 
-def main() -> None:
-    """Run main function."""
+def gen_msa() -> None:
+    """Generate msa."""
     conf = config()
     preprocess(conf.env)
     for fasta in iglob(conf.in_fasta):
         for key, seq in SeqIO.index(fasta, "fasta").items():
-            fpath = make_temp_fasta(key, seq, conf)
+            key, fpath = make_temp_fasta(key, seq, conf)
             a3m = make_msa(fpath, key, conf)
             ss2 = make_ss(a3m, conf)
             hhr, atab = make_hhr_atab(a3m, ss2, conf)
@@ -63,4 +72,4 @@ def main() -> None:
 
 
 if __name__ == "__main__":
-    main()
+    gen_msa()

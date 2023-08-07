@@ -35,6 +35,8 @@ license  : GPL-3.0+
 
 Rfold Preprocessor for Data.
 """
+from rconfig import Conf, Env, config
+
 # Standard Library
 import shlex, shutil, subprocess
 from os import listdir, makedirs, remove
@@ -42,9 +44,6 @@ from os.path import abspath, basename, dirname, exists, join
 
 # Types
 from typing import cast
-
-# Config
-from config import Conf, Env, config
 
 
 def preprocess(env: Env) -> None:
