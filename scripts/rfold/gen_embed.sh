@@ -27,4 +27,6 @@ mkdir -p $OUTD
 sort $IN/IDX | uniq | sort > $IN/IDX.uniq
 
 #python "$SCRIPT_DIR"/$RFD/network/predict_smile.py $RFD/weights $DB $IN $OUTD $4
+cp $SCRIPT_DIR/model.py $RFD/network
+cp $SCRIPT_DIR/predict.py $RFD/network
 python $RFD/network/predict_smile.py $RFD/weights $DB $IN $OUTD $4
