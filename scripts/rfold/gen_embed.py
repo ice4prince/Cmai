@@ -40,7 +40,7 @@ import subprocess
 import os
 
 # Others
-from rconfig import Conf, config
+from .rconfig import Conf, config
 import tyro
 
 
