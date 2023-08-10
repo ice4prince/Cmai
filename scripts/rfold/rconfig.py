@@ -57,19 +57,23 @@ class Env:
     """Envs."""
 
     RF_BASE: Annotated[str, "RoseTTAFold repo path"] = os.environ.get(
-        "RF_BASE", "./RoseTTAFold"
+        "RF_BASE","/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/scripts/rfold/RoseTTAFold"
     )
+
+    # RF_SCRIPTS: Annotated[str, "Scripts folder."] = os.environ.get(
+    #     "RF_SCRIPTS", "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/scripts"
+    # }
     RF_DATA_BASE: Annotated[str, "RoseTTAFold data base path"] = os.environ.get(
-        "RF_DATA_BASE", "./data"
+        "RF_DATA_BASE", "/project/DPDS/Wang_lab/shared/BCR_antigen/data"
     )
     RF_RUNTIME_BASE: Annotated[str, "RoseTTAFold runtime base path"] = os.environ.get(
-        "RF_RUNTIME_BASE", "./runtime"
+        "RF_RUNTIME_BASE","/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output/RFoutputs"
     )
     CSBLAST_DATA: Annotated[str, "CSBLAST data path"] = os.environ.get(
-        "CSBLAST_DATA", "./deps/csblast-2.2.3/data"
+        "CSBLAST_DATA", "rfold/RoseTTAFold/csblast-2.2.3/data"
     )
     PSIPRED_DATA: Annotated[str, "PSIPRED data path"] = os.environ.get(
-        "PSIPRED_DATA", "./deps/psipred/data"
+        "PSIPRED_DATA", "/home2/s205236/.conda/envs/RoseTTAFold/share/psipred_4.01/data"
     )
 
     auto_gen_env: bool = True
@@ -96,8 +100,8 @@ class Env:
 class RuntimeEnv:
     """Runtime envs."""
 
-    cpu: Annotated[int, "Max CPUs per process"] = 8
-    processes: Annotated[int, "Max processes"] = 8
+    cpu: Annotated[int, "Max CPUs"] = 8
+    # processes: Annotated[int, "Max process"] = 8
     mem: Annotated[int, "Max memory"] = 32
     use_cpu: Annotated[bool, "Use CPU or GPU"] = False
 
@@ -106,10 +110,10 @@ class RuntimeEnv:
 class Exe:
     """Executables."""
 
-    hhsuit_path: Annotated[str, "HHsuite executables path."] = "deps/hh-suite/build/bin"
-    psipred_path: Annotated[str, "PSIPRED executables path."] = "deps/psipred/bin"
-    csblast_path: Annotated[str, "CSBLAST executables path."] = "deps/csblast-2.2.3/bin"
-    blast_path: Annotated[str, "BLAST executables path."] = "deps/blast-legacy/bin"
+    hhsuit_path: Annotated[str, "HHsuite executables path."] = "rfold/deps/hhsuite/bin"
+    psipred_path: Annotated[str, "PSIPRED executables path."] = "/home2/s205236/.conda/envs/RoseTTAFold/bin"
+    csblast_path: Annotated[str, "CSBLAST executables path."] = "rfold/RoseTTAFold/csblast-2.2.3/bin"
+    blast_path: Annotated[str, "BLAST executables path."] = "/home2/s205236/.conda/envs/RoseTTAFold/bin"
 
     hhsearch: Annotated[str, "HHsearch executable."] = field(init=False)
     hhblits: Annotated[str, "HHblits executable."] = field(init=False)
@@ -160,9 +164,19 @@ class DB:
 class Conf:
     """Config."""
 
-    in_fasta: str = "./*.fasta"
-
+    in_fasta: str = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/intermediates/antigens.fasta"
+    """ Print verbose messages """
+    verbose: bool = False #"Print verbose messages or not."]
+    """ Add suffix to the protein id in the results."""
     suffix: bool = False
+    """ only generate the msa and exit """
+    gen_msa: bool = False
+    """ Skip generating msa and only run prediction """
+    run_rf: bool = False
+    """ Skip preprocessn """
+    skip_preprocess: bool = False
+    """ Skip extraction """
+    skip_extract: bool = False
 
     env: Env = field(default_factory=Env)
     runtime: RuntimeEnv = field(default_factory=RuntimeEnv)

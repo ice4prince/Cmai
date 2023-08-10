@@ -35,7 +35,7 @@ license  : GPL-3.0+
 
 Rfold Preprocessor for Data.
 """
-from rconfig import Conf, Env, config
+from .rconfig import Conf, Env, config
 
 # Standard Library
 import shlex, shutil, subprocess

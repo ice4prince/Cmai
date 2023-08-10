@@ -1,9 +1,7 @@
 para	arg
 cpu	32
 mem	128
-use_cpu	gpu
-hhsearch	rfscripts/bin/hhsearch
-hhblits	rfscripts/bin/hhblits
-hhfilter	rfscripts/bin/hhfilter
-psipred	psipred
-psipass2	psipass2
+hhsuit_path	rfold/deps/hhsuite/bin
+csblast_path	rfold/RoseTTAFol/csblast-2.2.3/bin
+CSBLAST_DATA	rfold/RoseTTAFold/csblast-2.2.3/data
+PSIPRED_DATA	/home2/s205236/.conda/envs/RoseTTAFold/share/psipred_4.01/data

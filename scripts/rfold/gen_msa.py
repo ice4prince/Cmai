@@ -34,8 +34,8 @@ license  : GPL-3.0+
 
 Run rfpd.py
 """
-from rconfig import Conf, config
-from rfpd import make_hhr_atab, make_msa, make_ss, preprocess, to_data_dir
+from .rconfig import Conf, config
+from .rfpd import make_hhr_atab, make_msa, make_ss, preprocess, to_data_dir
 
 # Standard Library
 import os
@@ -44,6 +44,7 @@ from glob import iglob
 # Others
 import tyro
 from Bio import SeqIO, SeqRecord
+
 
 
 def make_temp_fasta(key: str, seq: SeqRecord.SeqRecord, conf: Conf) -> tuple[str, str]:
