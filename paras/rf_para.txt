@@ -1,7 +1,10 @@
 para	arg
-cpu	32
-mem	128
-hhsuit_path	rfold/deps/hhsuite/bin
-csblast_path	rfold/RoseTTAFol/csblast-2.2.3/bin
-CSBLAST_DATA	rfold/RoseTTAFold/csblast-2.2.3/data
-PSIPRED_DATA	/home2/s205236/.conda/envs/RoseTTAFold/share/psipred_4.01/data
+runtime.cpu	32
+runtime.mem	128
+exe.hhsuit-path	rfold/deps/hhsuite/bin
+exe.psipred-path	rfold/RoseTTAFold/csblast-2.2.3/bin
+exe.csblast-path	/home2/s205236/.conda/envs/RoseTTAFold/bin
+exe.blast-path	/home2/s205236/.conda/envs/RoseTTAFold/bin
+env.CSBLAST-DATA	rfold/RoseTTAFold/csblast-2.2.3/data
+env.PSIPRED-DATA	/home2/s205236/.conda/envs/RoseTTAFold/share/psipred_4.01/data
+env.BLASTMAT	/home2/s205236/.conda/envs/RoseTTAFold/share/blast-2.2.26/data
