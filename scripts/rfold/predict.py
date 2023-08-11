@@ -345,10 +345,10 @@ class Predictor():
 
 def parse_args():
     _, m, db, inb, out, cpu, *_ = sys.argv
-    if cpu == 'cpu':
-        use_cpu = True
-    elif cpu == "gpu":
+    if cpu == 'False':
         use_cpu = False
+    elif cpu == "True":
+        use_cpu = True
     else:
         use_cpu = True
     return m, db, inb, out, use_cpu
