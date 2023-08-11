@@ -1,7 +1,7 @@
-deps/*
+# deps/*
 !deps/*.org
 !deps/*.sh
-
+*.ipynb
 weights*
 cache_mutex
 env.sh
