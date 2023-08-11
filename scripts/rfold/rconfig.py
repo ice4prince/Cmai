@@ -75,6 +75,9 @@ class Env:
     PSIPRED_DATA: Annotated[str, "PSIPRED data path"] = os.environ.get(
         "PSIPRED_DATA", "/home2/s205236/.conda/envs/RoseTTAFold/share/psipred_4.01/data"
     )
+    BLASTMAT: Annotated[str, "BLASTMAT data path"] = os.environ.get(
+        "BLASTMAT", "/home2/s205236/.conda/envs/RoseTTAFold/share/blast-2.2.26/data"
+    )
 
     auto_gen_env: bool = True
 
