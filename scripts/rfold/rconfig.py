@@ -60,9 +60,6 @@ class Env:
         "RF_BASE","/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/scripts/rfold/RoseTTAFold"
     )
 
-    # RF_SCRIPTS: Annotated[str, "Scripts folder."] = os.environ.get(
-    #     "RF_SCRIPTS", "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/scripts"
-    # }
     RF_DATA_BASE: Annotated[str, "RoseTTAFold data base path"] = os.environ.get(
         "RF_DATA_BASE", "/project/DPDS/Wang_lab/shared/BCR_antigen/data"
     )
@@ -103,10 +100,9 @@ class Env:
 class RuntimeEnv:
     """Runtime envs."""
 
-    cpu: Annotated[int, "Max CPUs"] = 8
-    # processes: Annotated[int, "Max process"] = 8
-    mem: Annotated[int, "Max memory"] = 32
-    use_cpu: Annotated[bool, "Use CPU or GPU"] = False
+    cpu: Annotated[int, "Max CPUs"] = 8 # Max number of CPUs (in GB)
+    mem: Annotated[int, "Max memory"] = 32 # Max memory to use (in GB)
+    use_cpu: Annotated[bool, "Use CPU or GPU"] = False # Use cpu or gpu, default is gpu
 
 
 @dataclass
@@ -168,18 +164,19 @@ class Conf:
     """Config."""
 
     in_fasta: str = "/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/intermediates/antigens.fasta"
-    """ Print verbose messages """
+    """ fasta files to input """
     verbose: bool = False #"Print verbose messages or not."]
-    """ Add suffix to the protein id in the results."""
+    """ Print verbose messages """
     suffix: bool = False
-    """ only generate the msa and exit """
+    """ Add suffix to the protein id in the results."""
     gen_msa: bool = False
-    """ Skip generating msa and only run prediction """
+    """ only generate the msa and exit """
     run_rf: bool = False
-    """ Skip preprocessn """
+    """ Skip generating msa and only run prediction """
     skip_preprocess: bool = False
-    """ Skip extraction """
+    """ Skip preprocessn """
     skip_extract: bool = False
+    """ Skip extraction """
 
     env: Env = field(default_factory=Env)
     runtime: RuntimeEnv = field(default_factory=RuntimeEnv)
