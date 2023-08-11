@@ -101,7 +101,7 @@ def run_embed(conda_env,args,path_rf_env):
         fasta_file = args.fasta
     embed_args = ['--in-fasta', fasta_file,
                  '--env.RF_RUNTIME_BASE',args.out+'/RFoutputs',
-                 '--env.RF_RUNTIME_BASE',args.rf_data,
+                 '--env.RF_DATA_BASE',args.rf_data,
                  '--env.RF-BASE',CODE_DIR+'/scripts/rfold/RoseTTAFold'
                 ]
     if args.rf_para:
@@ -114,7 +114,7 @@ def run_embed(conda_env,args,path_rf_env):
             embed_args.append('--'+key)
             embed_args.append(value)
     else:
-        args_to_add = ['--runtime.cpu',args.cpu,'--runtime.mem',args.mem,
+        args_to_add = ['--runtime.cpu',str(args.cpu),'--runtime.mem',str(args.mem),
                          '--env.CSBLAST-DATA','rfold/RoseTTAFold/csblast-2.2.3/data',
                          '--env.PSIPRED-DATA',path_rf_env+'/share/psipred_4.01/data',
                          '--env.BLASTMAT',path_rf_env+'/share/blast-2.2.26/data',
@@ -128,7 +128,7 @@ def run_embed(conda_env,args,path_rf_env):
         #     embed_args.append('--use-cpu')
         #     embed_args.append(args.use_cpu)
         #embed_args.append(add_arg)
-    if agrs.use_cpu:
+    if args.use_cpu:
         embed_args.append('--runtime.use-cpu')
     if args.gen_msa:
         embed_args.append('--gen-msa')
@@ -142,6 +142,7 @@ def run_embed(conda_env,args,path_rf_env):
         embed_args.append('--verbose')
     if args.suffix:
         embed_args.append('--suffix')
+    # print('runEmbed',embed_args)
     print('runEmbed',' '.join(embed_args))
     # subprocess.run(['conda', 'run', '-n', 'runEmbed', 'python', 'runEmbed.py']+ embed_args, cwd='scripts',capture_output=False)
     run_script_in_conda_env(conda_env,'runEmbed.py',embed_args,working_directory='scripts')
