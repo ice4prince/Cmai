@@ -1,0 +1,25 @@
+#+options: ':nil *:t -:t ::t <:t H:3 \n:nil ^:{} arch:headline
+#+options: author:t broken-links:mark c:nil creator:nil
+#+options: d:(not "LOGBOOK") date:t e:t email:nil f:t inline:t num:t
+#+options: p:nil pri:nil prop:nil stat:t tags:t tasks:t tex:t
+#+options: timestamp:t title:t toc:t todo:t |:t
+#+title: readme
+#+date: <2023-08-03 Thu>
+#+author: Nasy
+#+email: nasyxx@gmail.com
+#+language: en
+#+select_tags: export
+#+exclude_tags: noexport
+#+creator: Emacs 30.0.50 (Org mode 9.7-pre)
+#+cite_export:
+
+
+* Rfold
+
+** Install deps
+
+#+begin_src sh
+  pip install biopython rich tyro
+#+end_src
+
+And see ~./deps/readme.org~

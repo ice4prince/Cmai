@@ -1,11 +1,14 @@
 import os
 from glob import iglob
 
-from config import Conf, config
-from Preprocess import preprocess
+from rfold.rconfig import Conf#, config
+from Preprocess import check_fasta
 from NPZtoPair import exPair
-from rfscripts.rfpd import run_msa
-from rfscripts.rfpd import run_rfpd
+from rfold.gen_msa import gen_msa
+from rfold.gen_embed import gen_embed
+import tyro
+# from rfscripts.rfpd import run_msa
+# from rfscripts.rfpd import run_rfpd
 #from rfscripts.config import Conf, config
 #parser = OptionParser()
 #parser.add_option("-f", "--fasta",
@@ -23,30 +26,30 @@ from rfscripts.rfpd import run_rfpd
 
 def Pre(conf: Conf) -> None:
     print('Preprocessing...')
-    preprocess(conf)
+    check_fasta(conf)
 
 def runEmbed(conf: Conf) -> None:
     print('Embedding...')
-    if not os.path.exists(conf.path.out):
-        os.mkdir(conf.path.out)
+    if not os.path.exists(conf.env.RF_RUNTIME_BASE):
+        os.mkdir(conf.env.RF_RUNTIME_BASE)
         print('results directory is created!')
-    print(conf)
+    # print(conf)
     if conf.gen_msa and not conf.run_rf:
         print('only generating msa...')
-        run_msa(conf)
+        gen_msa(conf)
         exit()
     if not conf.gen_msa and conf.run_rf:
         print('only running RoseTTAFold..')
-        run_rfpd(conf)
+        gen_embed(conf)
         return
-    run_msa(conf)
-    run_rfpd(conf)
+    gen_msa(conf)
+    gen_embed(conf)
     return
 
 
 def extract(conf: Conf) -> None:
     print('Extracting...')
-    npzFile = conf.path.out + '/results/pred/*feature.npz'
+    npzFile = conf.env.RF_RUNTIME_BASE + '/pred/*feature.npz'
     for npz in iglob(npzFile):
         exPair(npz)
         if conf.verbose:
@@ -57,7 +60,8 @@ def extract(conf: Conf) -> None:
 #    os.system(cmd)
 
 if __name__ == "__main__":
-    print(config)
+    config = tyro.cli(Conf)
+    # print(config)
     if config.skip_preprocess:
         print('skipping preprocessing...')
     else:

@@ -17,7 +17,7 @@ conda activate myenv #replace myenv using your specifed environment name
 # conda env create -f torchEnv.yml
 # conda activate torchEnv.yml #OR create your environment from the yml file and activate it.
 export CUDA_VISIBLE_DEVICES=0
-python3.8 ~/V_wrapup.py \
+python3.8 ~/Vwrap.py \
 	-i ~/inputfile \
 	# input the sequence or gene id file. Usually in txt.
 	-o ~/outputFolder \

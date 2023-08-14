@@ -315,13 +315,14 @@ def embedV(V_seq, precise = False,backward =False):
 #            outseq.append(encoded.detach().cpu().numpy()[0,:])
             deseq.append(decoded.detach().cpu().numpy()[0,0,:,:])
 
-    return(outseq,decoded,V_seq)
+    return(outseq,deseq,inseq)
 
-def OutV(v_seq,outseq,Output,gene_ids=[],type='sequence',species='human'):
+def OutV(V_seq,outseq,deseq,inseq,Output,gene_ids=[],type='sequence',species='human'):
     if not os.path.exists(Output):
         os.makedirs(Output)
     #    os.makedirs(os.path.join(Output,'pths'))
-        os.makedirs(os.path.join(Output,'heatmaps'))
+    if not os.path.exists(os.path.join(Output,'heatmaps_V')):
+        os.makedirs(os.path.join(Output,'heatmaps_V'))
     encoded_V=pd.DataFrame(outseq)
     if type == 'sequence':
         encoded_V['sequence'] = V_seq
@@ -342,7 +343,7 @@ def OutV(v_seq,outseq,Output,gene_ids=[],type='sequence',species='human'):
             axs[1].set_title(str(gene_pick)+'-th gene: input aa seq')
             sns.heatmap(np.transpose(deseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[0])
             sns.heatmap(np.transpose(inseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[1])
-            plt.savefig(Output+'/heatmaps/heatmap_'+str(i)+'th_V.png')
+            plt.savefig(Output+'/heatmaps_V/heatmap_'+str(i)+'th_V.png')
     elif type == 'gene_id':
         gene_ids = gene_ids[0]
         index_pick=random.sample(range(len(gene_ids)),10)
@@ -356,9 +357,15 @@ def OutV(v_seq,outseq,Output,gene_ids=[],type='sequence',species='human'):
             axs[1].set_title(gene_pick+' input aa seq')
             sns.heatmap(np.transpose(deseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[0])
             sns.heatmap(np.transpose(inseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[1])
-            plt.savefig(Output+'/heatmaps/heatmap_'+str(i)+'_V.png')
+            plt.savefig(Output+'/heatmaps_V/heatmap_'+str(i)+'_V.png')
 
 if __name__ == "__main__":
-    V_input,*_=InputV(InFile = args.input,type = args.type,species = args.species)
-    V_output,V_decode = embedV(V_input)
-    OutV(v_seq=V_input,outseq=V_output,Output = args.output,gene_ids=_,type = args.type,species = args.species)
+    try:
+        V_input,_=InputV(InFile = args.input,type = args.type,species = args.species)
+        V_output,V_deseq,V_inseq = embedV(V_input)
+        OutV(V_input,V_output,V_deseq,V_inseq,Output = args.output,gene_ids=_,type = args.type,species = args.species)
+    except ValueError:
+        V_input = InputV(InFile = args.input,type = args.type,species = args.species)
+#    print(len(V_input))
+        V_output,V_deseq,V_inseq = embedV(V_input)
+        OutV(V_input,V_output,V_deseq,V_inseq,Output = args.output,type = args.type,species = args.species)
