@@ -268,10 +268,10 @@ class Predictor():
                     prob = prob.reshape(-1, L, L).permute(1,2,0).cpu().numpy()
                     prob_s.append(prob)
 
-        np.savez_compressed("%s.npz"%(out_prefix), dist=prob_s[0].astype(np.float16), \
-                            omega=prob_s[1].astype(np.float16),\
-                            theta=prob_s[2].astype(np.float16),\
-                            phi=prob_s[3].astype(np.float16))
+        np.savez_compressed("%s.npz"%(out_prefix), dist=prob_s[0].astype(np.float32), \
+                            omega=prob_s[1].astype(np.float32),\
+                            theta=prob_s[2].astype(np.float32),\
+                            phi=prob_s[3].astype(np.float32))
 
         self.write_pdb(seq[0], xyz[0], idx_pdb[0], Bfacts=lddt[0], prefix="%s_init"%(out_prefix))
 
