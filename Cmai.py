@@ -96,7 +96,7 @@ def run_preprocess(conda_env,args):
 
 def run_embed(conda_env,args,path_rf_env):
     if args.fasta is None:
-        fasta_file = CODE_DIR+'/data/intermediates/antigens.fasta'
+        fasta_file = args.pre_dir+'/antigens.fasta'
     else:
         fasta_file = args.fasta
     embed_args = ['--in-fasta', fasta_file,
