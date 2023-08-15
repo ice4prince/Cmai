@@ -52,10 +52,12 @@ def make_temp_fasta(key: str, seq: SeqRecord.SeqRecord, conf: Conf) -> tuple[str
     #     fdir := os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta"), exist_ok=True
     # )
     # fasta = os.path.join(fdir, f"{key}.fasta")
-    fdir, fasta = os.path.split(
+    fdir, fkey = os.path.split(
         os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta", f"{key}.fasta")
     )
     os.makedirs(fdir, exist_ok=True)
+    fasta = os.path.join(fdir, fkey)
+    key = fkey.replace(".fasta", "")
     if conf.suffix:
         length = len(list(iglob(fasta.replace(".fasta", ".*.fasta"))))
         key = f"{key}.{length:03d}"
