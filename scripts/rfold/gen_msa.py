@@ -46,13 +46,18 @@ import tyro
 from Bio import SeqIO, SeqRecord
 
 
-
 def make_temp_fasta(key: str, seq: SeqRecord.SeqRecord, conf: Conf) -> tuple[str, str]:
     """Make temp fasta file."""
-    os.makedirs(
-        fdir := os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta"), exist_ok=True
+    # os.makedirs(
+    #     fdir := os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta"), exist_ok=True
+    # )
+    # fasta = os.path.join(fdir, f"{key}.fasta")
+    fdir, fkey = os.path.split(
+        os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta", f"{key}.fasta")
     )
-    fasta = os.path.join(fdir, f"{key}.fasta")
+    os.makedirs(fdir, exist_ok=True)
+    fasta = os.path.join(fdir, fkey)
+    key = fkey.replace(".fasta", "")
     if conf.suffix:
         length = len(list(iglob(fasta.replace(".fasta", ".*.fasta"))))
         key = f"{key}.{length:03d}"
