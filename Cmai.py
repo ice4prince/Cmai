@@ -192,6 +192,11 @@ if not os.path.exists(OUT):
     # If not, create the directory
     os.makedirs(OUT)
     os.makedirs(OUT+'/RFoutputs')
+
+if not os.path.exists(args.pre_dir):
+    # If not, create the directory
+    os.makedirs(args.pre_dir)
+    os.makedirs(args.pre_dir+'/NPY')
 # if CONT:
 #     MODE = 'continuous'
 #     print('mode switching ...')

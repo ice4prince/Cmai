@@ -208,7 +208,7 @@ def get_antigen_dict(df):
     antigen_pool = df['Antigen_id'].unique()
     antigen_dict = {}
     for antigen in antigen_pool:
-        antigen_dict[antigen] = np.load(NPY_DIR+'/'+antigen+'.pair.npy')/w
+        antigen_dict[antigen] = np.load(NPY_DIR+'/'+antigen+'.pair.npy').astype(np.float32)/w
     return antigen_dict
 
 

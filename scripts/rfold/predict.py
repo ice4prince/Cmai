@@ -267,7 +267,7 @@ class Predictor():
                     prob = self.active_fn(logit.float()) # distogram
                     prob = prob.reshape(-1, L, L).permute(1,2,0).cpu().numpy()
                     prob_s.append(prob)
-
+        print(prob_s[0].dtype)
         np.savez_compressed("%s.npz"%(out_prefix), dist=prob_s[0].astype(np.float32), \
                             omega=prob_s[1].astype(np.float32),\
                             theta=prob_s[2].astype(np.float32),\
