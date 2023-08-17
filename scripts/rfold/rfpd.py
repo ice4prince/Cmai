@@ -109,7 +109,7 @@ def one_search(
         )
         if res.returncode:
             raise RuntimeError(
-                "HHBLITS failed with {in_fasta=},{out=},{dbi=},{db=},{e=}."
+                f"HHBLITS failed with {in_fasta=},{out=},{dbi=},{db=},{e=}."
             )
 
         # hhfilter
