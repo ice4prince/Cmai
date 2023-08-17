@@ -21,15 +21,12 @@ git clone git@github.com:RosettaCommons/RoseTTAFold.git
 
 ## Data Preparation
 
-```
-Input file:
 Required columns:
 	| Antigen_id | Antigen_seq | BCR_Vh | BCR_CDR3h |
 	**To be noticed:**
 	If there is no 'Antigen_seq' column, a fasta file MUST be provided.
 Optional columns:
 	| BCR_species | BCR_id | Score | test | ... |
-```
 
 ## Pipeline
 
