@@ -70,7 +70,7 @@ optional arguments:
   --rf_data RF_DATA     the database folder for RoseTTAFold
   --fasta FASTA         The fasta file entering runEbed. When no sequence included in the input, the separate fasta
                         file of antigens is required
-  --pre_dir PRE_DIR     the directory to save the preprocessed data.
+  --pre_dir PRE_DIR     the directory to save the preprocessed data. If not defiend, same with output directory.  
   --npy_dir NPY_DIR     the npy folder if different with preprocess folder
   --cpu CPU             the maximum of cpus for antigen embedding. If not defined, use the value of paras/rf_para.txt
   --mem MEM             the maximum of memory in GB for antigen embedding. If not defined, use the value of
