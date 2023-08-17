@@ -54,9 +54,9 @@ args = parser.parse_args()
 # In[ ]:
 CODE_DIR = args.code
 OUT = args.out
-if arg.pre_dir is None:
+if args.pre_dir is None:
     args.pre_dir = OUT
-    
+
 if args.npy_dir is not None:
     NPY_DIR = args.npy_dir
 else:
