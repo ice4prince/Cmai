@@ -26,7 +26,7 @@ parser.add_argument('--out',type = str, help = 'the directory for output files',
 parser.add_argument('--env_path', help='the file saving the directory of the Conda environments- python of runEmbed, python of runBind, and RoseTTAFold in order.',default = 'paras/env_path')
 parser.add_argument('--rf_data',type = str, help = 'the database folder for RoseTTAFold',default= '/project/DPDS/Wang_lab/shared/BCR_antigen/data')
 parser.add_argument('--fasta',type = str, help = 'The fasta file entering runEbed. When no sequence included in the input, the separate fasta file of antigens is required',default =None)
-parser.add_argument('--pre_dir',type = str, help='the directory to save the preprocessed data.',default = 'data/intermediates')
+parser.add_argument('--pre_dir',type = str, help='the directory to save the preprocessed data. If not defiend, same with output directory.',default = None)
 parser.add_argument('--npy_dir',type = str, help = 'the npy folder if different with preprocess folder',default = None)
 parser.add_argument('--cpu',type = str, help = 'the maximum of cpus for antigen embedding. If not defined, use the value of paras/rf_para.txt',default = 8)
 parser.add_argument('--mem',type = str, help = 'the maximum of memory in GB for antigen embedding. If not defined, use the value of paras/rf_para.txt',default = 8)
@@ -54,6 +54,9 @@ args = parser.parse_args()
 # In[ ]:
 CODE_DIR = args.code
 OUT = args.out
+if arg.pre_dir is None:
+    args.pre_dir = OUT
+    
 if args.npy_dir is not None:
     NPY_DIR = args.npy_dir
 else:
