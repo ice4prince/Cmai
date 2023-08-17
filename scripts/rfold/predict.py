@@ -260,6 +260,7 @@ class Predictor():
                 t2d = t2d[:,:10].to(self.device)
                 with torch.cuda.amp.autocast():
                     logit_s, msa, xyz, lddt, pair = self.model(msa, seq, idx_pdb, t1d=t1d, t2d=t2d)
+                    # import pdb;pdb.set_trace()
                     msa = msa.cpu().numpy()
                     pair_s = pair.cpu().numpy()
                 prob_s = list()
@@ -267,11 +268,11 @@ class Predictor():
                     prob = self.active_fn(logit.float()) # distogram
                     prob = prob.reshape(-1, L, L).permute(1,2,0).cpu().numpy()
                     prob_s.append(prob)
-        print(prob_s[0].dtype)
-        np.savez_compressed("%s.npz"%(out_prefix), dist=prob_s[0].astype(np.float32), \
-                            omega=prob_s[1].astype(np.float32),\
-                            theta=prob_s[2].astype(np.float32),\
-                            phi=prob_s[3].astype(np.float32))
+#         print(prob_s[0].dtype)
+        np.savez_compressed("%s.npz"%(out_prefix), dist=prob_s[0].astype(np.float16), \
+                            omega=prob_s[1].astype(np.float16),\
+                            theta=prob_s[2].astype(np.float16),\
+                            phi=prob_s[3].astype(np.float16))
 
         self.write_pdb(seq[0], xyz[0], idx_pdb[0], Bfacts=lddt[0], prefix="%s_init"%(out_prefix))
 
