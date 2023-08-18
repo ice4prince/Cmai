@@ -32,8 +32,8 @@ parser.add_argument('--cpu',type = str, help = 'the maximum of cpus for antigen 
 parser.add_argument('--mem',type = str, help = 'the maximum of memory in GB for antigen embedding. If not defined, use the value of paras/rf_para.txt',default = 8)
 parser.add_argument('--use_cpu',action = 'store_true', help = 'the option to use cpu or gpu.',default = False)
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
-parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
-parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The default is 10000',default = 10000)
+parser.add_argument('--min_size_background_bcr', type=int, help='the initial and minimum sample size of background BCRs. The default is 100',default = 100)
+parser.add_argument('--max_size_background_bcr', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The default is 10000',default = 10000)
 # parser.add_argument('--continuous', action='store_true', help='swtich the mode from binary to continuous, default mode is binary.')
 parser.add_argument('--rf_para',action = 'store_true',help = 'use the parameters from paras/rf_para.txt for antigen embedding. Default is False')
 parser.add_argument('--gen_msa',action = 'store_true',help = 'only run generating msa and exit. Default is False')
@@ -45,6 +45,7 @@ parser.add_argument('--runBind',action = 'store_true',help = 'only run binding o
 parser.add_argument('--skip_check',action = 'store_true',help = 'skip check and preprocess of input data, only use when it has been done before. Default is False')
 parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--suffix', action='store_true', help='Adding suffix to antigen id. Only use to distinguish same-name antigens. The default is False.')
+parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
 
@@ -155,7 +156,7 @@ def run_embed(conda_env,args,path_rf_env):
 # Switch to conda env2
 def run_binding(conda_env,args):
     # if mode == 'binary':
-    bind_args = ['--code',CODE_DIR,'--input',args.pre_dir,'--out',OUT,'--seed',str(args.seed),'--subsample',str(args.subsample),'--bottomline',str(args.bottomline)]
+    bind_args = ['--code',CODE_DIR,'--input',args.pre_dir,'--out',OUT,'--seed',str(args.seed),'--subsample',str(args.min_size_background_bcr),'--bottomline',str(args.max_size_background_bcr)]
     if args.npy_dir is not None:
         bind_args.append('--npy_dir')
         bind_args.append(args.npy_dir)
@@ -165,6 +166,8 @@ def run_binding(conda_env,args):
         bind_args.append('--verbose')
     if args.merge:
         bind_args.append('--merge')
+    if args.no_rank:
+        bind_args.append('--no_rank')
     print('rinBind ',' '.join(bind_args))
 
     # subprocess.run(['conda', 'run', '-n', 'runBind', 'python', 'scripts/runBind.py'] + bind_args,capture_output=False)
