@@ -294,13 +294,13 @@ def embedCDR3(CDR3, precise = False):
             else:
                 outseq.append(encoded.detach().cpu().numpy()[0,:])
             deseq.append(decoded.detach().cpu().numpy()[0,0,:,:])
-    return(outseq,deseq,CDR3)
+    return(outseq,deseq,inseq)
 
-def OutCDR3(outseq,Output):
+def OutCDR3(outseq,deseq,inseq,Output):
     if not os.path.exists(Output):
         os.makedirs(Output)
     #    os.makedirs(os.path.join(Output,'pths'))
-        os.makedirs(os.path.join(Output,'heatmaps'))
+    os.makedirs(os.path.join(Output,'heatmaps_CDR3'))
     encoded_V=pd.DataFrame(outseq)
     encoded_V.to_csv(Output+'/encoded_CDR3.csv')
 
@@ -317,9 +317,9 @@ def OutCDR3(outseq,Output):
         sns.heatmap(np.transpose(deseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[0])
     #plt.show()
         sns.heatmap(np.transpose(inseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[1])
-        plt.savefig(Output+'/heatmaps/heatmap_'+str(i)+'_CDR3.png')
+        plt.savefig(Output+'/heatmaps_CDR3/heatmap_'+str(i)+'_CDR3.png')
 
 if __name__ == "__main__":
     CDR3 = InputCDR3(InFile = args.input)
-    CDR3_out,CDR3_decode = embedV(CDR3)
-    OutV(outseq = CDR3_out,Output = args.output)
+    CDR3_out,CDR3_decode,CDR3_input = embedCDR3(CDR3)
+    OutCDR3(CDR3_out,CDR3_decode,CDR3_input,Output = args.output)

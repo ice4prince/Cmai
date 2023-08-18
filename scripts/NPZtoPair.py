@@ -15,7 +15,7 @@ sys.path.append(parent)
 
 # importing
 import numpy as np
-from config import Conf, config
+from rfold.rconfig import Conf, config
 from glob import iglob
 #from optparse import OptionParser
 
@@ -25,7 +25,7 @@ def exPair(npzFile):
     np.save(npzFile.replace('feature.npz','pair.npy'),pair)
 
 if __name__ == "__main__":
-    npzF = config.path.out + '/results/pred/*feature.npz'
+    npzF = conf.env.RF_RUNTIME_BASE + '/pred/*feature.npz'
     for npz in iglob(npzF):
         exPair(npz)
         print('embedding of %s is extracted!' %npz.rsplit('/',1)[1])

@@ -9,7 +9,7 @@ sys.path.append(parent)
 
 from Bio import SeqIO
 from colorama import Fore, Style
-from config import Conf, config
+from rfold.rconfig import Conf, config
 
 #parser = OptionParser()
 #parser.add_option("-f", "--fasta",
@@ -26,9 +26,9 @@ from config import Conf, config
 badLetters= ['b', 'j', 'o', 'u', 'x', 'z','*']
 good_sequences = []
 remove_list = []
-def preprocess(conf: Conf):
-    INfasta = conf.fasta
-    output = conf.path.out
+def check_fasta(conf: Conf):
+    INfasta = conf.in_fasta
+    output = conf.env.RF_RUNTIME_BASE
     verbose = conf.verbose
 #    print('fasta: %s' %INfasta)
     for fasta in SeqIO.parse(open(INfasta),'fasta'):
@@ -63,4 +63,4 @@ def preprocess(conf: Conf):
     print('Preprocess is completed!')
 
 if __name__ == "__main__":
-    preprocess(config)
+    check_fasta(config)

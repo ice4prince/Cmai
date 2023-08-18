@@ -208,7 +208,7 @@ def get_antigen_dict(df):
     antigen_pool = df['Antigen_id'].unique()
     antigen_dict = {}
     for antigen in antigen_pool:
-        antigen_dict[antigen] = np.load(NPY_DIR+'/'+antigen+'.pair.npy')/w
+        antigen_dict[antigen] = np.load(NPY_DIR+'/'+antigen+'.pair.npy').astype(np.float32)/w
     return antigen_dict
 
 
@@ -311,7 +311,7 @@ class checkDataset(Dataset):
 
     def extract_antigen(self,antigen_name,verbose=False):
         try:
-            antigen_import = np.load(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy')/w
+            antigen_import = np.load(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy').astype(np.float32)/w
             if not antigen_import.shape[1] == self.lens_dict[antigen_name]:
                 print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding '+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
                 exit()
