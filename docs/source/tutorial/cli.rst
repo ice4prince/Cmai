@@ -99,3 +99,28 @@ All the "automatically generated" parameters are generated upon installation via
 ``./get_env_path.sh`` command. In general, there is no need to change the paths to RoseTTAFold
 binaries unless the installation on the system has changed. In the latter case, re-running
 the aforementioned command is recommended.
+
+Background BCR Thresholds
+--------------------------
+
+Notice that Cmai use the ``--min_size_background_bcr`` and ``--max_size_background_bcr`` parameters
+to determine the number of background BCRs for ranking the input antibody. As mentioned at the end
+of the :doc:`Quickstart Guide <../quickstart>`, the number of background BCRs included for ranking
+gets progressively larger given that a certain threshold is met. We now turn our attention to discuss
+what these thresholds are and how they are stored as parameters for Cmai.
+
+First, let's reiterate the procedure of ranking here with slightly more details.
+We start from the ``min_size_background_bcr`` and computes the percentile rank of the input the
+antibody. If the percentile rank is smaller than the specified threshold, meaning that it is better
+than a large enough number of background BCRs, we increase the number of background BCRs by a factor of 10
+and use its associated threshold. The procedure is repeated
+until ``max_size_background_bcr`` is reached or when the threshold is no longer met. This procedure allows Cmai
+to fine tune the number of background BRCs to include and to give a nuanced understanding
+of the input antigen's binding affinity in context.
+
+Since thresholds are needed for every step, we have included good defaults in the ``paras/cutoff_table.txt``
+file, which is shipped with Cmai. By default, you do not need to change these values, unless you
+are using different background BCR numbers or you would like to experiment. In the latter case, 
+you can specify your custom cutoffs in the ``cutoffs`` column of the file and save it in the same
+location.
+

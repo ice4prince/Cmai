@@ -58,11 +58,13 @@ whereas the CDR3h region of the BCR is
 
     CARSNALDAW
 
-The Vh sequence contains the V-terminal and C-terminal ends. Cmai makes the following assumptions
-(requirements) about Vh and CDR3h inputs:
+Cmai makes the following assumptions (requirements) about Vh and CDR3h inputs:
 
-1. The N-terminal end of the Vh sequence must be complete. The sequencing technology must be able to find the complete sequence.
-2. The C-terminal end does not include the "C" amino acid, which is included in the CDR3h sequence.
+1. The Vh gene sequence must be complete at the N terminal. If the full N terminal is not covered by sequencing,
+   corresponding parts of the germline sequence of the Vh gene can be extracted to pad the N terminal. For one
+   example on how to do this, please refer to imputation of uncovered V-D-J regions in the
+   `mixcr software <https://github.com/milaboratory/mixcr>`_.
+2. The C Terminal does not include the "C" amino acid, which is included in the CDR3h sequence.
 
 .. note::
 
@@ -98,7 +100,7 @@ The ``Cmai`` Pipeline
 **********************
 
 
-Once you have your ``input.csv`` ready and all the necessary installations, you can well poised to run the pipeline.
+Once you have your ``input.csv`` ready and all the necessary installations, you are well poised to run the pipeline.
 Here are the command-line arguments you will need:
 
 
@@ -140,15 +142,15 @@ If the inference process is successful, there are two things in the directory:
 For this quickstart guide and most workflows, the main interest is in the ``binding_results.csv``.
 The format of the CSV is the following:
 
-============ ===============================================================================================================================================================================================
+============ ======================================================================================================================================================================================================
 Column Name     Contents                                                   
------------- -----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
+------------ ------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------
 record_id     An identifier (name) for this entry.
 Antigen       The antigen name that corresponds to the ``antigen_id`` from the input.
-BCR_id        An identifier for the BCR given the antigen.
-Score         The binding score between the given antigen and antibody: smaller better.
-Rank          The percentile rank of the predicted binding affinity of the query antibody towards the query antigen, as compared to those of a large population of background antibodies the same antigen.
-============ ===============================================================================================================================================================================================
+BCR_id        An identifier for the BCR.
+Score         The binding score between the given antigen and antibody: smaller means stronger binding.
+Rank          The percentile rank of the predicted binding affinity of the query antibody towards the query antigen, as compared to those of a large population of background antibodies against the same antigen.
+============ ======================================================================================================================================================================================================
 
 The ``record_id``, ``antigen``, and ``BCR_id`` are used to identify the antigen and antibody
 used in the model. What is of interest for most users are the ``Score`` and ``Rank``. The
@@ -157,10 +159,11 @@ provide an easy interpretation of the predicted binding score, we compare this b
 to the predicted binding scores of a large population oif naturally occurring BCRs as background,
 and derived a metric called the percentile rank. The exact steps of this procedure is as follows: 
 
-1. First, the antibody is compared against 100 background BCRs.
-2. If results from Step 1 is meet a predetermined threshold of percentile rank (*i.e.* desired performance), the antibody is then compared against 1000 background BCRs.
-3. This process is repeated until the number of background BCRs reach the ``bottomline`` or 1,000,000 BCRs.
+1. First, the antibody is compared against ``min_size_background_bcr`` or 100 background BCRs.
+2. If results from Step 1 have met a predetermined threshold of percentile rank (*i.e.* desired performance),
+   the antibody is then compared against 1000 background BCRs. (Note that the number always increases by a
+   factor of 10.)
+3. This process is repeated until the number of background BCRs reach the ``max_size_background_bcr`` or 1,000,000 BCRs, whichever is reached first.
 
-The details of setting the ``bottomline`` and threshold are included in the :doc:`CLI Options in Depth <tutorial/cli>`
+The details of setting the ``max_size_background_bcr`` and threshold are further discussed in the :doc:`CLI Options in Depth <tutorial/cli>`
 section.
-
