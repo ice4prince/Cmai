@@ -2,8 +2,8 @@
 Releases
 ###################
 
-v0.0.1
+v0.0.0
 ********
 
-- Creating this template repository.
-- Note, there won't be official releases.
+- Development officially begins!
+- Stay tuned!
