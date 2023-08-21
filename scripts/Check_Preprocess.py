@@ -135,7 +135,7 @@ def check_input(df,fastaname=None):
     # This exits the function. If you want to exit the script completely, use `exit()`
     if 'Antigen_seq' in df.columns:
         write_fasta(df,PRE_DIR+'/antigens.fasta')
-        print('Write antigen sequence from input file to intermediates folder.')
+        print('Write antigen sequence from input file to '+str(PRE_DIR)+'/antigens.fasta')
     else:
         fasta_dict = parse_fasta(fastaname)
         df['Antigen_seq'] = df['Antigen_id'].map(fasta_dict)
