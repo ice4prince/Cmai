@@ -4,8 +4,8 @@ CLI Options in Depth
 
 While the :doc:`Quickstart Guide <../quickstart>` shows a few examples of the common usage
 of Cmai, there are many more options available in our package. Namely, you can preciesly
-control what's being run and how the various steps are steps at your finger tip. Here,
-we details of each argument and provide some examples on common usages.
+control what's being run and how the various steps are excecuted at your finger tip. Here,
+we include the details of each argument and provide some examples on common usages.
 
 ----------------------------
 

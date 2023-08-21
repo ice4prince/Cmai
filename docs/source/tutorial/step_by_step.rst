@@ -29,7 +29,7 @@ If you wish to have a more detailed breakdown of the pipeline, we can do it in t
 .. code-block:: shell
 
     python Cmai.py --code '<path_to_Cmai_dir>' --input '<path_to_input.csv>' --out '<path_to_output_dir>' --rf_data '<path_to_RoseTTAFold_database_dir>'  --runEmbed --gen_msa --use_cpu
-	python Cmai.py --code '<path_to_Cmai_dir>' --input '<path_to_input.csv>' --out '<path_to_output_dir>' --rf_data '<path_to_RoseTTAFold_database_dir>'  --runEmbed --run_rf
+    python Cmai.py --code '<path_to_Cmai_dir>' --input '<path_to_input.csv>' --out '<path_to_output_dir>' --rf_data '<path_to_RoseTTAFold_database_dir>'  --runEmbed --run_rf
 
 Here, we first use the ``--gen_msa`` flag and then the ``--run_rf`` step. Running
 both is functionally equivalent to the one-step embedding step above.

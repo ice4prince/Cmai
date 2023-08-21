@@ -37,7 +37,7 @@ go through the example again, we will instead show you the error you will receiv
 
 As seen, it is very clear that your GPU is running out of memory if you receive this error.
 In fact, this error stems from RoseTTAFold. If you encounter something different, then it's
-still worth a shot to try the pipeline hear, but you may want to investigate further or
+still worth a shot to try the pipeline here, but you may want to investigate further or
 head over to GitHub to talk about the issue.
 
 
