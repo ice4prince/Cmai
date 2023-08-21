@@ -34,21 +34,30 @@ license  : GPL-3.0+
 
 Run rfpd.py
 """
-from rconfig import Conf, config
-from rfpd import make_hhr_atab, make_msa, make_ss, preprocess, to_data_dir
+from .rconfig import Conf, config
+from .rfpd import make_hhr_atab, make_msa, make_ss, preprocess, to_data_dir
 
 # Standard Library
 import os
 from glob import iglob
 
 # Others
+import tyro
 from Bio import SeqIO, SeqRecord
 
 
 def make_temp_fasta(key: str, seq: SeqRecord.SeqRecord, conf: Conf) -> tuple[str, str]:
     """Make temp fasta file."""
-    os.makedirs(fdir := os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta"), exist_ok=True)
-    fasta = os.path.join(fdir, f"{key}.fasta")
+    # os.makedirs(
+    #     fdir := os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta"), exist_ok=True
+    # )
+    # fasta = os.path.join(fdir, f"{key}.fasta")
+    fdir, fkey = os.path.split(
+        os.path.join(conf.env.RF_RUNTIME_BASE, "temp.fasta", f"{key}.fasta")
+    )
+    os.makedirs(fdir, exist_ok=True)
+    fasta = os.path.join(fdir, fkey)
+    key = fkey.replace(".fasta", "")
     if conf.suffix:
         length = len(list(iglob(fasta.replace(".fasta", ".*.fasta"))))
         key = f"{key}.{length:03d}"
@@ -58,9 +67,8 @@ def make_temp_fasta(key: str, seq: SeqRecord.SeqRecord, conf: Conf) -> tuple[str
     return key, fasta
 
 
-def gen_msa() -> None:
+def gen_msa(conf: Conf) -> None:
     """Generate msa."""
-    conf = config()
     preprocess(conf.env)
     for fasta in iglob(conf.in_fasta):
         for key, seq in SeqIO.index(fasta, "fasta").items():
@@ -72,4 +80,4 @@ def gen_msa() -> None:
 
 
 if __name__ == "__main__":
-    gen_msa()
+    gen_msa(tyro.cli(Conf))

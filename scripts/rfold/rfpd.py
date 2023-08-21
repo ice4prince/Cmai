@@ -35,11 +35,11 @@ license  : GPL-3.0+
 
 Rfold Preprocessor for Data.
 """
-from rconfig import Conf, Env, config
+from .rconfig import Conf, Env, config
 
 # Standard Library
 import shlex, shutil, subprocess
-from os import listdir, makedirs, remove
+from os import listdir, makedirs, remove, environ
 from os.path import abspath, basename, dirname, exists, join
 
 # Types
@@ -109,7 +109,7 @@ def one_search(
         )
         if res.returncode:
             raise RuntimeError(
-                "HHBLITS failed with {in_fasta=},{out=},{dbi=},{db=},{e=}."
+                f"HHBLITS failed with {in_fasta=},{out=},{dbi=},{db=},{e=}."
             )
 
         # hhfilter
@@ -169,17 +169,28 @@ def make_msa(path: str, key: str, conf: Conf) -> str:
     return cast(str, shutil.move(f"{a3m_target}_bk", a3m_target))
 
 
-def ss_cmd(name: str, cmd: str, conf: Conf, *, stdout: None | str = None) -> None:
+def ss_cmd(
+    name: str,
+    cmd: str,
+    conf: Conf,
+    *,
+    stdout: None | str = None,
+    env: None | dict = None,
+) -> None:
     """Run ss CMD."""
     logs = join(conf.env.RF_RUNTIME_BASE, "work", "logs")
     cmds = shlex.split(cmd)
+    if env is None:
+        env = {}
     with (
         open(stdout or join(logs, "make_ss.stdout"), "ab") as stdoutf,
         open(join(logs, "make_ss.stderr"), "ab") as stderr,
     ):
         conf.log(f"{name}: {cmds}")
         conf.log(" ".join(cmds))
-        res = subprocess.run(cmds, stdout=stdoutf, stderr=stderr)
+        res = subprocess.run(
+            cmds, stdout=stdoutf, stderr=stderr, env={**environ, **env}
+        )
         if res.returncode:
             raise RuntimeError(f"make_ss failed with {name}, {cmd=}")
 
@@ -200,14 +211,19 @@ def make_ss(a3m: str, conf: Conf) -> str:
         conf,
     )
 
-    with (open(a3m) as fr, open(f"{ID}.fasta", "w") as gr):
+    with open(a3m) as fr, open(f"{ID}.fasta", "w") as gr:
         gr.write(fr.readline())
         gr.write(fr.readline())
-    with (open(f"{ID}.pn", "w") as fw, open(f"{ID}.sn", "w") as gw):
+    with open(f"{ID}.pn", "w") as fw, open(f"{ID}.sn", "w") as gw:
         fw.write(f"{ID}.chk\n")
         gw.write(f"{ID}.fasta\n")
 
-    ss_cmd("makemat", f"{conf.exe.makemat} -P {ID}", conf)
+    ss_cmd(
+        "makemat",
+        f"{conf.exe.makemat} -P {ID}",
+        conf,
+        env={"BLASTMAT": conf.env.BLASTMAT},
+    )
 
     ddir = conf.env.PSIPRED_DATA
     ss_cmd(
@@ -225,7 +241,7 @@ def make_ss(a3m: str, conf: Conf) -> str:
         stdout=f"{ID}.horiz",
     )
 
-    with (open(f"{ID}.horiz") as fr2, open(ss2, "w") as gr2):
+    with open(f"{ID}.horiz") as fr2, open(ss2, "w") as gr2:
         gr2.write(">ss_pred\n")
         for lp in fr2:
             if lp.startswith("Pred"):
@@ -258,7 +274,7 @@ def make_hhr_atab(a3m: str, ss2: str, conf: Conf) -> tuple[str, str]:
     ss2a3m = a3m.replace(".a3m", ".ss2.a3m")
     db = join(conf.env.RF_DATA_BASE, conf.db.pdb)
 
-    with (open(a3m) as f, open(ss2) as g, open(ss2a3m, "w") as h):
+    with open(a3m) as f, open(ss2) as g, open(ss2a3m, "w") as h:
         h.write(g.read())
         h.write(f.read())
 
@@ -295,7 +311,9 @@ def test() -> None:
     """Run test."""
     conf = config()
     preprocess(conf.env)
-    a3m = make_msa(f"{dirname(abspath(__file__))}/../../xx.fasta", "Eta", conf)  # passed
+    a3m = make_msa(
+        f"{dirname(abspath(__file__))}/../../xx.fasta", "Eta", conf
+    )  # passed
     ss2 = make_ss(a3m, conf)
     hhr, atab = make_hhr_atab(a3m, ss2, conf)
     to_data_dir("Eta", a3m, ss2, hhr, atab, conf)

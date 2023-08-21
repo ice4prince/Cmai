@@ -8,6 +8,7 @@
 
 import os
 import sys
+from sys import exit
 import pandas as pd
 import numpy as np
 import random
@@ -53,6 +54,7 @@ parser.add_argument('--species', action='store_true', help='match the species of
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
 parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
 parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
+parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
 
@@ -208,7 +210,7 @@ def get_antigen_dict(df):
     antigen_pool = df['Antigen_id'].unique()
     antigen_dict = {}
     for antigen in antigen_pool:
-        antigen_dict[antigen] = np.load(NPY_DIR+'/'+antigen+'.pair.npy')/w
+        antigen_dict[antigen] = np.load(NPY_DIR+'/'+antigen+'.pair.npy').astype(np.float32)/w
     return antigen_dict
 
 
@@ -311,7 +313,7 @@ class checkDataset(Dataset):
 
     def extract_antigen(self,antigen_name,verbose=False):
         try:
-            antigen_import = np.load(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy')/w
+            antigen_import = np.load(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy').astype(np.float32)/w
             if not antigen_import.shape[1] == self.lens_dict[antigen_name]:
                 print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding '+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
                 exit()
@@ -745,7 +747,16 @@ print('threshold to enter the next level of ranking:',cutoffs_dict)
 
 
 # In[184]:
-
+if args.no_rank:
+    check_loader = DataLoader(checkDataset(target, antigen_dict, NPY_DIR,len_dict),1)
+    res_check = check_score(check_loader,model_mix)
+    if args.merge:
+        merged = target.merge(res_check, on='record_id', how='left')
+        merged.to_csv(OUT_DIR+'/merged_results_no_rank.csv')
+        exit()
+    else:
+        res_check.to_csv(OUT_DIR+'/binding_results_no_rank.csv')
+        exit()
 
 score_dict = {}
 subsample = SUBSAMPLE
