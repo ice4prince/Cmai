@@ -111,8 +111,8 @@ def run_embed(conda_env,args,path_rf_env):
     if args.rf_para:
         rf_para = pd.read_csv('paras/rf_para.txt',sep='\t').set_index('para')['arg'].to_dict()
         # if args.use_cpu is not None and args.use_cpu != rf_para['use_cpu']: rf_para['use_cpu'] =  args.use_cpu
-        if args.cpu != rf_para['cpu']: rf_para['cpu'] =  args.cpu
-        if args.mem != rf_para['mem']: rf_para['mem'] =  args.mem
+        if args.cpu != rf_para['runtime.cpu']: rf_para['runtime.cpu'] =  args.cpu
+        if args.mem != rf_para['runtime.mem']: rf_para['runtime.mem'] =  args.mem
     #    add_arg = []
         for key,value in rf_para.items():
             embed_args.append('--'+key)
