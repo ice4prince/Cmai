@@ -755,7 +755,7 @@ if args.no_rank:
         merged.to_csv(OUT_DIR+'/merged_results_no_rank.csv')
         exit()
     else:
-        res_check(OUT_DIR+'/binding_results_no_rank.csv')
+        res_check.to_csv(OUT_DIR+'/binding_results_no_rank.csv')
         exit()
 
 score_dict = {}
