@@ -1,21 +1,58 @@
 README
 
 ## Installation and Prerequisite
-
+Download Cmai and install the environments.
 ```sh
 cd /path/to/Cmai
 git clone git@github.com:ice4prince/Cmai.git
 conda env create -f models/runEmbed.yml
 conda env create -f models/runBind.yml
-#  In the folder rfscripts, Install RoseTTAFold from RoseTTAFold's git.
+```
+In the folder scripts/rfold, Install RoseTTAFold from [RoseTTAFold's git](https://github.com/RosettaCommons/RoseTTAFold).
+```
 cd scripts/rfscripts
 git clone git@github.com:RosettaCommons/RoseTTAFold.git
-# Follow the README in RoseTTAFold OR go through
-	# create the environment
-	# download network weights
-	# download and install third-party softwareand
-	# download sequence and structure databases
-# Save the environment path to paras/env_path IN ORDER
+```
+Follow the README in RoseTTAFold OR go through  
+
+	1. create the environment
+	
+	# If your NVIDIA driver compatible with cuda11
+	conda env create -f RoseTTAFold-linux.yml
+	# If not (but compatible with cuda10)
+	conda env create -f RoseTTAFold-linux-cu101.yml
+	# create conda environment for pyRosetta folding & running DeepAccNet
+	conda env create -f folding-linux.yml
+
+	2. download network weights
+	
+	wget https://files.ipd.uw.edu/pub/RoseTTAFold/weights.tar.gz
+	tar xfz weights.tar.gz
+	
+	3. download and install third-party software
+	
+	./install_dependencies.sh
+	 
+	4. download sequence and structure databases
+	
+	# uniref30 [46G]
+	wget http://wwwuser.gwdg.de/~compbiol/uniclust/2020_06/UniRef30_2020_06_hhsuite.tar.gz
+	mkdir -p UniRef30_2020_06
+	tar xfz UniRef30_2020_06_hhsuite.tar.gz -C ./UniRef30_2020_06
+	
+	# BFD [272G]
+	wget https://bfd.mmseqs.com/bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz
+	mkdir -p bfd
+	tar xfz bfd_metaclust_clu_complete_id30_c90_final_seq.sorted_opt.tar.gz -C ./bfd
+	
+	# structure templates (including *_a3m.ffdata, *_a3m.ffindex) [over 100G]
+	wget https://files.ipd.uw.edu/pub/RoseTTAFold/pdb100_2021Mar03.tar.gz
+	tar xfz pdb100_2021Mar03.tar.gz
+	# for CASP14 benchmarks, we used this one: https://files.ipd.uw.edu/pub/RoseTTAFold/pdb100_2020Mar11.tar.gz
+	
+
+Save the environment path to paras/env_path IN ORDER
+```
 ./get_env_path.sh
 ```
 
