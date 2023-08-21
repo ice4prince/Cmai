@@ -13,42 +13,41 @@ we details of each argument and provide some examples on common usages.
 Arguments Overview
 **********************
 
-
-
 Cmai Arguments
 -----------------
 
-====================== ================== ========== ===========================================================================================================================
-Argument                 Purpose            Input       Functionality                                                         
----------------------- ------------------ ---------- ---------------------------------------------------------------------------------------------------------------------------
-``-h`` or ``--help``     Documentation      None       Show the help message and all CLI options.
-``--code``               Config             ``str``    The absolute path to the Cmai directory.
-``--input``              Config             ``str``    The absolute/relative path to the ``input.csv`` file.
-``--out``                Config             ``str``    The absolute/relative path to the output directory.
-``--env_path``           Config             ``str``    The file saving the directory of the Conda environments: ``runEmbed``, ``runBind``, and RoseTTA enviroments in order.
-``--rf_data``            RoseTTAFold        ``str``    The directory that store the RosettaFold structure and sequence databases. 
-``--fasta``              RoseTTAFold        ``str``    The path to the FASTA files for antigen sequences. 
-``--pre_dir``            RoseTTAFold        ``str``    The directory to save the preprocessed data.
-``--npy_dir``            RoseTTAFold        ``str``    The direcrtory for ``npy`` files if it is different from the ``pre_dir``. 
-``--cpu``                RoseTTAFold        ``int``    The maximum number of CPU cores for embedding.
-``--mem``                RoseTTAFold        ``int``    The amount of system RAM available.
-``--use_cpu``            RoseTTAFold        None       Whether to use CPU instead of GPU.
-``--seed``               Config             ``int``    The seed used in random number generator to ensure reproducibility.
-``--subsample``          Config             ``int``    The initial sample size of background BCRs.
-``--bottomline``         Config             ``int``    The largest amount of random background to be used.
-``--rf_para``            RoseTTAFold        None       Use the parameters from ``paras/rf_para.txt`` for antigen embedding, defaults to False.
-``--gen_msa``            Mode               None       Generate MSA only and exit.
-``--run_rf``             Mode               None       Skip generating msa and running embedding prediction, defaults to False.
-``--skip_preprocess``    Mode               None       Skip preprocessing of antigen embedding, defaults to False.
-``--skip_extract``       Mode               None       Skip extracting ``NPY`` for antigen embedding, defaults to False.
-``--runEmbed``           Mode               None       Run the embedding step only, defaults to False.
-``--runBind``            Mode               None       Run the binding step only, defaults to False.
-``--skip_check``         Mode               None       Skip the proprocessing step and data-checking step (use only if already done), defaults to False.
-``--species``            Mode               None       Match trhe species of background BCR to the target BCR.
-``--suffix``             Config             None       Add suffix to antigen id, which is used to distinguish antigens with the same name, defaults to False.
-``--verbose``            Config             None       Enable verbose output, defaults to False.
-``--merge``              Config             None       Merge the output to the ``input.csv`` dataset, defaults to False.
-====================== ================== ========== ===========================================================================================================================
+================================== ================== ========== ===========================================================================================================================
+Argument                            Purpose            Input       Functionality                                                         
+---------------------------------- ------------------ ---------- ---------------------------------------------------------------------------------------------------------------------------
+``-h`` or ``--help``                Documentation      None       Show the help message and all CLI options.
+``--code``                          Config             ``str``    The absolute path to the Cmai directory.
+``--input``                         Config             ``str``    The absolute/relative path to the ``input.csv`` file.
+``--out``                           Config             ``str``    The absolute/relative path to the output directory.
+``--env_path``                      Config             ``str``    The file saving the directory of the Conda environments: ``runEmbed``, ``runBind``, and RoseTTA enviroments in order.
+``--rf_data``                       RoseTTAFold        ``str``    The directory that store the RosettaFold structure and sequence databases. 
+``--fasta``                         RoseTTAFold        ``str``    The path to the FASTA files for antigen sequences. 
+``--pre_dir``                       RoseTTAFold        ``str``    The directory to save the preprocessed data, defaults to the output directory.
+``--npy_dir``                       RoseTTAFold        ``str``    The direcrtory for ``npy`` files if it is different from the ``pre_dir``. 
+``--cpu``                           RoseTTAFold        ``int``    The maximum number of CPU cores for embedding.
+``--mem``                           RoseTTAFold        ``int``    The amount of system RAM available.
+``--use_cpu``                       RoseTTAFold        None       Whether to use CPU instead of GPU.
+``--seed``                          Config             ``int``    The seed used in random number generator to ensure reproducibility.
+``--min_size_background_bcr``       Config             ``int``    The initial and minimum sample size of background BCRs, defaults to 100.
+``--max_size_background_bcr``       Config             ``int``    The maximum size for subsample of background BCRs, which should no more than 1000000, defaults to 10000.
+``--rf_para``                       RoseTTAFold        None       Use the parameters from ``paras/rf_para.txt`` for antigen embedding, defaults to False.
+``--gen_msa``                       Mode               None       Generate MSA only and exit.
+``--run_rf``                        Mode               None       Skip generating msa and running embedding prediction, defaults to False.
+``--skip_preprocess``               Mode               None       Skip preprocessing of antigen embedding, defaults to False.
+``--skip_extract``                  Mode               None       Skip extracting ``NPY`` for antigen embedding, defaults to False.
+``--runEmbed``                      Mode               None       Run the embedding step only, defaults to False.
+``--runBind``                       Mode               None       Run the binding step only, defaults to False.
+``--skip_check``                    Mode               None       Skip the proprocessing step and data-checking step (use only if already done), defaults to False.
+``--species``                       Mode               None       Match trhe species of background BCR to the target BCR.
+``--suffix``                        Config             None       Add suffix to antigen id, which is used to distinguish antigens with the same name, defaults to False.
+``--no_rank``                       Config             None       Only export the predicted score but without ranking with background BCRs, defaults to False.
+``--verbose``                       Config             None       Enable verbose output, defaults to False.
+``--merge``                         Config             None       Merge the output to the ``input.csv`` dataset, defaults to False.
+================================== ================== ========== ===========================================================================================================================
 
 As you may have noticed, there are in general four types of arguments (or called flags),
 and here are their overall functions:
@@ -94,7 +93,9 @@ exe.PSIPRED-DATA     No          Automatically generated       The path to ``psi
 
 Notice that two of the parameters are exposed in the Cmai CLI with their own arguments.
 Cmai CLI arguments take priority in each run, but they will not overwrite the configurations
-stored here. If you wish to customize the rest, ``rf_para.txt`` is the only method for
-customization. However, there is generally no need to change the paths to RoseTTAFold
-binaries unless the installation on the system has changed. In the latter case, rerunning
-the ``./get_env_path.sh`` command is recommended.
+stored here.
+
+All the "automatically generated" parameters are generated upon installation via the
+``./get_env_path.sh`` command. In general, there is no need to change the paths to RoseTTAFold
+binaries unless the installation on the system has changed. In the latter case, re-running
+the aforementioned command is recommended.
