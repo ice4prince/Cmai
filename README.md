@@ -10,7 +10,7 @@ conda env create -f models/runBind.yml
 ```
 In the folder scripts/rfold, Install RoseTTAFold from [RoseTTAFold's git](https://github.com/RosettaCommons/RoseTTAFold).
 ```
-cd scripts/rfscripts
+cd scripts/rfold
 git clone git@github.com:RosettaCommons/RoseTTAFold.git
 ```
 Follow the README in RoseTTAFold OR go through  
