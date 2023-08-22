@@ -13,7 +13,7 @@ of this approach.
 The Embedding Step
 ************************************
 
-The embedding step uses RoseTTAFold to embed the XXX. This can be done in two ways:
+The embedding step uses RoseTTAFold to embed a given antigen. This can be done in two ways:
 either in one step or two steps. The one-step process is as follows:
 
 .. code-block:: shell

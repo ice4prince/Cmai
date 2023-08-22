@@ -156,7 +156,7 @@ The ``record_id``, ``antigen``, and ``BCR_id`` are used to identify the antigen 
 used in the model. What is of interest for most users are the ``Score`` and ``Rank``. The
 score is the direct output from the model, and a smaller score indicates better binding. To
 provide an easy interpretation of the predicted binding score, we compare this binding score
-to the predicted binding scores of a large population oif naturally occurring BCRs as background,
+to the predicted binding scores of a large population of naturally occurring BCRs as background,
 and derived a metric called the percentile rank. The exact steps of this procedure is as follows: 
 
 1. First, the antibody is compared against ``min_size_background_bcr`` or 100 background BCRs.
