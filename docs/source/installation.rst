@@ -102,6 +102,7 @@ First, you will need to clone the GitHub repository:
 
 .. code-block:: shell
 
+    cd scripts/rfold
     git clone https://github.com/RosettaCommons/RoseTTAFold.git
     cd RoseTTAFold
 

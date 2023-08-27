@@ -25,13 +25,13 @@ Argument                            Purpose            Input       Functionality
 ``--out``                           Config             ``str``    The absolute/relative path to the output directory.
 ``--env_path``                      Config             ``str``    The file saving the directory of the Conda environments: ``runEmbed``, ``runBind``, and RoseTTA enviroments in order.
 ``--rf_data``                       RoseTTAFold        ``str``    The directory that store the RosettaFold structure and sequence databases. 
-``--fasta``                         RoseTTAFold        ``str``    The path to the FASTA files for antigen sequences. 
+``--fasta``                         RoseTTAFold        ``str``    The path to the FASTA files for antigen sequences.
 ``--pre_dir``                       RoseTTAFold        ``str``    The directory to save the preprocessed data, defaults to the output directory.
 ``--npy_dir``                       RoseTTAFold        ``str``    The direcrtory for ``npy`` files if it is different from the ``pre_dir``. 
 ``--cpu``                           RoseTTAFold        ``int``    The maximum number of CPU cores for embedding.
 ``--mem``                           RoseTTAFold        ``int``    The amount of system RAM available.
 ``--use_cpu``                       RoseTTAFold        None       Whether to use CPU instead of GPU.
-``--seed``                          Config             ``int``    The seed used in random number generator to ensure reproducibility.
+``--seed``                          Config             ``int``    The seed used in random number generator to ensure reproducibility, defaults to 1.
 ``--min_size_background_bcr``       Config             ``int``    The initial and minimum sample size of background BCRs, defaults to 100.
 ``--max_size_background_bcr``       Config             ``int``    The maximum size for subsample of background BCRs, which should no more than 1000000, defaults to 10000.
 ``--rf_para``                       RoseTTAFold        None       Use the parameters from ``paras/rf_para.txt`` for antigen embedding, defaults to False.
@@ -100,14 +100,23 @@ All the "automatically generated" parameters are generated upon installation via
 binaries unless the installation on the system has changed. In the latter case, re-running
 the aforementioned command is recommended.
 
-Background BCR Thresholds
---------------------------
+
+
+---------------------------------
+
+**************************
+Background BCRs
+**************************
 
 Notice that Cmai use the ``--min_size_background_bcr`` and ``--max_size_background_bcr`` parameters
 to determine the number of background BCRs for ranking the input antibody. As mentioned at the end
 of the :doc:`Quickstart Guide <../quickstart>`, the number of background BCRs included for ranking
 gets progressively larger given that a certain threshold is met. We now turn our attention to discuss
-what these thresholds are and how they are stored as parameters for Cmai.
+what these thresholds are, how they are stored as parameters for Cmai, and what background BCRs are
+included.
+
+Percentile Rank Thresholds
+---------------------------
 
 First, let's reiterate the procedure of ranking here with slightly more details.
 We start from the ``min_size_background_bcr`` and computes the percentile rank of the input the
@@ -124,3 +133,11 @@ are using different background BCR numbers or you would like to experiment. In t
 you can specify your custom cutoffs in the ``cutoffs`` column of the file and save it in the same
 location.
 
+Background BCR Selection
+-------------------------
+
+Since there is a random component in selecting background BCRs, we have reproducibility in mind while
+making such a selection. If users **sets** a specific ``seed``, then the background BCRs will be randomly
+chosen based on the seed given. On the other hand, when the ``seed`` is not set, the background BCRs
+are fixed using the default seed of 1. In this case, we allow both flexibility of customization and
+an easy default for everyone to reproduce their results.

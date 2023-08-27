@@ -5,7 +5,8 @@ Working with Limited VRAM
 Since Cmai both uses RoseTTAFold and has a deep learning model under the hood, it is necessary
 to have a GPU for inference. In the :doc:`Installation Guide <../installation>`, we briefly
 described the requirements: a Nvidia GPU with *sufficient* VRAM. The definition of "sufficient"
-here is a bit vague: while 24GB will definitely be enough, anything less than 8GB may not.
+here is a bit vague: while state-of-the-art GPUs such as A100 with 40G will definitely be
+an ideal chocie, consumer GPUs with anything less than 8GB will be a poor choice.
 While this is not a problem for servers or cloud nodes with modern enterprise GPUs, average
 users at home may not have access to a high-end consumer-grade GPU. Thus, in this tutorial,
 we go more in depth on a work-around to enable the inference of Cmai using a GPU with
@@ -58,7 +59,7 @@ The first `runEmbed` step looks like this:
 
 .. code-block:: shell
 
-    python Cmai.py --use_cpu "cpu" --mem 32 --runEmbed --code '<path_to_Cmai_dir>' --input '<path_to_input.csv>' --out '<path_to_output_dir>' --rf_data '<path_to_RoseTTAFold_database_dir>'
+    python Cmai.py --use_cpu --mem 32 --runEmbed --code '<path_to_Cmai_dir>' --input '<path_to_input.csv>' --out '<path_to_output_dir>' --rf_data '<path_to_RoseTTAFold_database_dir>'
 
 
 In the above code snippet, you will need to replace the desired paths. Also, you will want to change the ``--mem``
