@@ -51,7 +51,7 @@ def preprocess(CDR3):
     CDR3 = [element for element in CDR3 if element != 'NA']
     for i in range(len(CDR3)):
       #print(CDR3[i])
-        if CDR3[i].count('X')>5 or CDR3[i].count('*')>5:
+        if CDR3[i].count('X')>10 or CDR3[i].count('*')>10:
             CDR3[i] = 'NA'
     if CDR3.count('NA') !=0:
         print('Bad sequence to delete:',CDR3.count('NA')/len(CDR3))
