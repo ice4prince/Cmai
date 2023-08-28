@@ -67,7 +67,7 @@ def preprocess(V_seq):
     V_seq = [seq for seq in V_seq if str(seq) != 'NA']
     for i in range(len(V_seq)):
       #print(dfseq[i])
-      if V_seq[i].count('X')>5 or V_seq[i].count('*')>5:
+      if V_seq[i].count('X')>10 or V_seq[i].count('*')>10:
             print('The '+str(i)+'th sequence: '+ V_seq[i]+' has more than 5 stop codons or undefiend nucleotides, and it is to be deleted!')
             V_seq[i] = 'NA'
     if V_seq.count('NA') > 0:
