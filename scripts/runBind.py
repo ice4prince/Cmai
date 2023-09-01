@@ -189,7 +189,7 @@ def build_BCR_dict(dataset,colname,precise = False):
         uniq_embedding,_,input_keys = embedV(uniq_keys,precise = precise)
     i = 0
     mydict = {}
-    for key in input_keys:
+    for key in uniq_keys:
         mydict[key] = uniq_embedding[i]
         i += 1
     return(mydict)
