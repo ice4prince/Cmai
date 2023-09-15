@@ -244,14 +244,14 @@ def make_ss(a3m: str, conf: Conf) -> str:
     with open(f"{ID}.horiz") as fr2, open(ss2, "w") as gr2:
         gr2.write(">ss_pred\n")
         for lp in fr2:
-            if lp.startswith("Pred"):
+            if lp.startswith("Pred") and len(lp.split()) == 2:
                 gr2.write(lp.split()[1])
                 gr2.write("\n")
 
         gr2.write(">ss_conf\n")
         fr2.seek(0)
         for lc in fr2:
-            if lc.startswith("Conf"):
+            if lc.startswith("Conf") and len(lc.split()) == 2:
                 gr2.write(lc.split()[1])
                 gr2.write("\n")
 
