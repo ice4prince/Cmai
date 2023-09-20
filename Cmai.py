@@ -186,6 +186,7 @@ def embed_bcr(conda_env,args):
     bcr_args = ['--input',args.pre_dir,'--out',OUT]
     if args.bcr_heatmap:
         bcr_args.append('--verbose')
+    print('get_bcr ',' '.join(bind_args))
     run_script_in_conda_env(conda_env,'scripts/get_bcr.py',bcr_args)
     # elif mode == 'continuous':
     #     cont_args = ['--code',CODE_DIR,'--input',args.pre_dir,'--out',OUT,'--seed',str(args.seed),'--subsample',str(args.subsample),'--bottomline',str(args.bottomline)]
