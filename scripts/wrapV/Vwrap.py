@@ -332,15 +332,16 @@ def OutV(V_seq,outseq,deseq,inseq,Output,gene_ids=[],type='sequence',species='hu
     encoded_V.to_csv(Output+'/encodedV.csv')
 
     if type == 'sequence':
-        index_pick=random.sample(range(len(V_seq)),10)
+        index_pick=random.sample(range(len(V_seq)),min(10,len(V_seq)))
         print(index_pick)
         ###select random 10 to plot out ##
         for i in index_pick:
-            gene_pick=i
-            print(gene_pick)
+            gene_pick=V_seq[i]
+            # print(gene_pick)
             fig,axs=plt.subplots(2,1,figsize=(50,5))
-            axs[0].set_title(str(gene_pick)+'-th gene: decoded aa seq')
-            axs[1].set_title(str(gene_pick)+'-th gene: input aa seq')
+            axs[0].set_title(str(gene_pick)+': decoded aa seq')
+            axs[1].set_title(str(gene_pick)+': input aa seq')
+            fig.tight_layout(pad=3.0)
             sns.heatmap(np.transpose(deseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[0])
             sns.heatmap(np.transpose(inseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[1])
             plt.savefig(Output+'/heatmaps_V/heatmap_'+str(i)+'th_V.png')
@@ -351,13 +352,14 @@ def OutV(V_seq,outseq,deseq,inseq,Output,gene_ids=[],type='sequence',species='hu
         ###select random 10 to plot out ###
         for i in index_pick:
             gene_pick=gene_ids[i]
-            print(gene_pick)
+            # print(gene_pick)
             fig,axs=plt.subplots(2,1,figsize=(50,5))
-            axs[0].set_title(gene_pick+' decoded aa seq')
-            axs[1].set_title(gene_pick+' input aa seq')
+            axs[0].set_title(gene_pick+': decoded aa seq')
+            axs[1].set_title(gene_pick+': input aa seq')
+            fig.tight_layout(pad=3.0)
             sns.heatmap(np.transpose(deseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[0])
             sns.heatmap(np.transpose(inseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[1])
-            plt.savefig(Output+'/heatmaps_V/heatmap_'+str(i)+'_V.png')
+            plt.savefig(Output+'/heatmaps_V/heatmap_'+str(i)+'th_V.png')
 
 if __name__ == "__main__":
     try:

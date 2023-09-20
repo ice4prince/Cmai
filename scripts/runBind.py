@@ -47,16 +47,17 @@ parser = argparse.ArgumentParser(description='Parameters for the binding model.'
 
 # Add a optional argument
 parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
-parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = 'data/intermediates')
+parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
 parser.add_argument('--npy_dir',type = str, help = 'the npy folder if different with input folder',default = None)
-parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example')
-parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
+parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
+# parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
 parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
 parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
 parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
+parser.add_argument('--debug', action='store_true', help='Enable debug mode and print intermediates output every step.')
 
 args = parser.parse_args()
 
@@ -64,12 +65,12 @@ CODE_DIR = args.code
 INPUT_DIR = args.input
 
 OUT_DIR = args.out
-MATCHING_SPECIES = args.species
+# MATCHING_SPECIES = args.species
 SEED = args.seed
 SUBSAMPLE = args.subsample
 BOTTOMLINE = args.bottomline
 VERBOSE = args.verbose
-
+DEBUG = args.debug
 
 # In[171]:
 
@@ -87,7 +88,8 @@ VERBOSE = args.verbose
 
 
 # In[172]:
-
+if DEBUG:
+    print('Entering DEBUG mode.')
 
 if BOTTOMLINE >1000000:
     print('The bottomline cannot be larger than 1,000,000.')
@@ -180,6 +182,7 @@ torch.set_printoptions(precision=10)
 #             print(Fore.GREEN +str(col)+' PASS!')
 #     print(Style.RESET_ALL)
 
+
 def build_BCR_dict(dataset,colname,precise = False):
     cols = dataset.filter(like = colname)
     uniq_keys = pd.unique(cols.values.ravel()).tolist()
@@ -237,13 +240,22 @@ class checkDataset(Dataset):
 #         bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True)
 #         pair_feat = self.__comb_embed_gpu(bcr_feat)
 #         return pair_feat,index_key
-        antigen_key = your_dict['Antigen_id']
-#        print(antigen_key)
-        aalens_key = self.lens_dict[antigen_key]
-        cdr3_key = your_dict['BCR_CDR3h']
-        v_key = your_dict['BCR_Vh']
-        bcr_key = your_dict['BCR_id']
         index_key = your_dict['record_id']
+        if DEBUG:
+            print('EntryID:'+str(index_key))
+        antigen_key = your_dict['Antigen_id']
+        if DEBUG:
+            print('Antigen:'+str(antigen_key))
+        aalens_key = self.lens_dict[antigen_key]
+        bcr_key = your_dict['BCR_id']
+        if DEBUG:
+            print('BCR:'+str(bcr_key))
+        cdr3_key = your_dict['BCR_CDR3h']
+        if DEBUG:
+            print('BCR_CDR3h:'+str(cdr3_key))
+        v_key = your_dict['BCR_Vh']
+        if DEBUG:
+            print('BCR_Vh:'+str(v_key))
         bcr_feat = self.__embedding_BCR(cdr3_key,v_key,precise = True) #MARK HERE: EDIT the embedding_BCR function using a dictionary of bcr_id:bcr_embedding
         if antigen_key not in self.antigen_in.keys():
             self.__get_antigen_in(antigen_key)
@@ -335,6 +347,8 @@ class checkDataset(Dataset):
         else:
 #            print('CDR3 in dictionary!!')
             cdr3_feat = self.cdr3_dict[cdr3_seq]
+        if DEBUG:
+            print('cdr3:'+str(cdr3_feat))
         if v_seq not in self.v_dict:
 #            print('V not in dictionary!!')
 #            df2 = pd.DataFrame([v_seq])
@@ -344,6 +358,8 @@ class checkDataset(Dataset):
         else:
 #            print('V in dictionary!!')
             v_feat = self.v_dict[v_seq]
+        if DEBUG:
+            print('v:'+str(v_feat))
         bcr_feat = np.concatenate((cdr3_feat,v_feat))
         return bcr_feat
 
@@ -377,6 +393,7 @@ class rankDataset(Dataset):
 
     def __getitem__(self, idx):
         bcr_dict = self.bcr_pool[idx]
+#         print(idx)
 #        index_key = bcr_dict['ID']
         v_key = bcr_dict['Vh']
         cdr3_key = bcr_dict['CDR3h']
@@ -418,12 +435,14 @@ class rankDataset(Dataset):
             self.cdr3_dict[cdr3_seq]=cdr3_feat
         else:
             cdr3_feat = self.cdr3_dict[cdr3_seq]
+#         print(cdr3_feat)
         if v_seq not in self.v_dict:
             v_feat,*_ = embedV([v_seq],precise = precise)
             v_feat = v_feat[0]
             self.v_dict[v_seq]=v_feat
         else:
             v_feat = self.v_dict[v_seq]
+#         print(v_feat)
         bcr_feat = np.concatenate((cdr3_feat,v_feat))
         return bcr_feat
 
@@ -584,6 +603,8 @@ def check_score(dataloader,model):
         score = out.cpu().detach().tolist()
         df = pd.DataFrame({'record_id':index_idx,'Antigen':antigen_key,'BCR_id':bcr_key,'Score':score})
         res = pd.concat([res,df],axis=0,ignore_index=True)
+        if DEBUG:
+            print(res.head())
     return(res)
 
 
@@ -638,18 +659,18 @@ background = pd.read_csv(BACKGROUND,compression='gzip') # with columns 'Vh','CDR
 # In[75]:
 
 
-if 'BCR_species' in target_file.columns:
-    unique_values = target_file['BCR_species'].dropna().unique()
-    if len(unique_values) == 1 and unique_values[0] in {'human', 'mouse'}:
-        species = unique_values[0]
-        print('The species is:',species)
-        if MATCHING_SPECIES:
-            print('matching the background species...')
-            background = background[background['species']==species]
-    else:
-        print('The target species are not unique or not in the background species.')
-else:
-    print('No species are specified!')
+# if 'BCR_species' in target_file.columns:
+#     unique_values = target_file['BCR_species'].dropna().unique()
+#     if len(unique_values) == 1 and unique_values[0] in {'human', 'mouse'}:
+#         species = unique_values[0]
+#         print('The species is:',species)
+#         if MATCHING_SPECIES:
+#             print('matching the background species...')
+#             background = background[background['species']==species]
+#     else:
+#         print('The target species are not unique or not in the background species.')
+# else:
+#     print('No species are specified!')
 
 
 # In[178]:
@@ -678,10 +699,11 @@ else:
     back100 = background.sample(frac=1/10000, random_state=SEED)
     Vh_dict = build_BCR_dict(back100,'Vh',precise = True)
     CDR3h_dict = build_BCR_dict(back100,'CDR3h',precise = True)
-# with open('data/background/default100_V_dict.pkl','wb') as f:
-#     pickle.dump(Vh_dict, f)
-# with open('data/background//default100_CDR3_dict.pkl','wb') as f:
-#     pickle.dump(CDR3h_dict, f)
+if DEBUG:
+    with open(OUT_DIR+'/first100_V_dict.pkl','wb') as f:
+        pickle.dump(Vh_dict, f)
+    with open(OUT_DIR+'/first100_CDR3_dict.pkl','wb') as f:
+        pickle.dump(CDR3h_dict, f)
 
 
 # In[80]:

@@ -296,24 +296,27 @@ def embedCDR3(CDR3, precise = False):
             deseq.append(decoded.detach().cpu().numpy()[0,0,:,:])
     return(outseq,deseq,inseq)
 
-def OutCDR3(outseq,deseq,inseq,Output):
+def OutCDR3(CDR3_seq,outseq,deseq,inseq,Output):
     if not os.path.exists(Output):
         os.makedirs(Output)
     #    os.makedirs(os.path.join(Output,'pths'))
-    os.makedirs(os.path.join(Output,'heatmaps_CDR3'))
-    encoded_V=pd.DataFrame(outseq)
-    encoded_V.to_csv(Output+'/encoded_CDR3.csv')
+    if not os.path.exists(Output+'/heatmaps_CDR3'):
+        os.makedirs(os.path.join(Output,'heatmaps_CDR3'))
+    encoded_CDR3=pd.DataFrame(outseq)
+    encoded_CDR3['sequence'] = CDR3_seq
+    encoded_CDR3.to_csv(Output+'/encoded_CDR3.csv')
 
-    index_pick=random.sample(range(len(outseq)),10)
+    index_pick=random.sample(range(len(outseq)),min(10,len(CDR3_seq)))
     print(index_pick)
     ###select random 10 to plot out ###
     for i in index_pick:
-        gene_pick=i
+        gene_pick=CDR3_seq[i]
     #    print(gene_pick)
         fig,axs=plt.subplots(2,1,figsize=(50,5))
     #fig,ax2=plt.subplots(figsize=(30,3))
-        axs[0].set_title(str(gene_pick)+'-th gene: decoded aa seq')
-        axs[1].set_title(str(gene_pick)+'-th gene: input aa seq')
+        axs[0].set_title(str(gene_pick)+': decoded aa seq')
+        axs[1].set_title(str(gene_pick)+': input aa seq')
+        fig.tight_layout(pad=3.0)
         sns.heatmap(np.transpose(deseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[0])
     #plt.show()
         sns.heatmap(np.transpose(inseq[i]),vmax=5,vmin=-5,square=True,cmap='PiYG',center=0,linewidths=0.1,ax=axs[1])
@@ -322,4 +325,4 @@ def OutCDR3(outseq,deseq,inseq,Output):
 if __name__ == "__main__":
     CDR3 = InputCDR3(InFile = args.input)
     CDR3_out,CDR3_decode,CDR3_input = embedCDR3(CDR3)
-    OutCDR3(CDR3_out,CDR3_decode,CDR3_input,Output = args.output)
+    OutCDR3(CDR3,CDR3_out,CDR3_decode,CDR3_input,Output = args.output)
