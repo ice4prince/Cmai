@@ -59,6 +59,7 @@ parser.add_argument('--verbose', action='store_true', help='Enable verbose outpu
 parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode and print intermediates output every step.')
 
+
 args = parser.parse_args()
 
 CODE_DIR = args.code

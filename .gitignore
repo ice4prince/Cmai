@@ -19,6 +19,7 @@ scripts/rfold/hhsuite-3.2.0-AVX2-Linux.tar.gz
 scripts/wrapV/Untitled.ipynb
 scripts/wrapV/V_wrapup.ipynb
 .pair.npy
+
 .DS_Store
 ._*
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
@@ -28,6 +29,7 @@ scripts/wrapV/V_wrapup.ipynb
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
 .ipynb
+
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 

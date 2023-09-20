@@ -240,6 +240,7 @@ if not args.skip_check:
 if args.embedBCR:
     embed_bcr(path_bind,args)
 
+
 if args.runEmbed and not args.runBind:
     run_embed(path_embed,args,path_rf)
     move_npy(args.out+'/RFoutputs/pred',NPY_DIR)

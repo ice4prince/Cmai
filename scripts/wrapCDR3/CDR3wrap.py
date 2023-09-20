@@ -305,7 +305,6 @@ def OutCDR3(CDR3_seq,outseq,deseq,inseq,Output):
     encoded_CDR3=pd.DataFrame(outseq)
     encoded_CDR3['sequence'] = CDR3_seq
     encoded_CDR3.to_csv(Output+'/encoded_CDR3.csv')
-
     index_pick=random.sample(range(len(outseq)),min(10,len(CDR3_seq)))
     print(index_pick)
     ###select random 10 to plot out ###

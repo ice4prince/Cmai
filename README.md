@@ -23,7 +23,7 @@ Follow the README in RoseTTAFold OR go through
 	conda env create -f RoseTTAFold-linux-cu101.yml
 	# create conda environment for pyRosetta folding & running DeepAccNet
 	conda env create -f folding-linux.yml
-
+	
 	2. download network weights
 	
 	wget https://files.ipd.uw.edu/pub/RoseTTAFold/weights.tar.gz
@@ -49,21 +49,21 @@ Follow the README in RoseTTAFold OR go through
 	wget https://files.ipd.uw.edu/pub/RoseTTAFold/pdb100_2021Mar03.tar.gz
 	tar xfz pdb100_2021Mar03.tar.gz
 	# for CASP14 benchmarks, we used this one: https://files.ipd.uw.edu/pub/RoseTTAFold/pdb100_2020Mar11.tar.gz
-	
+
 
 Save the environment path to paras/env_path IN ORDER
 ```
 ./get_env_path.sh
 ```
-
 ## Data Preparation
 
 Required columns:  
+
 	| Antigen_id | Antigen_seq | BCR_Vh | BCR_CDR3h |  
 	**To be noticed:**  
 	If there is no 'Antigen_seq' column, a fasta file MUST be provided.  
 Optional columns:  
-	| BCR_id | Score | test | ... |  
+| BCR_id | Score | test | ... |  
 
 ## Pipeline
 
@@ -96,15 +96,18 @@ usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PA
                [--runEmbed] [--runBind] [--skip_check] [--suffix] [--no_rank]
                [--verbose] [--merge] [--move_npy] [--embedBCR] [--bcr_heatmap]
                [--debug]
+```
 
 Parameters for the interface script.
 
+```sh
 optional arguments:
   -h, --help            show this help message and exit
   --code CODE           the Cmai directory
   --input INPUT         the input files in csv which should include
                         Antigen_id,BCR_Vh,BCR_CDR3h
   --out OUT             the directory for output files. An absolute path is required.
+
   --env_path ENV_PATH   the file saving the directory of the Conda environments-
                         python of runEmbed, python of runBind, and RoseTTAFold in
                         order.
@@ -124,6 +127,7 @@ optional arguments:
   --min_size_background_bcr MIN_SIZE_BACKGROUND_BCR
                         the initial and minimum sample size of background BCRs. The
                         default is 100
+
   --max_size_background_bcr MAX_SIZE_BACKGROUND_BCR
                         the maximum size for subsample of background BCRs, which
                         should no more than 1000000. The default is 10000
@@ -151,4 +155,5 @@ optional arguments:
                         comparison. Default is False
   --debug               Switch to the debug mode and print output step by step.
                         Default is False
+
 ```
