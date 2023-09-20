@@ -41,13 +41,17 @@ parser.add_argument('--run_rf',action = 'store_true',help = 'skip generating msa
 parser.add_argument('--skip_preprocess',action = 'store_true',help = 'skip preprocess of antigen_embedding. Default is False')
 parser.add_argument('--skip_extract',action = 'store_true',help = 'skip extracting NPY for antigen embedding. Default is False')
 parser.add_argument('--runEmbed',action = 'store_true',help = 'only run antigen embedding. Default is False')
-parser.add_argument('--runBind',action = 'store_true',help = 'only run binding or comparing. Default is False')
+parser.add_argument('--runBind',action = 'store_true',help = 'only run binding. Default is False')
 parser.add_argument('--skip_check',action = 'store_true',help = 'skip check and preprocess of input data, only use when it has been done before. Default is False')
-parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
+# parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--suffix', action='store_true', help='Adding suffix to antigen id. Only use to distinguish same-name antigens. The default is False.')
 parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
+parser.add_argument('--move_npy',action = 'store_true',help = 'only move npy files to the  desired directory. Default is False')
+parser.add_argument('--embedBCR',action = 'store_true',help = 'extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False')
+parser.add_argument('--bcr_heatmap',action = 'store_true',help = 'export full embedding results including the heatmap comparison. Default is False')
+parser.add_argument('--debug',action = 'store_true',help = 'Switch to the debug mode and print output step by step. Default is False')
 
 args = parser.parse_args()
 
@@ -160,14 +164,16 @@ def run_binding(conda_env,args):
     if args.npy_dir is not None:
         bind_args.append('--npy_dir')
         bind_args.append(args.npy_dir)
-    if args.species:
-        bind_args.append('--species')
+    # if args.species:
+    #     bind_args.append('--species')
     if args.verbose:
         bind_args.append('--verbose')
     if args.merge:
         bind_args.append('--merge')
     if args.no_rank:
         bind_args.append('--no_rank')
+    if args.debug:
+        bind_args.append('--debug')
     print('rinBind ',' '.join(bind_args))
 
     # subprocess.run(['conda', 'run', '-n', 'runBind', 'python', 'scripts/runBind.py'] + bind_args,capture_output=False)
@@ -175,7 +181,12 @@ def run_binding(conda_env,args):
 #    run_script_in_outer_env('scripts/runBind.py',bind_args)
 #    run_script_in_conda_env('runBind','scripts/runBind.py',bind_args)
     run_script_in_conda_env(conda_env,'scripts/runBind.py',bind_args)
-
+###MARK HERE
+def embed_bcr(conda_env,args):
+    bcr_args = ['--input',args.pre_dir,'--out',OUT]
+    if args.bcr_heatmap:
+        bcr_args.append('--verbose')
+    run_script_in_conda_env(conda_env,'scripts/get_bcr.py',bcr_args)
     # elif mode == 'continuous':
     #     cont_args = ['--code',CODE_DIR,'--input',args.pre_dir,'--out',OUT,'--seed',str(args.seed),'--subsample',str(args.subsample),'--bottomline',str(args.bottomline)]
     #     if args.species:
@@ -225,6 +236,9 @@ print(f'path_bind: {path_bind}')
 if not args.skip_check:
     run_preprocess(path_bind,args)
 
+if args.embedBCR:
+    embed_bcr(path_bind,args)
+
 if args.runEmbed and not args.runBind:
     run_embed(path_embed,args,path_rf)
     move_npy(args.out+'/RFoutputs/pred',NPY_DIR)
@@ -232,6 +246,11 @@ if args.runEmbed and not args.runBind:
 if not args.runEmbed and args.runBind:
     run_binding(path_bind,args)
     exit(0)
+
+if args.move_npy:
+    move_npy(args.out+'/RFoutputs/pred',NPY_DIR)
+    exit(0)
+
 # run_embed(args,runEmbed_env_path)
 # move_npy(args.out+'/RFoutputs/results/pred',NPY_DIR)
 # run_binding(args)
