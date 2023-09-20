@@ -3,6 +3,8 @@ data/example/archive
 archive
 try.py
 data/intermediates/NPY
+data/example/output/RFoutputs
+data/example/output/NPY
 scripts/rfscripts/typings
 scripts/rfscripts/pdm.lock
 scripts/rfscripts/.pdm-python
@@ -16,7 +18,7 @@ scripts/env.sh
 scripts/rfold/hhsuite-3.2.0-AVX2-Linux.tar.gz
 scripts/wrapV/Untitled.ipynb
 scripts/wrapV/V_wrapup.ipynb
-
+.pair.npy
 .DS_Store
 ._*
 # Created by https://www.toptal.com/developers/gitignore/api/python,jupyternotebooks
