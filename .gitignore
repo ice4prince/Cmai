@@ -25,7 +25,7 @@ scripts/wrapV/V_wrapup.ipynb
 ### JupyterNotebooks ###
 # gitignore template for Jupyter Notebooks
 # website: http://jupyter.org/
-
+.ipynb
 .ipynb_checkpoints
 */.ipynb_checkpoints/*
 
