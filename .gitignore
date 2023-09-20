@@ -5,6 +5,8 @@ try.py
 data/intermediates/NPY
 data/example/output/RFoutputs
 data/example/output/NPY
+scripts/*ipynb
+scripts/*/*ipynb
 scripts/rfscripts/typings
 scripts/rfscripts/pdm.lock
 scripts/rfscripts/.pdm-python
