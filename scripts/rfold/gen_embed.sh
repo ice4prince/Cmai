@@ -24,7 +24,13 @@ SCRIPT_DIR=$( cd -- "$( dirname -- "${BASH_SOURCE[0]}" )" &> /dev/null && pwd )
 mkdir -p $IN
 mkdir -p $OUTD
 
-sort $IN/IDX | uniq | sort > $IN/IDX.uniq
+if [ ! -f $IN/IDX.uniq ]; then
+  echo "IDX.uniq does not exist, sort and uniq IDX..."
+  sort $IN/IDX | uniq | sort > $IN/IDX.uniq
+else
+  echo "IDX.uniq exists, skipping..."
+fi
+
 
 #python "$SCRIPT_DIR"/$RFD/network/predict_smile.py $RFD/weights $DB $IN $OUTD $4
 cp $SCRIPT_DIR/model.py $RFD/network/RoseTTAFoldModel.py
