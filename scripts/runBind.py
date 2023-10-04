@@ -183,6 +183,16 @@ torch.set_printoptions(precision=10)
 #             print(Fore.GREEN +str(col)+' PASS!')
 #     print(Style.RESET_ALL)
 
+def check_npy(df):
+    for antigen in df['Antigen_id'].unique():
+        if not os.path.exists(NPY_DIR+'/'+antigen+'.pair.npy'):
+            print('The embedding for antigen: '+antigen+' is not found in NPY directory, Skipping...')
+            deleted_rows = df[df['Antigen_id']==antigen]
+            with open(INPUT_DIR+'/Skipped_entry.txt','a') as report:
+                for _,row in deleted_rows.iterrows():
+                    report.write(','.join(map(str, row.values)) + '\n')
+            df = df[df['Antigen_id']!=antigen]
+    return df
 
 def build_BCR_dict(dataset,colname,precise = False):
     cols = dataset.filter(like = colname)
@@ -676,7 +686,7 @@ background = pd.read_csv(BACKGROUND,compression='gzip') # with columns 'Vh','CDR
 
 # In[178]:
 
-target = target_file
+target = check_npy(target_file)
 # target = preprocess(target_file)
 # target.to_csv(INPUT_DIR+'/filtered_input.csv')
 
