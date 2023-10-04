@@ -68,7 +68,7 @@ Optional columns:
 ## Pipeline
 
 ```sh
-python Cmai.py --code '/path/to/Cmai' --input 'data/example/input.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'
+python Cmai.py --code '/path/to/Cmai' --input 'data/example/input.csv' --out '/path/to/Cmai/example/data/example/output' --rf_data 'path/to/RoseTTAFold_database'
 ```
 ## Step-by-step Pipeline
 
