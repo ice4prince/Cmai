@@ -20,7 +20,7 @@ import re
 
 
 parser = argparse.ArgumentParser(description='Parameters for the interface script.')
-parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
+parser.add_argument('--code', type=str, help='the Cmai directory',default = os.path.dirname(__file__))
 parser.add_argument('--input',type = str, help = 'the input files in csv which should include Antigen_id,BCR_Vh,BCR_CDR3h',default = 'data/example/input.csv')
 parser.add_argument('--out',type = str, help = 'the directory for output files. An absolute path is required.',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
 parser.add_argument('--env_path', help='the file saving the directory of the Conda environments- python of runEmbed, python of runBind, and RoseTTAFold in order.',default = 'paras/env_path')
