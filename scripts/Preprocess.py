@@ -1,4 +1,3 @@
-
 #from optparse import OptionParser
 import os
 import sys
@@ -23,7 +22,7 @@ from rfold.rconfig import Conf, config
 #(options, args) = parser.parse_args()
 # In[3]:
 
-badLetters= ['b', 'j', 'o', 'u', 'x', 'z','*']
+badLetters= {'b', 'j', 'o', 'u', 'x', 'z','*'}
 good_sequences = []
 remove_list = []
 def check_fasta(conf: Conf):
@@ -32,7 +31,7 @@ def check_fasta(conf: Conf):
     verbose = conf.verbose
 #    print('fasta: %s' %INfasta)
     for fasta in SeqIO.parse(open(INfasta),'fasta'):
-        if len([x for x in badLetters if x in fasta.seq.lower()])>0:
+        if badLetters & set(fasta.seq.lower()):
             print(Fore.RED +'Antigen %s contains special or unknown amino acid(s) and has been removed!' % fasta.id)
             remove_list.append(fasta.id)
         else:
