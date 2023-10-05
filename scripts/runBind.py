@@ -75,7 +75,9 @@ DEBUG = args.debug
 
 # In[171]:
 
-
+np.random.seed(SEED)
+torch.use_deterministic_algorithms(True, warn_only=True)
+torch.manual_seed(SEED)
 
 
 # CODE_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai'
