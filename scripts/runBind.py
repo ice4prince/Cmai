@@ -66,6 +66,8 @@ CODE_DIR = args.code
 INPUT_DIR = args.input
 
 OUT_DIR = args.out
+BACK_BATCH_SIZE = 1
+BATCH_SIZE = 1
 # MATCHING_SPECIES = args.species
 SEED = args.seed
 SUBSAMPLE = args.subsample
@@ -646,7 +648,7 @@ def locate_rank(number, my_list):
 
 def generate_score_dict(df,score_dict,antigen_dict,cdr3_dict,v_dict,model,subsample=1/10000,seed =SEED):
     for antigen_id, antigen in antigen_dict.items():
-        background_loader = DataLoader(rankDataset(df, antigen, cdr3_dict, v_dict,subsample_ratio=subsample,seed=seed),1)
+        background_loader = DataLoader(rankDataset(df, antigen, cdr3_dict, v_dict,subsample_ratio=subsample,seed=seed),BACK_BATCH_SIZE)
         score_background = background_scores(background_loader,model)
         score_dict[antigen_id]=score_background
     return(score_dict)
@@ -656,7 +658,7 @@ def generate_score_dict(df,score_dict,antigen_dict,cdr3_dict,v_dict,model,subsam
 
 
 def calculate_rank(df,score_dict,antigen_dict,len_dict,model):
-    check_loader = DataLoader(checkDataset(df, antigen_dict, NPY_DIR,len_dict),1)
+    check_loader = DataLoader(checkDataset(df, antigen_dict, NPY_DIR,len_dict),BATCH_SIZE)
     res_check = check_score(check_loader,model)
     res_check['Rank'] = res_check.apply(lambda row: locate_rank(row['Score'], score_dict[row['Antigen']]), axis=1)
     return(res_check)
@@ -706,7 +708,7 @@ for key,value in antigen_dict.items():
 if SEED == 1:
     with open('data/background/default100_V_dict.pkl','rb') as f:
         Vh_dict = pickle.load(f)
-    with open('data/background//default100_CDR3_dict.pkl','rb') as f:
+    with open('data/background/default100_CDR3_dict.pkl','rb') as f:
         CDR3h_dict = pickle.load(f)
 else:
     back100 = background.sample(frac=1/10000, random_state=SEED)

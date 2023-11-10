@@ -60,6 +60,7 @@ def preprocess(CDR3):
 
 def aamapping(peptideSeq,aa_dict):#Transform aa seqs to Atchley's factors.
     peptideList = []
+    peptideSeq=peptideSeq.upper()
     if len(peptideSeq)>PADDING:
         print('Length: '+str(len(peptideSeq))+' over bound!')
         peptideSeq=peptideSeq[0:PADDING]

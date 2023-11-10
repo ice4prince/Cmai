@@ -40,7 +40,7 @@ import time
 import numpy as np
 np.random.seed(0)
 import torch
-torch.use_deterministic_algorithms(True, warn_only=True)
+# torch.use_deterministic_algorithms(True)#, warn_only=True)
 torch.manual_seed(0)
 import torch.nn as nn
 from torch.utils import data
