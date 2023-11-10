@@ -78,6 +78,7 @@ def preprocess(V_seq):
 
 def aamapping(peptideSeq,aa_dict,backward=False):#Transform aa seqs to Atchley's factors.
     peptideList = []
+    peptideSeq=peptideSeq.upper()
     if len(peptideSeq)>PADDING:
         print('Length: '+str(len(peptideSeq))+' over bound!')
         if backward:

@@ -106,6 +106,7 @@ def filter_bad_bcr(df):
 #    print(df[some_columns].head())
     for col in some_columns:
         df[col] = df[col].apply(lambda x: x.replace(' ', ''))
+        df[col] = df[col].apply(lambda x: x.upper())
     mask = df[some_columns].applymap(check_bad_bcr)
     filtered_df = df[mask.all(axis=1)]
     return filtered_df
