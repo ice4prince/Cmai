@@ -70,16 +70,11 @@ def write_fasta(df,filename):
 
 
 def parse_fasta(filename):
+    fasta_dict = {}
     with open(filename, 'r') as file:
-        id_seq_dict = {}
-        for line in file:
-            line = line.rstrip()  # remove newline character
-            if line.startswith('>'):
-                id_ = line[1:]  # remove '>'
-                id_seq_dict[id_] = ''
-            else:
-                id_seq_dict[id_] += line
-        return id_seq_dict
+        for record in SeqIO.parse(file, "fasta"):
+            fasta_dict[record.id] = str(record.seq)
+        return fasta_dict
 
 
 # In[84]:
@@ -139,27 +134,40 @@ def check_input(df,fastaname=None):
         print('Write antigen sequence from input file to '+str(PRE_DIR)+'/antigens.fasta')
     else:
         fasta_dict = parse_fasta(fastaname)
+        missing_ids = df[~df['Antigen_id'].isin(fasta_dict.keys())]['Antigen_id'].unique()
+        print("Missing Antigen IDs:", missing_ids,'are REMOVED!')
         df['Antigen_seq'] = df['Antigen_id'].map(fasta_dict)
         print('read in the antigen sequence from the fasta file.')
+
 
 #    print(df.head())
     # if MODE == 'binary':
     if 'BCR_id' not in df.columns:
         df = add_BCR_id(df)
         print('BCR_id is added.')
+    # df.to_csv(PRE_DIR+'/processed_input_check.csv')
+    # print(df.head())
+    # substrings = ['Vh', 'CDR3h', 'Antigen_seq']
+    # some_columns = [col for col in df.columns if any(sub in col for sub in substrings)]
+    # for col in some_columns:
+    #     print(col,type(df[col]))
+    #     df[col] = df[col].apply(lambda x: x.replace(' ', ''))
+        # df[col] = df[col].apply(lambda x: x.upper())
+    # print(some_columns)
+    # df = filter_bad_bcr(df)
     df = preprocess(df)
     print('record_id is added.')
-    # if MODE == 'continuous':
-    #     if 'BetterBCR_id' not in df.columns:
-    #         df_better = df[['BetterBCR_Vh','BetterBCR_CDR3h']]
-    #         df_worse = df[['WorseBCR_Vh','WorseBCR_CDR3h']]
-    #         df_better.columns= df_worse.columns = ['BCR_Vh','BCR_CDR3h']
-    #         df_better = add_BCR_id(df_better)
-    #         df_worse = add_BCR_id(df_worse)
-    #         df['BetterBCR_id'] = df_better['BCR_id']
-    #         df['WorseBCR_id'] = df_worse['BCR_id']
-    #         print('BetterBCR_id and worseBCR_id are both added.')
-    print(df.head())
+    # # if MODE == 'continuous':
+    # #     if 'BetterBCR_id' not in df.columns:
+    # #         df_better = df[['BetterBCR_Vh','BetterBCR_CDR3h']]
+    # #         df_worse = df[['WorseBCR_Vh','WorseBCR_CDR3h']]
+    # #         df_better.columns= df_worse.columns = ['BCR_Vh','BCR_CDR3h']
+    # #         df_better = add_BCR_id(df_better)
+    # #         df_worse = add_BCR_id(df_worse)
+    # #         df['BetterBCR_id'] = df_better['BCR_id']
+    # #         df['WorseBCR_id'] = df_worse['BCR_id']
+    # #         print('BetterBCR_id and worseBCR_id are both added.')
+    # print(df.head())
     return df
 
 
