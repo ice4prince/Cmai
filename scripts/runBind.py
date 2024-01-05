@@ -56,7 +56,7 @@ parser.add_argument('--subsample', type=int, help='the initial sample size of ba
 parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
 parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
-parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
+parser.add_argument('--no_merge', action='store_true', help='Unable merging output to input, default is False.')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode and print intermediates output every step.')
 
 
@@ -787,7 +787,7 @@ print('threshold to enter the next level of ranking:',cutoffs_dict)
 if args.no_rank:
     check_loader = DataLoader(checkDataset(target, antigen_dict, NPY_DIR,len_dict),1)
     res_check = check_score(check_loader,model_mix)
-    if args.merge:
+    if not args.no_merge:
         merged = target.merge(res_check, on='record_id', how='left')
         merged.to_csv(OUT_DIR+'/merged_results_no_rank.csv')
         exit()
@@ -822,9 +822,8 @@ if len(s_target)>0:
 
 # In[187]:
 
-
-output.to_csv(OUT_DIR+'/binding_results.csv')
-
-if args.merge:
+if args.no_merge:
+    output.to_csv(OUT_DIR+'/binding_results.csv')
+else:
     merged = target.merge(output, on='record_id', how='left')
     merged.to_csv(OUT_DIR+'/merged_results.csv')
