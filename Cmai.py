@@ -47,7 +47,7 @@ parser.add_argument('--skip_check',action = 'store_true',help = 'skip check and 
 parser.add_argument('--suffix', action='store_true', help='Adding suffix to antigen id. Only use to distinguish same-name antigens. The default is False.')
 parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
-parser.add_argument('--merge', action='store_true', help='Enable merging output to input, default is False.')
+parser.add_argument('--no_merge', action='store_true', help='Unable merging output to input, default is False.')
 parser.add_argument('--move_npy',action = 'store_true',help = 'only move npy files to the  desired directory. Default is False')
 parser.add_argument('--embedBCR',action = 'store_true',help = 'extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False')
 parser.add_argument('--bcr_heatmap',action = 'store_true',help = 'export full embedding results including the heatmap comparison. Default is False')
@@ -168,8 +168,8 @@ def run_binding(conda_env,args):
     #     bind_args.append('--species')
     if args.verbose:
         bind_args.append('--verbose')
-    if args.merge:
-        bind_args.append('--merge')
+    if args.no_merge:
+        bind_args.append('--no_merge')
     if args.no_rank:
         bind_args.append('--no_rank')
     if args.debug:
