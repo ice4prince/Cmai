@@ -11,6 +11,7 @@ import argparse
 import shutil
 import glob
 import re
+from scripts.NPZtoPair import exPair
 # from Bio import SeqIO #NOTE: proprocess need some prerequiste
 # Define the function to run the preprocess.py
 # def run_preprocess():
@@ -49,6 +50,7 @@ parser.add_argument('--no_rank', action='store_true', help='Only export the pred
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 parser.add_argument('--no_merge', action='store_true', help='Unable merging output to input, default is False.')
 parser.add_argument('--move_npy',action = 'store_true',help = 'only move npy files to the  desired directory. Default is False')
+parser.add_argument('--gen_npy',action = 'store_true',help = 'extract npy from npz files. Default is False')
 parser.add_argument('--embedBCR',action = 'store_true',help = 'extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False')
 parser.add_argument('--bcr_heatmap',action = 'store_true',help = 'export full embedding results including the heatmap comparison. Default is False')
 parser.add_argument('--debug',action = 'store_true',help = 'Switch to the debug mode and print output step by step. Default is False')
@@ -231,8 +233,8 @@ path_embed = lines[0].strip()
 path_bind = lines[1].strip()
 path_rf = lines[2].strip()
 
-print(f'path_embed: {path_embed}')
-print(f'path_bind: {path_bind}')
+#print(f'path_embed: {path_embed}')
+#print(f'path_bind: {path_bind}')
 # Run preprocess.py and get MODE
 if not args.skip_check:
     run_preprocess(path_bind,args)
@@ -251,6 +253,13 @@ if not args.runEmbed and args.runBind:
 
 if args.move_npy:
     move_npy(args.out+'/RFoutputs/pred',NPY_DIR)
+    exit(0)
+
+if args.gen_npy:
+    npzF = args.out+'/RFoutputs/pred/*feature.npz'
+    for npz in glob.iglob(npzF):
+        exPair(npz)
+        print('embedding of %s is extracted!' %npz.rsplit('/',1)[1])
     exit(0)
 
 # run_embed(args,runEmbed_env_path)
