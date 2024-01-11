@@ -134,6 +134,7 @@ optional arguments:
   --verbose             Enable verbose output, default is False.
   --no_merge            Unable merging output to input, default is False.
   --move_npy            only move npy files to the desired directory. Default is False
+  --gen_npy             extract npy from npz files. Default is False
   --embedBCR            extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False
   --bcr_heatmap         export full embedding results including the heatmap comparison. Default is False
   --debug               Switch to the debug mode and print output step by step. Default is False
