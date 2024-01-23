@@ -12,6 +12,8 @@ import shutil
 import glob
 import re
 from scripts.NPZtoPair import exPair
+from scripts.add_rank import locate_rank,map_rank
+import pickle
 # from Bio import SeqIO #NOTE: proprocess need some prerequiste
 # Define the function to run the preprocess.py
 # def run_preprocess():
@@ -35,6 +37,9 @@ parser.add_argument('--use_cpu',action = 'store_true', help = 'the option to use
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
 parser.add_argument('--min_size_background_bcr', type=int, help='the initial and minimum sample size of background BCRs. The default is 100',default = 100)
 parser.add_argument('--max_size_background_bcr', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The default is 10000',default = 10000)
+parser.add_argument('--export_background',action='store_true', help='Only export the score dict for background BCRs of quantity of the max_size_background_bcr number, default is False.')
+parser.add_argument('--add_rank',action='store_true', help='Only add ranks from background BCR scores to no_ranked results, default is False.')
+parser.add_argument('--background_score',type = str, help = 'the pkl file of the score dictionary of background BCRs',default = None)
 # parser.add_argument('--continuous', action='store_true', help='swtich the mode from binary to continuous, default mode is binary.')
 parser.add_argument('--rf_para',action = 'store_true',help = 'use the parameters from paras/rf_para.txt for antigen embedding. Default is False')
 parser.add_argument('--gen_msa',action = 'store_true',help = 'only run generating msa and exit. Default is False')
@@ -174,6 +179,8 @@ def run_binding(conda_env,args):
         bind_args.append('--no_merge')
     if args.no_rank:
         bind_args.append('--no_rank')
+    if args.export_background:
+        bind_args.append('--export_background')
     if args.debug:
         bind_args.append('--debug')
     print('rinBind ',' '.join(bind_args))
@@ -262,6 +269,16 @@ if args.gen_npy:
         print('embedding of %s is extracted!' %npz.rsplit('/',1)[1])
     exit(0)
 
+if args.add_rank:
+    if args.background_score is not None:
+        score_pkl=args.background_score
+    else:
+        score_pkl=args.out+'/background_score_dict.pkl'
+    with open(score_pkl,'rb') as score:
+        score_dict=pickle.load(score)
+    for file in glob.glob(args.out+'/*no_rank*csv'):
+        map_rank(file,score_dict)
+    exit(0)
 # run_embed(args,runEmbed_env_path)
 # move_npy(args.out+'/RFoutputs/results/pred',NPY_DIR)
 # run_binding(args)

@@ -40,21 +40,23 @@ print(str(datetime.now()))
 
 # In[ ]:
 
-
+current = os.path.dirname(os.path.realpath(__file__))
+parent = os.path.dirname(current)
 
 
 parser = argparse.ArgumentParser(description='Parameters for the binding model.')
 
 # Add a optional argument
-parser.add_argument('--code', type=str, help='the Cmai directory',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai')
-parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
+parser.add_argument('--code', type=str, help='the Cmai directory',default = parent)
+parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = os.path.join(parent,'data/example/output'))
 parser.add_argument('--npy_dir',type = str, help = 'the npy folder if different with input folder',default = None)
-parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
+parser.add_argument('--out',type = str, help = 'the directory for output files',default = os.path.join(parent,'data/example/output'))
 # parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
 parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
 parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
 parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
+parser.add_argument('--export_background',action='store_true', help='Only export the score dict for background BCRs of amount of the bottomline number, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 parser.add_argument('--no_merge', action='store_true', help='Unable merging output to input, default is False.')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode and print intermediates output every step.')
@@ -725,7 +727,9 @@ if DEBUG:
 
 
 len_dict = target.drop_duplicates(subset='Antigen_id').set_index('Antigen_id')['Antigen_seq'].map(len).to_dict()
-
+# len_dict={}
+# for key, value in antigen_dict.items():
+#     len_dict[key]=value.shape[1]
 
 # In[92]:
 
@@ -769,9 +773,7 @@ scheduler = ReduceLROnPlateau(optimizer,mode = 'min',factor=0.1,patience =10,ver
 # In[183]:
 
 
-df = pd.read_csv('paras/cutoff_table.txt', sep='\t')
-cutoffs_dict = df.set_index('backsample')['cutoffs'].to_dict()
-print('threshold to enter the next level of ranking:',cutoffs_dict)
+
 
 
 # In[164]:
@@ -796,6 +798,23 @@ if args.no_rank:
         exit()
 
 score_dict = {}
+if args.export_background:
+    print('Exporting dict for '+str(BOTTOMLINE)+' background BCRs...')
+    score_dict = {}
+    if BOTTOMLINE==10000 & SEED == 1:
+        with open('data/background/back1w_V_dict.pkl','rb') as f:
+            Vh_dict = pickle.load(f)
+        with open('data/background/back1w_CDR3_dict.pkl','rb') as f:
+            CDR3h_dict = pickle.load(f)
+    score_dict = generate_score_dict(background,score_dict,antigen_dict,CDR3h_dict,Vh_dict,model_mix,subsample=BOTTOMLINE/1000000,seed=SEED)
+    with open(OUT_DIR+'/background_score_dict.pkl', 'wb') as outfile:
+        pickle.dump(score_dict, outfile)
+    exit()
+
+df = pd.read_csv('paras/cutoff_table.txt', sep='\t')
+cutoffs_dict = df.set_index('backsample')['cutoffs'].to_dict()
+print('threshold to enter the next level of ranking:',cutoffs_dict)
+
 subsample = SUBSAMPLE
 s_target =  target
 f_antigens = antigen_dict
@@ -820,6 +839,8 @@ if len(s_target)>0:
     percentage_completed = output.shape[0] / target.shape[0] * 100
     print(f'Completed {percentage_completed:.2f}% of entries...')
 
+with open(OUT_DIR+'/background_score_dict_'+str(BOTTOMLINE)+'.pkl', 'wb') as outfile:
+    pickle.dump(score_dict, outfile)
 # In[187]:
 
 if args.no_merge:
