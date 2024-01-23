@@ -91,9 +91,10 @@ python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check -
 usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PATH] [--rf_data RF_DATA]
                [--fasta FASTA] [--pre_dir PRE_DIR] [--npy_dir NPY_DIR] [--cpu CPU] [--mem MEM] [--use_cpu]
                [--seed SEED] [--min_size_background_bcr MIN_SIZE_BACKGROUND_BCR]
-               [--max_size_background_bcr MAX_SIZE_BACKGROUND_BCR] [--rf_para] [--gen_msa] [--run_rf]
-               [--skip_preprocess] [--skip_extract] [--runEmbed] [--runBind] [--skip_check] [--suffix] [--no_rank]
-               [--verbose] [--no_merge] [--move_npy] [--embedBCR] [--bcr_heatmap] [--debug]
+               [--max_size_background_bcr MAX_SIZE_BACKGROUND_BCR] [--export_background] [--add_rank]
+               [--background_score BACKGROUND_SCORE] [--rf_para] [--gen_msa] [--run_rf] [--skip_preprocess]
+               [--skip_extract] [--runEmbed] [--runBind] [--skip_check] [--suffix] [--no_rank] [--verbose]
+               [--no_merge] [--move_npy] [--gen_npy] [--embedBCR] [--bcr_heatmap] [--debug]
 
 Parameters for the interface script.
 
@@ -120,6 +121,11 @@ optional arguments:
   --max_size_background_bcr MAX_SIZE_BACKGROUND_BCR
                         the maximum size for subsample of background BCRs, which should no more than 1000000. The
                         default is 10000
+  --export_background   Only export the score dict for background BCRs of quantity of the max_size_background_bcr
+                        number, default is False.
+  --add_rank            Only add ranks from background BCR scores to no_ranked results, default is False.
+  --background_score BACKGROUND_SCORE
+                        the pkl file of the score dictionary of background BCRs
   --rf_para             use the parameters from paras/rf_para.txt for antigen embedding. Default is False
   --gen_msa             only run generating msa and exit. Default is False
   --run_rf              skip generating msa and running embedding prediction. Default is False
