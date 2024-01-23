@@ -127,16 +127,10 @@ def check_input(df,fastaname=None):
             print(f"{col} is missing.")
             exit()
     print('All required columns are included.')
-    rows_with_nan = df[df.isna().any(axis=1)]
-    if rows_with_nan.shape[0]>0:
-        print('The rows below contains NA and is removed!')
-        print(rows_with_nan)
-        df.dropna(inplace=True)
-#    print(df.head())
-    # This exits the function. If you want to exit the script completely, use `exit()`
     if 'Antigen_seq' in df.columns:
         write_fasta(df,PRE_DIR+'/antigens.fasta')
         print('Write antigen sequence from input file to '+str(PRE_DIR)+'/antigens.fasta')
+        required_cols.append('Antigen_seq')
     else:
         fasta_dict = parse_fasta(fastaname)
         missing_ids = df[~df['Antigen_id'].isin(fasta_dict.keys())]['Antigen_id'].unique()
@@ -144,6 +138,16 @@ def check_input(df,fastaname=None):
             print("Missing Antigen IDs:", missing_ids,'are REMOVED!')
         df['Antigen_seq'] = df['Antigen_id'].map(fasta_dict)
         print('read in the antigen sequence from the fasta file.')
+        
+    rows_with_nan = df[df[required_cols].isna().any(axis=1)]
+    if rows_with_nan.shape[0]>0:
+        print('The rows below contains NA and is removed!')
+        print(rows_with_nan)
+        df.dropna(subset=required_cols, inplace=True)
+#    print(df.head())
+    # This exits the function. If you want to exit the script completely, use `exit()`
+
+
 
 
 #    print(df.head())
