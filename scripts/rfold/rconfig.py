@@ -177,6 +177,9 @@ class Conf:
     """ Skip preprocessn """
     skip_extract: bool = False
     """ Skip extraction """
+    e_values: str = "1e-30 1e-10 1e-6 1e-3"
+    """ E-value cutoff for inclusion in result alignment """
+    
 
     env: Env = field(default_factory=Env)
     runtime: RuntimeEnv = field(default_factory=RuntimeEnv)
