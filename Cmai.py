@@ -59,6 +59,7 @@ parser.add_argument('--gen_npy',action = 'store_true',help = 'extract npy from n
 parser.add_argument('--embedBCR',action = 'store_true',help = 'extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False')
 parser.add_argument('--bcr_heatmap',action = 'store_true',help = 'export full embedding results including the heatmap comparison. Default is False')
 parser.add_argument('--debug',action = 'store_true',help = 'Switch to the debug mode and print output step by step. Default is False')
+parser.add_argument('--e_values', type = str, help = "E-value cutoff for inclusion in result alignment.  Default is '1e-30 1e-10 1e-6 1e-3'", default = None)
 
 args = parser.parse_args()
 
@@ -157,6 +158,8 @@ def run_embed(conda_env,args,path_rf_env):
         embed_args.append('--verbose')
     if args.suffix:
         embed_args.append('--suffix')
+    if args.e_values:
+        embed_args.extend(['--e_values', args.e_values])
     # print('runEmbed',embed_args)
     print('runEmbed',' '.join(embed_args))
     # subprocess.run(['conda', 'run', '-n', 'runEmbed', 'python', 'runEmbed.py']+ embed_args, cwd='scripts',capture_output=False)
