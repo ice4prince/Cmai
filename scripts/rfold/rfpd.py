@@ -161,7 +161,7 @@ def make_msa(path: str, key: str, conf: Conf) -> str:
         conf.log(f"MSA exists: {a3m_target}")
         return a3m_target
     for dbi, db in enumerate(dbs):
-        for e in "1e-30 1e-10 1e-6 1e-3".split():
+        for e in conf.e_values.split():
             p, a3m = one_search(path, key, dbi, db, e, conf)
             if p:
                 return cast(str, shutil.copy2(a3m, f"{a3m_target}"))
