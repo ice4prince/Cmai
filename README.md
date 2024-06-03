@@ -94,7 +94,7 @@ usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PA
                [--max_size_background_bcr MAX_SIZE_BACKGROUND_BCR] [--export_background] [--add_rank]
                [--background_score BACKGROUND_SCORE] [--rf_para] [--gen_msa] [--run_rf] [--skip_preprocess]
                [--skip_extract] [--runEmbed] [--runBind] [--skip_check] [--suffix] [--no_rank] [--verbose]
-               [--no_merge] [--move_npy] [--gen_npy] [--embedBCR] [--bcr_heatmap] [--debug]
+               [--no_merge] [--move_npy] [--gen_npy] [--embedBCR] [--bcr_heatmap] [--debug] [--e_values]
 
 Parameters for the interface script.
 
@@ -144,5 +144,8 @@ optional arguments:
   --embedBCR            extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False
   --bcr_heatmap         export full embedding results including the heatmap comparison. Default is False
   --debug               Switch to the debug mode and print output step by step. Default is False
+  --e_values E_VALUES   E-value cutoff for inclusion in result alignment. Default
+                        is '1e-30 1e-10 1e-6 1e-3'
+
 ```
 
