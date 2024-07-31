@@ -54,7 +54,7 @@ parser.add_argument('--suffix', action='store_true', help='Adding suffix to anti
 parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 parser.add_argument('--no_merge', action='store_true', help='Unable merging output to input, default is False.')
-parser.add_argument('--move_npy',action = 'store_true',help = 'only move npy files to the  desired directory. Default is False')
+parser.add_argument('--move_npy',action = 'store_true',help = 'only move npy files to the desired directory. Default is False')
 parser.add_argument('--gen_npy',action = 'store_true',help = 'extract npy from npz files. Default is False')
 parser.add_argument('--embedBCR',action = 'store_true',help = 'extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False')
 parser.add_argument('--bcr_heatmap',action = 'store_true',help = 'export full embedding results including the heatmap comparison. Default is False')
