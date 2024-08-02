@@ -138,7 +138,7 @@ def check_input(df,fastaname=None):
             print("Missing Antigen IDs:", missing_ids,'are REMOVED!')
         df['Antigen_seq'] = df['Antigen_id'].map(fasta_dict)
         print('read in the antigen sequence from the fasta file.')
-        
+
     rows_with_nan = df[df[required_cols].isna().any(axis=1)]
     if rows_with_nan.shape[0]>0:
         print('The rows below contains NA and is removed!')
@@ -191,4 +191,4 @@ input_checked = check_input(input_file,fastaname = FASTA)
 # In[107]:
 
 
-input_checked.to_csv(PRE_DIR+'/processed_input.csv')
+input_checked.to_csv(PRE_DIR+'/processed_input.csv',index=False)
