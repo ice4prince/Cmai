@@ -51,21 +51,86 @@ Follow the README in RoseTTAFold OR go through
 	# for CASP14 benchmarks, we used this one: https://files.ipd.uw.edu/pub/RoseTTAFold/pdb100_2020Mar11.tar.gz
 
 
-Save the environment path to paras/env_path IN ORDER
+Save the environment path to paras/env_path **IN ORDER**
 ```
 ./get_env_path.sh
 ```
-## Data Preparation
 
-Required columns:  
 
-	| Antigen_id | Antigen_seq | BCR_Vh | BCR_CDR3h |  
-	**To be noticed:**  
-	If there is no 'Antigen_seq' column, a fasta file MUST be provided.  
-Optional columns:  
-| BCR_id | Score | test | ... |  
+## Data Preparation and Examples
 
-TO BE NOTICED: Rows with NA will be removed!!!!
+**Required** columns:  
+
+| Antigen_id | Antigen_seq | BCR_Vh | BCR_CDR3h |
+| ---------- | ----------- | ------ | --------- |
+
+**To be noticed:**  
+
+If there is NO 'Antigen_seq' column, a fasta file **MUST** be provided.  
+
+**Optional** columns:  
+
+| BCR_id | Score | test | ...  |
+| ------ | ----- | ---- | ---- |
+
+TO BE NOTICED: Rows with **NA** will be **REMOVED**!!!!
+
+**Test data**
+
+| Antigen_id | Antigen_seq                                                  | BCR_id | BCR_Vh                                                       | BCR_CDR3h            | BCR_species |
+| ---------- | ------------------------------------------------------------ | ------ | ------------------------------------------------------------ | -------------------- | ----------- |
+| H4Hubei    | mlsivilfllvaenssqnytgnpvicmghhavangtmvktltddqvevvaaqelvesqnlpelcpsplrlvdgqtcdiingalgspgcdhlngaewdvfierpnamdtcypfdvpdyqslrsilasngkfefiaeefqwttvkqdgksgackranvndffnrlnwlvksdgnayplqnltkvnngdyarlyiwgvhhpstdteqtnlyknnpggvtvstktsqtsvvpniggrpwvrgqsgrisfywtivepgdlivfntignliaprghyklnnqkkstilntaipigscvskchtdkgslsttkpfqnisriaigncpkyvkqgslklatgmrnipekasrglfgaiagfiengwqglidgwygfrhqnaegtgtaadlkstqaaidqingklnrliektnekyhqiekefeqvegriqdlekyvedtkidlwsynaellvalenqhtidvtdsemnklfervrrqlrenaedkgngcfeifhkcdnnciesirngtydhdiyrdeainnrfqiqgvkltqgykdtilwisfsiscfllvalllafvlwacqngnircqici | BCR_6  | QVQLQQSGPGLVKPSQTLSLTCAISGDSVSSYNAVWNWIRQSPSRGLEWLGRTYYRSGWYNDYAESVKSRITINPDTSKNQFSLQLNSVTPEDTAVYY | CARSGHITVFGVNVDAFDMW |             |
+| H4Hubei    | mlsivilfllvaenssqnytgnpvicmghhavangtmvktltddqvevvaaqelvesqnlpelcpsplrlvdgqtcdiingalgspgcdhlngaewdvfierpnamdtcypfdvpdyqslrsilasngkfefiaeefqwttvkqdgksgackranvndffnrlnwlvksdgnayplqnltkvnngdyarlyiwgvhhpstdteqtnlyknnpggvtvstktsqtsvvpniggrpwvrgqsgrisfywtivepgdlivfntignliaprghyklnnqkkstilntaipigscvskchtdkgslsttkpfqnisriaigncpkyvkqgslklatgmrnipekasrglfgaiagfiengwqglidgwygfrhqnaegtgtaadlkstqaaidqingklnrliektnekyhqiekefeqvegriqdlekyvedtkidlwsynaellvalenqhtidvtdsemnklfervrrqlrenaedkgngcfeifhkcdnnciesirngtydhdiyrdeainnrfqiqgvkltqgykdtilwisfsiscfllvalllafvlwacqngnircqici | BCR_7  | QVQLQQSGPGLVKPSQTLSLTCAISGFSVSSYNAVWNWIRQSPSRGLEWLGRTYYRSGWYNDYAESVKSRITINPDTSKNQFSLQLNSVTPEDTAVYY | CARSGHITVFGVNVDAFDMW |             |
+| ova        | mgsigaasmefcfdvfkelkvhhanenifycpiaimsalamvylgakdstrtqinkvvrfdklpgfgdsieaqcgtsvnvhsslrdilnqitkpndvysfslasrlyaeerypilpeylqcvkelyrgglepinfqtaadqarelinswvesqtngiirnvlqpssvdsqtamvlvnaivfkglwekafkdedtqampfrvteqeskpvqmmyqiglfrvasmasekmkilelpfasgtmsmlvllpdevsgleqlesiinfekltewtssnvmeerkikvylprmkmeekynltsvlmamgitdvfsssanlsgissaeslkisqavhaahaeineagrevvgsaeagvdaasvseefradhpflfcikhiatnavlffgrcvsp | BCR_11 | QVQLVQSGAEVKKPGASVKVSCKASGYTFTDYYMHWVRQAPGQGLEWMGKVNPNKRGTTYNQKFEGRVTMTTDTSTSTAYMELRSLRSDDTAVYY | CARSNALDAW           | human       |
+| ova        | mgsigaasmefcfdvfkelkvhhanenifycpiaimsalamvylgakdstrtqinkvvrfdklpgfgdsieaqcgtsvnvhsslrdilnqitkpndvysfslasrlyaeerypilpeylqcvkelyrgglepinfqtaadqarelinswvesqtngiirnvlqpssvdsqtamvlvnaivfkglwekafkdedtqampfrvteqeskpvqmmyqiglfrvasmasekmkilelpfasgtmsmlvllpdevsgleqlesiinfekltewtssnvmeerkikvylprmkmeekynltsvlmamgitdvfsssanlsgissaeslkisqavhaahaeineagrevvgsaeagvdaasvseefradhpflfcikhiatnavlffgrcvsp | BCR_12 | QVQLVQSGAEVKKPGASVKVSCKASGYTFTDYYMHWVRQAPGQGLEWMGRVNPNGRGTTYNQKFEGRVTMTTDTSTSTAYMELRSLRSDDTAVYY | CARSNALDAW           | human       |
+
+**Preprocessing and Intermediate Data**
+
+The intermediate data will be generated and saved in the **preprocessed directory** defined by '**--pre_dir**' which will be the same with the **output directory** if not specified.
+
+**Preprocessed  Data** 
+
+| Antigen_id | Antigen_seq                                                  |      |      |      |      | BCR_id | BCR_Vh                                                       | BCR_CDR3h            | BCR_species | record_id |
+| ---------- | ------------------------------------------------------------ | ---- | ---- | ---- | ---- | ------ | ------------------------------------------------------------ | :------------------- | ----------- | --------- |
+| H4Hubei    | MLSIVILFLLVAENSSQNYTGNPVICMGHHAVANGTMVKTLTDDQVEVVAAQELVESQNLPELCPSPLRLVDGQTCDIINGALGSPGCDHLNGAEWDVFIERPNAMDTCYPFDVPDYQSLRSILASNGKFEFIAEEFQWTTVKQDGKSGACKRANVNDFFNRLNWLVKSDGNAYPLQNLTKVNNGDYARLYIWGVHHPSTDTEQTNLYKNNPGGVTVSTKTSQTSVVPNIGGRPWVRGQSGRISFYWTIVEPGDLIVFNTIGNLIAPRGHYKLNNQKKSTILNTAIPIGSCVSKCHTDKGSLSTTKPFQNISRIAIGNCPKYVKQGSLKLATGMRNIPEKASRGLFGAIAGFIENGWQGLIDGWYGFRHQNAEGTGTAADLKSTQAAIDQINGKLNRLIEKTNEKYHQIEKEFEQVEGRIQDLEKYVEDTKIDLWSYNAELLVALENQHTIDVTDSEMNKLFERVRRQLRENAEDKGNGCFEIFHKCDNNCIESIRNGTYDHDIYRDEAINNRFQIQGVKLTQGYKDTILWISFSISCFLLVALLLAFVLWACQNGNIRCQICI |      |      |      |      | BCR_6  | QVQLQQSGPGLVKPSQTLSLTCAISGDSVSSYNAVWNWIRQSPSRGLEWLGRTYYRSGWYNDYAESVKSRITINPDTSKNQFSLQLNSVTPEDTAVYY | CARSGHITVFGVNVDAFDMW |             | record_0  |
+| H4Hubei    | MLSIVILFLLVAENSSQNYTGNPVICMGHHAVANGTMVKTLTDDQVEVVAAQELVESQNLPELCPSPLRLVDGQTCDIINGALGSPGCDHLNGAEWDVFIERPNAMDTCYPFDVPDYQSLRSILASNGKFEFIAEEFQWTTVKQDGKSGACKRANVNDFFNRLNWLVKSDGNAYPLQNLTKVNNGDYARLYIWGVHHPSTDTEQTNLYKNNPGGVTVSTKTSQTSVVPNIGGRPWVRGQSGRISFYWTIVEPGDLIVFNTIGNLIAPRGHYKLNNQKKSTILNTAIPIGSCVSKCHTDKGSLSTTKPFQNISRIAIGNCPKYVKQGSLKLATGMRNIPEKASRGLFGAIAGFIENGWQGLIDGWYGFRHQNAEGTGTAADLKSTQAAIDQINGKLNRLIEKTNEKYHQIEKEFEQVEGRIQDLEKYVEDTKIDLWSYNAELLVALENQHTIDVTDSEMNKLFERVRRQLRENAEDKGNGCFEIFHKCDNNCIESIRNGTYDHDIYRDEAINNRFQIQGVKLTQGYKDTILWISFSISCFLLVALLLAFVLWACQNGNIRCQICI |      |      |      |      | BCR_7  | QVQLQQSGPGLVKPSQTLSLTCAISGFSVSSYNAVWNWIRQSPSRGLEWLGRTYYRSGWYNDYAESVKSRITINPDTSKNQFSLQLNSVTPEDTAVYY | CARSGHITVFGVNVDAFDMW |             | record_1  |
+| ova        | MGSIGAASMEFCFDVFKELKVHHANENIFYCPIAIMSALAMVYLGAKDSTRTQINKVVRFDKLPGFGDSIEAQCGTSVNVHSSLRDILNQITKPNDVYSFSLASRLYAEERYPILPEYLQCVKELYRGGLEPINFQTAADQARELINSWVESQTNGIIRNVLQPSSVDSQTAMVLVNAIVFKGLWEKAFKDEDTQAMPFRVTEQESKPVQMMYQIGLFRVASMASEKMKILELPFASGTMSMLVLLPDEVSGLEQLESIINFEKLTEWTSSNVMEERKIKVYLPRMKMEEKYNLTSVLMAMGITDVFSSSANLSGISSAESLKISQAVHAAHAEINEAGREVVGSAEAGVDAASVSEEFRADHPFLFCIKHIATNAVLFFGRCVSP |      |      |      |      | BCR_11 | QVQLVQSGAEVKKPGASVKVSCKASGYTFTDYYMHWVRQAPGQGLEWMGKVNPNKRGTTYNQKFEGRVTMTTDTSTSTAYMELRSLRSDDTAVYY | CARSNALDAW           | human       | record_2  |
+| ova        | MGSIGAASMEFCFDVFKELKVHHANENIFYCPIAIMSALAMVYLGAKDSTRTQINKVVRFDKLPGFGDSIEAQCGTSVNVHSSLRDILNQITKPNDVYSFSLASRLYAEERYPILPEYLQCVKELYRGGLEPINFQTAADQARELINSWVESQTNGIIRNVLQPSSVDSQTAMVLVNAIVFKGLWEKAFKDEDTQAMPFRVTEQESKPVQMMYQIGLFRVASMASEKMKILELPFASGTMSMLVLLPDEVSGLEQLESIINFEKLTEWTSSNVMEERKIKVYLPRMKMEEKYNLTSVLMAMGITDVFSSSANLSGISSAESLKISQAVHAAHAEINEAGREVVGSAEAGVDAASVSEEFRADHPFLFCIKHIATNAVLFFGRCVSP |      |      |      |      | BCR_12 | QVQLVQSGAEVKKPGASVKVSCKASGYTFTDYYMHWVRQAPGQGLEWMGRVNPNGRGTTYNQKFEGRVTMTTDTSTSTAYMELRSLRSDDTAVYY | CARSNALDAW           | human       | record_3  |
+
+(processed_input.csv)
+
+The output directory for the test data is '**data/example/output**', where the intermediates for antigen embeddings should be saved in the folder '**RFoutputs**' which can be found at **RFoutputsLink**.
+
+If there is no 'antigen embedding directory' specified using **'--npy_dir'**, the antigen embeddings will be extracted and saved in the folder '**NPY**' in the 'preprocessed directory' as **'pred_dir/NPY',**  which is not included in the github but can be found at **NPYLink**.
+
+**Expected Output**
+
+The final output **WITHOUT** merging with the input data (using **--no_merge**):
+
+| record_id | Antigen | BCR_id_y | Score    | Rank     |
+| --------- | ------- | -------- | -------- | -------- |
+| record_0  | H4Hubei | BCR_6    | -3.97083 | 0.581942 |
+| record_1  | H4Hubei | BCR_7    | -3.97073 | 0.584042 |
+| record_2  | ova     | BCR_11   | -4.16114 | 0.025797 |
+| record_3  | ova     | BCR_12   | -4.16291 | 0.022598 |
+
+If **MERGED** with the input data (Default):
+
+| Antigen_id | Antigen_seq                                                  | BCR_id_x | BCR_Vh                                                       | BCR_CDR3h            | BCR_species | record_id | Antigen | BCR_id_y | Score    | Rank     |
+| ---------- | ------------------------------------------------------------ | -------- | ------------------------------------------------------------ | -------------------- | ----------- | --------- | ------- | -------- | -------- | -------- |
+| H4Hubei    | mlsivilfllvaenssqnytgnpvicmghhavangtmvktltddqvevvaaqelvesqnlpelcpsplrlvdgqtcdiingalgspgcdhlngaewdvfierpnamdtcypfdvpdyqslrsilasngkfefiaeefqwttvkqdgksgackranvndffnrlnwlvksdgnayplqnltkvnngdyarlyiwgvhhpstdteqtnlyknnpggvtvstktsqtsvvpniggrpwvrgqsgrisfywtivepgdlivfntignliaprghyklnnqkkstilntaipigscvskchtdkgslsttkpfqnisriaigncpkyvkqgslklatgmrnipekasrglfgaiagfiengwqglidgwygfrhqnaegtgtaadlkstqaaidqingklnrliektnekyhqiekefeqvegriqdlekyvedtkidlwsynaellvalenqhtidvtdsemnklfervrrqlrenaedkgngcfeifhkcdnnciesirngtydhdiyrdeainnrfqiqgvkltqgykdtilwisfsiscfllvalllafvlwacqngnircqici | BCR_6    | QVQLQQSGPGLVKPSQTLSLTCAISGDSVSSYNAVWNWIRQSPSRGLEWLGRTYYRSGWYNDYAESVKSRITINPDTSKNQFSLQLNSVTPEDTAVYY | CARSGHITVFGVNVDAFDMW |             | record_0  | H4Hubei | BCR_6    | -3.97083 | 0.581942 |
+| H4Hubei    | mlsivilfllvaenssqnytgnpvicmghhavangtmvktltddqvevvaaqelvesqnlpelcpsplrlvdgqtcdiingalgspgcdhlngaewdvfierpnamdtcypfdvpdyqslrsilasngkfefiaeefqwttvkqdgksgackranvndffnrlnwlvksdgnayplqnltkvnngdyarlyiwgvhhpstdteqtnlyknnpggvtvstktsqtsvvpniggrpwvrgqsgrisfywtivepgdlivfntignliaprghyklnnqkkstilntaipigscvskchtdkgslsttkpfqnisriaigncpkyvkqgslklatgmrnipekasrglfgaiagfiengwqglidgwygfrhqnaegtgtaadlkstqaaidqingklnrliektnekyhqiekefeqvegriqdlekyvedtkidlwsynaellvalenqhtidvtdsemnklfervrrqlrenaedkgngcfeifhkcdnnciesirngtydhdiyrdeainnrfqiqgvkltqgykdtilwisfsiscfllvalllafvlwacqngnircqici | BCR_7    | QVQLQQSGPGLVKPSQTLSLTCAISGFSVSSYNAVWNWIRQSPSRGLEWLGRTYYRSGWYNDYAESVKSRITINPDTSKNQFSLQLNSVTPEDTAVYY | CARSGHITVFGVNVDAFDMW |             | record_1  | H4Hubei | BCR_7    | -3.97073 | 0.584042 |
+| ova        | mgsigaasmefcfdvfkelkvhhanenifycpiaimsalamvylgakdstrtqinkvvrfdklpgfgdsieaqcgtsvnvhsslrdilnqitkpndvysfslasrlyaeerypilpeylqcvkelyrgglepinfqtaadqarelinswvesqtngiirnvlqpssvdsqtamvlvnaivfkglwekafkdedtqampfrvteqeskpvqmmyqiglfrvasmasekmkilelpfasgtmsmlvllpdevsgleqlesiinfekltewtssnvmeerkikvylprmkmeekynltsvlmamgitdvfsssanlsgissaeslkisqavhaahaeineagrevvgsaeagvdaasvseefradhpflfcikhiatnavlffgrcvsp | BCR_11   | QVQLVQSGAEVKKPGASVKVSCKASGYTFTDYYMHWVRQAPGQGLEWMGKVNPNKRGTTYNQKFEGRVTMTTDTSTSTAYMELRSLRSDDTAVYY | CARSNALDAW           | human       | record_2  | ova     | BCR_11   | -4.16114 | 0.025797 |
+| ova        | mgsigaasmefcfdvfkelkvhhanenifycpiaimsalamvylgakdstrtqinkvvrfdklpgfgdsieaqcgtsvnvhsslrdilnqitkpndvysfslasrlyaeerypilpeylqcvkelyrgglepinfqtaadqarelinswvesqtngiirnvlqpssvdsqtamvlvnaivfkglwekafkdedtqampfrvteqeskpvqmmyqiglfrvasmasekmkilelpfasgtmsmlvllpdevsgleqlesiinfekltewtssnvmeerkikvylprmkmeekynltsvlmamgitdvfsssanlsgissaeslkisqavhaahaeineagrevvgsaeagvdaasvseefradhpflfcikhiatnavlffgrcvsp | BCR_12   | QVQLVQSGAEVKKPGASVKVSCKASGYTFTDYYMHWVRQAPGQGLEWMGRVNPNGRGTTYNQKFEGRVTMTTDTSTSTAYMELRSLRSDDTAVYY | CARSNALDAW           | human       | record_3  | ova     | BCR_12   | -4.16291 | 0.022598 |
+
+(merged_results.csv)
+
+**Expected Time**
+
+The expected time for processing the test data is 55m55.012s.
+
+
+
 ## Pipeline
 
 ```sh

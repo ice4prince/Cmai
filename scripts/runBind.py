@@ -844,7 +844,7 @@ with open(OUT_DIR+'/background_score_dict_'+str(BOTTOMLINE)+'.pkl', 'wb') as out
 # In[187]:
 
 if args.no_merge:
-    output.to_csv(OUT_DIR+'/binding_results.csv')
+    output.to_csv(OUT_DIR+'/binding_results.csv',index=False)
 else:
     merged = target.merge(output, on='record_id', how='left')
-    merged.to_csv(OUT_DIR+'/merged_results.csv')
+    merged.to_csv(OUT_DIR+'/merged_results.csv',index=False)
