@@ -1,0 +1,4 @@
+backsample	cutoffs
+10	0.3
+100	0.1
+1000	0.01
