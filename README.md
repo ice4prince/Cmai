@@ -99,9 +99,9 @@ The intermediate data will be generated and saved in the **preprocessed director
 
 (processed_input.csv)
 
-The output directory for the test data is '**data/example/output**', where the intermediates for antigen embeddings should be saved in the folder '**RFoutputs**' which can be found at **RFoutputsLink**.
+The output directory for the test data is '**data/example/output**', where the intermediates for antigen embeddings should be saved in the folder '**RFoutputs**' which can be found at **[RFoutputsLink](https://qbrc.swmed.edu/labs/wanglab/download/cmai/RFoutputs.zip)**.
 
-If there is no 'antigen embedding directory' specified using **'--npy_dir'**, the antigen embeddings will be extracted and saved in the folder '**NPY**' in the 'preprocessed directory' as **'pred_dir/NPY',**  which is not included in the github but can be found at **NPYLink**.
+If there is no 'antigen embedding directory' specified using **'--npy_dir'**, the antigen embeddings will be extracted and saved in the folder '**NPY**' in the 'preprocessed directory' as **'pred_dir/NPY',**  which is not included in the github but can be found at **[NPYLink](https://qbrc.swmed.edu/labs/wanglab/download/cmai/NPY.zip)**.
 
 **Expected Output**
 
