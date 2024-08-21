@@ -3,8 +3,9 @@ README
 ## Installation and Prerequisite
 Download Cmai and install the environments.
 ```sh
-cd /path/to/Cmai
+cd /Parent/Dir
 git clone git@github.com:ice4prince/Cmai.git
+cd Cmai
 conda env create -f models/runEmbed.yml
 conda env create -f models/runBind.yml
 ```
@@ -12,6 +13,7 @@ In the folder scripts/rfold, Install RoseTTAFold from [RoseTTAFold's git](https:
 ```
 cd scripts/rfold
 git clone git@github.com:RosettaCommons/RoseTTAFold.git
+cd RoseTTAFold
 ```
 Follow the README in RoseTTAFold OR go through  
 
@@ -50,12 +52,20 @@ Follow the README in RoseTTAFold OR go through
 	tar xfz pdb100_2021Mar03.tar.gz
 	# for CASP14 benchmarks, we used this one: https://files.ipd.uw.edu/pub/RoseTTAFold/pdb100_2020Mar11.tar.gz
 
+**NOTE**: the path for sequence and structure databases (**UniRef30_2020_06, bfd, and pdb100_2021Mar03**) should be written down for downstream analysis.
 
-Save the environment path to paras/env_path **IN ORDER**
+Go back to Cmai and save the environment path to paras/env_path.
+
 ```
+cd /Parent/Dir/Cmai
 ./get_env_path.sh
 ```
 
+## Test with the example data
+
+```
+python Cmai.py --code '/path/to/Cmai' --input 'data/example/input.csv' --out '/path/to/Cmai/example/data/example/output' --rf_data 'path/to/RoseTTAFold_database'
+```
 
 ## Data Preparation and Examples
 
