@@ -144,7 +144,7 @@ The expected time for processing the test data is 55m55.012s.
 ## Pipeline
 
 ```sh
-python Cmai.py --code '/path/to/Cmai' --input 'data/example/input.csv' --out '/path/to/Cmai/example/data/example/output' --rf_data 'path/to/RoseTTAFold_database'
+python Cmai.py --input 'data/example/input.csv' --out '/path/to/Cmai/example/data/example/output' --rf_data 'path/to/RoseTTAFold_database'
 ```
 ## Step-by-step Pipeline
 
