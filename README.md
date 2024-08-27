@@ -64,7 +64,7 @@ cd /Parent/Dir/Cmai
 ## Test with the example data
 
 ```
-python Cmai.py --code '/path/to/Cmai' --input 'data/example/input.csv' --out '/path/to/Cmai/example/data/example/output' --rf_data 'path/to/RoseTTAFold_database'
+python Cmai.py --input 'data/example/input.csv' --out '/path/to/Cmai/example/data/example/output' --rf_data 'path/to/RoseTTAFold_database'
 ```
 
 ## Data Preparation and Examples
