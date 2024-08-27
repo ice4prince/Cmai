@@ -38,7 +38,7 @@ parser.add_argument('--seed', type=int, help='the seed for the first 100 backgro
 parser.add_argument('--min_size_background_bcr', type=int, help='the initial and minimum sample size of background BCRs. The default is 100',default = 100)
 parser.add_argument('--max_size_background_bcr', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The default is 10000',default = 10000)
 parser.add_argument('--min_size_background_antigen', type=float, help='the initial sample size ratio of background Antigens. The default is 0.01',default = 0.01)
-parser.add_argument('--max_size_background_antigen', type=float, help='the maximum size ratio for subsample of background antigens, which should no more than 100%. The deafult is 0.1',default = 0.1)
+parser.add_argument('--max_size_background_antigen', type=float, help='the maximum size ratio for subsample of background antigens, which should no more than 100. The deafult is 0.1',default = 0.1)
 parser.add_argument('--export_background',action='store_true', help='Only export the score dict for background BCRs of quantity of the max_size_background_bcr number, default is False.')
 parser.add_argument('--add_rank',action='store_true', help='Only add ranks from background BCR scores to no_ranked results, default is False.')
 parser.add_argument('--background_score',type = str, help = 'the pkl file of the score dictionary of background BCRs',default = None)
@@ -62,8 +62,8 @@ parser.add_argument('--gen_npy',action = 'store_true',help = 'extract npy from n
 parser.add_argument('--embedBCR',action = 'store_true',help = 'extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False')
 parser.add_argument('--bcr_heatmap',action = 'store_true',help = 'export full embedding results including the heatmap comparison. Default is False')
 parser.add_argument('--debug',action = 'store_true',help = 'Switch to the debug mode and print output step by step. Default is False')
-parser.add_argument('--backBCR_only', action='store_true', help='Only get the rank% in background BCRs. Default is False')
-parser.add_argument('--backAntigen_only', action='store_true', help='Only get the rank% in background antigens. Default is False')
+parser.add_argument('--backBCR_only', action='store_true', help='Only get the rank in background BCRs. Default is False')
+parser.add_argument('--backAntigen_only', action='store_true', help='Only get the rank in background antigens. Default is False')
 args = parser.parse_args()
 
 
@@ -191,9 +191,9 @@ def run_binding(conda_env,args):
     if args.debug:
         bind_args.append('--debug')
     if args.backBCR_only:
-        embed_args.extend('--backBCR_only')
+        bind_args.append('--backBCR_only')
     if args.backAntigen_only:
-        embed_args.extend('--backAntigen_only')
+        bind_args.append('--backAntigen_only')
     print('rinBind ',' '.join(bind_args))
 
     # subprocess.run(['conda', 'run', '-n', 'runBind', 'python', 'scripts/runBind.py'] + bind_args,capture_output=False)
