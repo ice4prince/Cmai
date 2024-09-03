@@ -1,17 +1,15 @@
 README
 
 ## Installation and Prerequisite
-Download Cmai and install the environments.
+Download Cmai.
 ```sh
 cd /Parent/Dir
 git clone git@github.com:ice4prince/Cmai.git
-cd Cmai
-conda env create -f models/runEmbed.yml
-conda env create -f models/runBind.yml
 ```
 In the folder scripts/rfold, Install RoseTTAFold from [RoseTTAFold's git](https://github.com/RosettaCommons/RoseTTAFold).
+
 ```
-cd scripts/rfold
+cd Cmai/scripts/rfold
 git clone git@github.com:RosettaCommons/RoseTTAFold.git
 cd RoseTTAFold
 ```
@@ -54,10 +52,44 @@ Follow the README in RoseTTAFold OR go through
 
 **NOTE**: the path for sequence and structure databases (**UniRef30_2020_06, bfd, and pdb100_2021Mar03**) should be written down for downstream analysis.
 
-Go back to Cmai and save the environment path to paras/env_path.
+Go back to Cmai and Install the environments:
 
 ```
 cd /Parent/Dir/Cmai
+conda env create -f models/runEmbed.yml
+conda env create -f models/runBind.yml
+```
+
+If a path is specified to install the conda environments:
+
+```
+conda env create -f models/runEmbed.yml -p /path/to/cmai_envs/runEmbed
+conda env create -f models/runBind.yml -p /path/to/cmai_envs/runBind
+```
+
+please remember to add the path to the conda env_dirs
+
+``` 
+conda config --append env_dirs /path/to/cmai_envs
+```
+
+and make sure that all three env names are listed in your conda environment list:
+
+```
+conda env list
+# conda environments:
+#
+base                  *  /path/to/python/3.8.x-anaconda
+runBind                  /path/to/cmai_envs/runBind
+runEmbed                 /path/to/cmai_envs/runEmbed
+RoseTTAFold              /path/to/.conda/envs/RoseTTAFold
+```
+
+*(RoseTTAFold can also been installed in the /path/to/cmai_envs if you like)*
+
+Then run the script provided to save the environment path to paras/env_path.
+
+```
 ./get_env_path.sh
 ```
 
