@@ -256,3 +256,8 @@ optional arguments:
 
 ```
 
+## Runtime
+
+Cmai is designed for large-scale inference on the binding properties between antigens and antibodies. Speed is thus an important factor in its scalability. Tested a GPU with BCR-antigen pairs sampled from SabDab,  we found the embedding step to take an average time of *11.84 minutes* for one antigen, whereas the binding step for one pair takes only *32.67 seconds*.
+
+In practice, the most common scenario is to test the binding between many BCRs against a specific antigen of interest, and in this case, the embedding step needs to be run **only once**, enabling efficient inferencce on massive datasets. 
