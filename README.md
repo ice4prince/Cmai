@@ -194,6 +194,8 @@ python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check -
 
 ## Usage
 
+Cmai.py is the main interface for users to execute Cmai after installation is successful. 
+
 ```shi
 usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PATH] [--rf_data RF_DATA]
                [--fasta FASTA] [--pre_dir PRE_DIR] [--npy_dir NPY_DIR] [--cpu CPU] [--mem MEM] [--use_cpu]
