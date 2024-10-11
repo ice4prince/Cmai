@@ -70,7 +70,7 @@ conda env create -f models/runBind.yml -p /path/to/cmai_envs/runBind
 please remember to add the path to the conda env_dirs
 
 ``` 
-conda config --append env_dirs /path/to/cmai_envs
+conda config --append envs_dirs /path/to/cmai_envs
 ```
 
 and make sure that all three env names are listed in your conda environment list:
