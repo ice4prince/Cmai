@@ -70,7 +70,7 @@ conda env create -f models/runBind.yml -p /path/to/cmai_envs/runBind
 please remember to add the path to the conda env_dirs
 
 ``` 
-conda config --append env_dirs /path/to/cmai_envs
+conda config --append envs_dirs /path/to/cmai_envs
 ```
 
 and make sure that all three env names are listed in your conda environment list:
@@ -194,6 +194,8 @@ python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check -
 
 ## Usage
 
+Cmai.py is the main interface for users to execute Cmai after installation is successful. 
+
 ```shi
 usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PATH] [--rf_data RF_DATA]
                [--fasta FASTA] [--pre_dir PRE_DIR] [--npy_dir NPY_DIR] [--cpu CPU] [--mem MEM] [--use_cpu]
@@ -256,10 +258,10 @@ optional arguments:
 
 ```
 
-## Runtime
+## Runtime and Memory Usage
 
-Cmai is designed for large-scale inference on the binding properties between antigens and antibodies. Speed is thus an important factor in its scalability. Tested a GPU with BCR-antigen pairs sampled from SabDab,  we found the embedding step to take an average time of *11.84 minutes* for one antigen, whereas the binding step for one pair takes only *32.67 seconds*.
+Cmai is designed for large-scale inference on the binding properties between antigens and antibodies. Speed is thus an important factor in its scalability. We randomly sampled 50 BCR-antigen binding pairs (50 unique antigens) from SabDab and ran our model. The model took an average of ~12 minutes to finish computing for each pair, which included both the antigen embedding computation step by RosettaFold (average time=*11.84 minutes*), and also the binding prediction/rank percentile computation step against 1 million BCRs (average time=*32.67 seconds*). In practice, the most common scenario is to test the binding between many BCRs against a specific antigen of interest, and in this case, the embedding step needs to be run **only once**, enabling efficient inference on massive datasets. 
 
-In practice, the most common scenario is to test the binding between many BCRs against a specific antigen of interest, and in this case, the embedding step needs to be run **only once**, enabling efficient inference on massive datasets. 
+In terms of computational hardware requirements, GPUs are required for the binding prediction phase (executed with `--runBind`), and are strongly recommended for the antigen embedding phase (`--run_rf`). For optimal performance, RoseTTAFold generally requires a GPU with at least 40 GB of memory to prevent out-of-memory errors. On the other hand, the MSA generation phase (`--gen_msa`) runs on CPUs. If GPU resources are limited, it is advisable to run the MSA generation phase separately on CPUs before proceeding with the other phases.
 
-In terms of computational resource requirements, GPUs are required for the binding prediction phase (executed with `--runBind`), and are strongly recommended for the antigen embedding phase (`--run_rf`). For optimal performance, RoseTTAFold generally requires a GPU with at least 40 GB of memory to prevent out-of-memory errors. On the other hand, the MSA generation phase (`--gen_msa`) runs on CPUs. If GPU resources are limited, it is advisable to run the MSA generation phase separately on CPUs before proceeding with the other phases.
+Our training and prediction computations were executed on the A100 GPU nodes of our UT Southwestern BioHPC server (https://portal.biohpc.swmed.edu/content/). 
