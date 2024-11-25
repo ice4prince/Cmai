@@ -200,10 +200,13 @@ Cmai.py is the main interface for users to execute Cmai after installation is su
 usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PATH] [--rf_data RF_DATA]
                [--fasta FASTA] [--pre_dir PRE_DIR] [--npy_dir NPY_DIR] [--cpu CPU] [--mem MEM] [--use_cpu]
                [--seed SEED] [--min_size_background_bcr MIN_SIZE_BACKGROUND_BCR]
-               [--max_size_background_bcr MAX_SIZE_BACKGROUND_BCR] [--export_background] [--add_rank]
-               [--background_score BACKGROUND_SCORE] [--rf_para] [--gen_msa] [--run_rf] [--skip_preprocess]
-               [--skip_extract] [--runEmbed] [--runBind] [--skip_check] [--suffix] [--no_rank] [--verbose]
-               [--no_merge] [--move_npy] [--gen_npy] [--embedBCR] [--bcr_heatmap] [--debug] [--e_values]
+               [--max_size_background_bcr MAX_SIZE_BACKGROUND_BCR]
+               [--min_size_background_antigen MIN_SIZE_BACKGROUND_ANTIGEN]
+               [--max_size_background_antigen MAX_SIZE_BACKGROUND_ANTIGEN] [--export_background] [--add_rank]
+               [--background_score BACKGROUND_SCORE] [--e_values E_VALUES] [--rf_para] [--gen_msa] [--run_rf]
+               [--skip_preprocess] [--skip_extract] [--runEmbed] [--runBind] [--skip_check] [--suffix] [--no_rank]
+               [--verbose] [--no_merge] [--move_npy] [--gen_npy] [--embedBCR] [--bcr_heatmap] [--debug]
+               [--backBCR_only] [--backAntigen_only]
 
 Parameters for the interface script.
 
@@ -230,11 +233,17 @@ optional arguments:
   --max_size_background_bcr MAX_SIZE_BACKGROUND_BCR
                         the maximum size for subsample of background BCRs, which should no more than 1000000. The
                         default is 10000
+  --min_size_background_antigen MIN_SIZE_BACKGROUND_ANTIGEN
+                        the initial sample size ratio of background Antigens. The default is 0.01
+  --max_size_background_antigen MAX_SIZE_BACKGROUND_ANTIGEN
+                        the maximum size ratio for subsample of background antigens, which should no more than 100.
+                        The deafult is 0.1
   --export_background   Only export the score dict for background BCRs of quantity of the max_size_background_bcr
                         number, default is False.
   --add_rank            Only add ranks from background BCR scores to no_ranked results, default is False.
   --background_score BACKGROUND_SCORE
                         the pkl file of the score dictionary of background BCRs
+  --e_values E_VALUES   E-value cutoff for inclusion in result alignment. Default is '1e-30 1e-10 1e-6 1e-3'
   --rf_para             use the parameters from paras/rf_para.txt for antigen embedding. Default is False
   --gen_msa             only run generating msa and exit. Default is False
   --run_rf              skip generating msa and running embedding prediction. Default is False
@@ -253,8 +262,8 @@ optional arguments:
   --embedBCR            extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False
   --bcr_heatmap         export full embedding results including the heatmap comparison. Default is False
   --debug               Switch to the debug mode and print output step by step. Default is False
-  --e_values E_VALUES   E-value cutoff for inclusion in result alignment. Default
-                        is '1e-30 1e-10 1e-6 1e-3'
+  --backBCR_only        Only get the rank in background BCRs. Default is False
+  --backAntigen_only    Only get the rank in background antigens. Default is False
 
 ```
 
@@ -265,3 +274,15 @@ Cmai is designed for large-scale inference on the binding properties between ant
 In terms of computational hardware requirements, GPUs are required for the binding prediction phase (executed with `--runBind`), and are strongly recommended for the antigen embedding phase (`--run_rf`). For optimal performance, RoseTTAFold generally requires a GPU with at least 40 GB of memory to prevent out-of-memory errors. On the other hand, the MSA generation phase (`--gen_msa`) runs on CPUs. If GPU resources are limited, it is advisable to run the MSA generation phase separately on CPUs before proceeding with the other phases.
 
 Our training and prediction computations were executed on the A100 GPU nodes of our UT Southwestern BioHPC server (https://portal.biohpc.swmed.edu/content/). 
+
+## Round-2 Training ##
+
+In the release of version 1.1.0, we updated Cmai to included the prediction of BCR-anchored pairs, which ranks the target antigen in a bunch of background antigens. The new version includes the original trained model for antigen anchored data and a new trained model for BCR anchored data. If not defined, both of the two directions will be predicted and output in the merged outputs, with the maximum and average scores attached for the two ranks. There are options to run single-anchor prediction by **--backBCR_only** for antigen anchored data and **--backAntigen_only** for BCR anchored data.
+
+The validations were conducted for Cmai version 1.1 with the ROC Curves presenting below:
+
+![Antigen-anchored data](Z:\shared\BCR_antigen\code\Cmai\archive\R2_Antigen_ROC_Curve.png)
+
+ 
+
+![BCR-anchored data](Z:\shared\BCR_antigen\code\Cmai\archive\R2_BCR_ROC_Curve.png)
