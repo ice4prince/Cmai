@@ -192,7 +192,7 @@ torch.set_printoptions(precision=10)
 def check_npy(df):
     for antigen in df['Antigen_id'].unique():
         if not os.path.exists(NPY_DIR+'/'+antigen+'.pair.npy'):
-            print('The embedding for antigen: '+antigen+' is not found in NPY directory, Skipping...')
+            print('The embedding for antigen: '+antigen+' is not found in NPY directory '+ NPY_DIR+', Skipping...')
             deleted_rows = df[df['Antigen_id']==antigen]
             with open(INPUT_DIR+'/Skipped_entry.txt','a') as report:
                 for _,row in deleted_rows.iterrows():
