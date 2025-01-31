@@ -93,6 +93,8 @@ Then run the script provided to save the environment path to paras/env_path.
 ./get_env_path.sh
 ```
 
+If BCR_anchored ranks are needed, you must download the embeddings of background antigens. Please email **tao.wang@utsouthwestern.edu** to request the background data.
+
 ## Test with the example data
 
 ```
