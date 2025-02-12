@@ -992,12 +992,12 @@ def locate_rank(number, my_list):
 # In[65]:
 
 
-for bcr_id, bcr_set in bcr_dict.items():
-    for bcr in bcr_set:
-        bcr_v,bcr_cdr3 = bcr
-        bcr_loader = rankDataset2(bcr_v,bcr_cdr3,antigen_ids,BACK_DIR,subsample_ratio=subsample2,seed = SEED)
-        bcr_score_background = background_scores(bcr_loader,model_mix2)
-        bcr_score_dict[bcr_id]=bcr_score_background
+# for bcr_id, bcr_set in bcr_dict.items():
+#     for bcr in bcr_set:
+#         bcr_v,bcr_cdr3 = bcr
+#         bcr_loader = rankDataset2(bcr_v,bcr_cdr3,antigen_ids,BACK_DIR,subsample_ratio=subsample2,seed = SEED)
+#         bcr_score_background = background_scores(bcr_loader,model_mix2)
+#         bcr_score_dict[bcr_id]=bcr_score_background
 
 
 # In[80]:
@@ -1016,7 +1016,7 @@ def generate_score_dict(df,antigen_ids,antigen_dict,bcr_dict,cdr3_dict,v_dict,an
             background_loader = rankDataset(df, antigen, cdr3_dict, v_dict,subsample_ratio=subsample1,seed=SEED)
             antigen_score_background = background_scores(background_loader,model1)
             antigen_score_dict[antigen_id]=antigen_score_background
-            i += 1     
+            i += 1
     elif bcr_only and not antigen_only: ###BCR_anchor, rank antigens in background antigens
         j= 0
         for bcr_id, bcr_set in bcr_dict.items():
@@ -1027,7 +1027,7 @@ def generate_score_dict(df,antigen_ids,antigen_dict,bcr_dict,cdr3_dict,v_dict,an
                 bcr_loader = rankDataset2(bcr_v,bcr_cdr3,antigen_ids,antigen_fpath_dict,subsample_ratio=subsample2,seed = SEED)
                 bcr_score_background = background_scores(bcr_loader,model2)
                 bcr_score_dict[bcr_id]=bcr_score_background
-            j += 1   
+            j += 1
 
     else:
         i = 0
@@ -1127,7 +1127,7 @@ target_file = pd.read_csv(INPUT) # required columns 'Vh','CDR3h', optional 'spec
 background = pd.read_csv(BACKGROUND,compression='gzip') # with columns 'Vh','CDR3h','file','species'
 
 
-antigen_files = glob(BACK_DIR+'/*/*pair.npy') 
+antigen_files = glob(BACK_DIR+'/*/*pair.npy')
 antigen_npys = [antigen.split('/')[-2]+'/'+antigen.split('/')[-1] for antigen in antigen_files]
 # antigen_files[0].split('/')[-2]+'/'+antigen_files[0].split('/')[-1]
 antigen_ids = [antigen_id.replace('.pair.npy','') for antigen_id in antigen_npys]
@@ -1348,7 +1348,7 @@ if args.export_background:
     if ANTIGEN_ONLY and not BCR_ONLY:
         print('Exporting dict for '+str(BOTTOMLINE2*1150)+' background antigens...')
         with open(OUT_DIR+'/background_bcr_score_dict.pkl', 'wb') as outfile:
-            pickle.dump(bcr_score_dict, outfile)        
+            pickle.dump(bcr_score_dict, outfile)
         exit()
     elif BCR_ONLY and not ANTIGEN_ONLY:
         print('Exporting dict for '+str(BOTTOMLINE1)+' background BCRs...')
@@ -1613,4 +1613,3 @@ if args.no_merge:
 else:
     merged = target.merge(output, on=['record_id','BCR_id'], how='left')
     merged.to_csv(OUT_DIR+'/merged_results.csv',index=False)
-
