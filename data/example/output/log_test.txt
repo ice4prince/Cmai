@@ -1,0 +1,7 @@
+Checking the columns...
+All required columns are included.
+Write antigen sequence from input file to /project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output/antigens.fasta
+BCR_id is added.
+record_id is added.
+The npy folders for background antigens is: /project/DPDS/Wang_lab/shared/BCR_antigen/data/rfscript/Antigen_embed/CLEANED/NPY
+Check_Proprocess  --code /project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai --input data/example/input.csv --pre_dir /project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output
