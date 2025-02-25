@@ -265,3 +265,8 @@ Cmai is designed for large-scale inference on the binding properties between ant
 In terms of computational hardware requirements, GPUs are required for the binding prediction phase (executed with `--runBind`), and are strongly recommended for the antigen embedding phase (`--run_rf`). For optimal performance, RoseTTAFold generally requires a GPU with at least 40 GB of memory to prevent out-of-memory errors. On the other hand, the MSA generation phase (`--gen_msa`) runs on CPUs. If GPU resources are limited, it is advisable to run the MSA generation phase separately on CPUs before proceeding with the other phases.
 
 Our training and prediction computations were executed on the A100 GPU nodes of our UT Southwestern BioHPC server (https://portal.biohpc.swmed.edu/content/). 
+
+To examine the impact of the diversity of the training data, three training datasets, each containing 20,000 entries and varying in the number of unique antigens (5-200 unique antigens), were used to train the model, with each model trained for 20 epochs. Our formal Cmai model was trained also for 20 epochs. When validated using the same external validation dataset, the validation accuracy increased from 0.55 to 0.79 as the number of distinct antigens increased from 5 to 200. This trend is presented in the plot below, where the performance of the full Cmai model was also included with an accuracy 0.91.
+![image001](https://github.com/user-attachments/assets/85da9cfa-6c31-4e1f-826d-da6cc0fcb0fd)
+
+
