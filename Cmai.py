@@ -75,13 +75,13 @@ if args.pre_dir is None:
 
 if args.npy_dir is not None:
     NPY_DIR = args.npy_dir
-# else:
-#     NPY_DIR = args.pre_dir+'/NPY'
+else:
+    NPY_DIR = args.pre_dir+'/NPY'
 
 if args.background_npy is not None:
     BACK_DIR = args.background_npy
-# else:
-#     BACK_DIR = NPY_DIR
+else:
+    BACK_DIR = NPY_DIR
 # print('The npy folders for background antigens is:',BACK_DIR)
 # CONT = args.continuous
 
