@@ -1,5 +1,13 @@
 README
 
+[![Published in Nature Cancer](https://img.shields.io/badge/Published%20in-Nature%20Cancer-blue)](https://doi.org/10.1038/s43018-025-01001-5)
+This repository supports the findings of our 2025 Nature Cancer publication:
+
+> **Profiling antigen‑binding affinity of B cell repertoires in tumors by deep learning predicts immune‑checkpoint inhibitor treatment outcomes**  
+> [https://doi.org/10.1038/s43018-025-01001-5](https://doi.org/10.1038/s43018-025-01001-5)
+
+This repository implements the complete model pipeline described in our publication, including data preprocessing, model training and validation, and inference. The model predicts antigen-binding affinity and immunotherapy outcomes based on B-cell repertoire sequencing data.
+
 ## Installation and Prerequisite
 Download Cmai.
 ```sh
@@ -296,17 +304,29 @@ Strikingly and very interestingly, we found that the branch of Cmai that is trai
 
 
 
-
-
-
-
-
-
-
 ## Impact of the diversity of the training data
 
 To examine the impact of the diversity of the training data, three training datasets, each containing 20,000 entries and varying in the number of unique antigens (5-200 unique antigens), were used to train the model, with each model trained for 20 epochs. Our formal Cmai model was trained also for 20 epochs. When validated using the same external validation dataset, the validation accuracy increased from 0.55 to 0.79 as the number of distinct antigens increased from 5 to 200. This trend is presented in the plot below, where the performance of the full Cmai model was also included with an accuracy 0.91.
 
 ![image001](https://github.com/user-attachments/assets/85da9cfa-6c31-4e1f-826d-da6cc0fcb0fd)
 
+## Citation
+
+If you use this code or find it helpful in your research, please cite our paper:
+
+> **Song B**, **Wang K**, **Na S**, **Yao J**, **Fattah FJ**, **Martin AL**, **von Itzstein MS**, et al.  
+> *Profiling antigen‑binding affinity of B cell repertoires in tumors by deep learning predicts immune‑checkpoint inhibitor treatment outcomes*.  
+> **Nature Cancer**, 2025. [https://doi.org/10.1038/s43018-025-01001-5](https://doi.org/10.1038/s43018-025-01001-5)
+
+```bibtex
+@article{Song2025ProfilingAntigenBinding,
+  title   = {Profiling antigen‑binding affinity of B cell repertoires in tumors by deep learning predicts immune‑checkpoint inhibitor treatment outcomes},
+  author  = {Song, Bing and Wang, Kaiwen and Na, Saiyang and Yao, Jia and Fattah, Farjana J. and Martin, Alexandra L. and von Itzstein, Mitchell S. and Yang, Donghan M. and Liu, Jialiang and Xue, Yaming and Liang, Chaoying and Guo, Yuzhi and Raman, Indu and Zhu, Chengsong and Dowell, Jonathan E. and Homsi, Jade and Rashdan, Sawsan and Yang, Shengjie and Gwin, Mary E. and Bai, Xiao‑chen and Wang, Jun and Conejo‑Garcia, Jose and Xie, Yang and Huang, Junzhou and Gerber, David E. and others},
+  journal = {Nature Cancer},
+  year    = {2025},
+  volume  = {6},
+  pages   = {–},
+  doi     = {10.1038/s43018-025-01001-5},
+  url     = {https://doi.org/10.1038/s43018-025-01001-5}
+}
 
