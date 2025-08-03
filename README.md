@@ -279,6 +279,7 @@ In terms of computational hardware requirements, GPUs are required for the bindi
 
 Our training and prediction computations were executed on the A100 GPU nodes of our UT Southwestern BioHPC server (https://portal.biohpc.swmed.edu/content/). 
 
+
 ## Round-2 Training ##
 
 In version 1.0, we only trained Cmai with the antigen as the anchor and contrasted between positive and negative binding BCRs. When Cmai 1.0 generates predictions, it also always uses the query antigen as the anchor, and tests different BCRs against the antigen (this is how we calculated rank%). In version 1.1.0, we updated Cmai to include with the other direction of contrast, where the BCR serves as the anchor, and the antigens will be compared for their binding towards the query BCR. Again, the training, validation and application of Cmai in this direction all follow this pattern. This updated version incorporates the original trained model (antigen as anchor) alongside a newly trained model (BCR as anchor). By default, predictions are performed for both directions, and the merged outputs include rank% (antigen anchor), rank% (BCR anchor), maximum/average rank% of both directions. Additionally, options are available for just generating predictions for each direction: **--backBCR_only** for antigen-anchored data and **--backAntigen_only** for BCR-anchored data.
@@ -301,5 +302,11 @@ Strikingly and very interestingly, we found that the branch of Cmai that is trai
 
 
 
+
+## Impact of the diversity of the training data
+
+To examine the impact of the diversity of the training data, three training datasets, each containing 20,000 entries and varying in the number of unique antigens (5-200 unique antigens), were used to train the model, with each model trained for 20 epochs. Our formal Cmai model was trained also for 20 epochs. When validated using the same external validation dataset, the validation accuracy increased from 0.55 to 0.79 as the number of distinct antigens increased from 5 to 200. This trend is presented in the plot below, where the performance of the full Cmai model was also included with an accuracy 0.91.
+
+![image001](https://github.com/user-attachments/assets/85da9cfa-6c31-4e1f-826d-da6cc0fcb0fd)
 
 
