@@ -1,7 +1,15 @@
 #!/usr/bin/env python
 # coding: utf-8
 
-# In[69]:
+# In[ ]:
+
+
+
+
+
+# In[2]:
+
+
 
 
 
@@ -23,6 +31,7 @@ import colorama
 from colorama import Fore,Back,Style
 import matplotlib.pyplot as plt
 import csv
+import gc
 import pickle
 from Bio import SeqIO
 module_path = os.path.abspath(os.path.join('..'))
@@ -33,12 +42,18 @@ from datetime import datetime
 import torch.optim as optim
 from torch.optim.lr_scheduler import ReduceLROnPlateau
 import argparse
+from glob import glob
 from sklearn.model_selection import train_test_split
 print("Today's date:",date.today())
 print(str(datetime.now()))
 
 
-# In[ ]:
+# In[3]:
+
+
+
+
+
 
 current = os.path.dirname(os.path.realpath(__file__))
 parent = os.path.dirname(current)
@@ -49,17 +64,22 @@ parser = argparse.ArgumentParser(description='Parameters for the binding model.'
 # Add a optional argument
 parser.add_argument('--code', type=str, help='the Cmai directory',default = parent)
 parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = os.path.join(parent,'data/example/output'))
-parser.add_argument('--npy_dir',type = str, help = 'the npy folder if different with input folder',default = None)
+parser.add_argument('--npy_dir',type = str, help = 'the npy folder if different with input directory/NPY',default = None)
+parser.add_argument('--background_npy',type = str, help = 'the npy folder for background antigens if different with the input directory/NPY',default = None)
 parser.add_argument('--out',type = str, help = 'the directory for output files',default = os.path.join(parent,'data/example/output'))
 # parser.add_argument('--species', action='store_true', help='match the species of background BCR to the target BCR. NOTE: the species MUST BE specified and unique in the target BCR input.')
 parser.add_argument('--seed', type=int, help='the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the seed to default 1',default = 1)
-parser.add_argument('--subsample', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
-parser.add_argument('--bottomline', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
+parser.add_argument('--subsample1', type=int, help='the initial sample size of background BCRs. The default is 100',default = 100)
+parser.add_argument('--subsample2', type=float, help='the initial sample size ratio of background Antigens. The default is 0.03',default = 0.03)
+parser.add_argument('--bottomline1', type=int, help='the maximum size for subsample of background BCRs, which should no more than 1000000. The deafult is 10000',default = 10000)
+parser.add_argument('--bottomline2', type=float, help='the maximum size ratio for subsample of background antigens, which should no more than 100%. The deafult is 0.3',default = 0.3)
 parser.add_argument('--no_rank', action='store_true', help='Only export the predicted score but no rank in background BCRs, default is False.')
 parser.add_argument('--export_background',action='store_true', help='Only export the score dict for background BCRs of amount of the bottomline number, default is False.')
 parser.add_argument('--verbose', action='store_true', help='Enable verbose output, default is False.')
 parser.add_argument('--no_merge', action='store_true', help='Unable merging output to input, default is False.')
 parser.add_argument('--debug', action='store_true', help='Enable debug mode and print intermediates output every step.')
+parser.add_argument('--Antigen_only', action='store_true', help='Only get the rank% of anchored antigen in background BCRs. Default is False')
+parser.add_argument('--BCR_only', action='store_true', help='Only get the rank% of anchored BCRs in background antigens. Default is False')
 
 
 args = parser.parse_args()
@@ -72,15 +92,86 @@ BACK_BATCH_SIZE = 1
 BATCH_SIZE = 1
 # MATCHING_SPECIES = args.species
 SEED = args.seed
-SUBSAMPLE = args.subsample
-BOTTOMLINE = args.bottomline
+SUBSAMPLE1 = args.subsample1
+SUBSAMPLE2 = args.subsample2
+BOTTOMLINE1 = args.bottomline1
+BOTTOMLINE2 = args.bottomline2
+ANTIGEN_ONLY = args.Antigen_only #anchor antigen
+BCR_ONLY = args.BCR_only #anchor BCR
 VERBOSE = args.verbose
 DEBUG = args.debug
+if args.npy_dir is not None:
+    NPY_DIR = args.npy_dir
+else:
+    NPY_DIR = INPUT_DIR+'/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
+# BACK_DIR = args.background_npy
+if args.background_npy is not None:
+    BACK_DIR = args.background_npy
+else:
+    BACK_DIR = NPY_DIR
+if ANTIGEN_ONLY and not BCR_ONLY:
+    print(Fore.GREEN+'Only Ranking the antigens...'+Style.RESET_ALL)
+elif BCR_ONLY and not ANTIGEN_ONLY:
+    print(Fore.GREEN+'Only Ranking the BCRs...'+Style.RESET_ALL)
+else:
+    print(Fore.GREEN+'Ranking both antigens and BCRs...'+Style.RESET_ALL)
 
-# In[171]:
+if VERBOSE:
+    print('Verbose Mode is: ON!')
+
+
+# In[124]:
+
+
+
+
+
+
+
+# current = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/scripts'
+# parent = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai'
+# CODE_DIR = parent
+# INPUT_DIR = os.path.join(parent,'data/example/output1_2')
+
+# OUT_DIR = os.path.join(parent,'data/example/output')
+# BACK_BATCH_SIZE = 1
+# BATCH_SIZE = 1
+# # MATCHING_SPECIES = args.species
+# SEED = 1
+# SUBSAMPLE1 = 100
+# SUBSAMPLE2 = 0.03
+# BOTTOMLINE1 = 10000
+# BOTTOMLINE2 = 0.3
+# BOSE = False
+# DEBUG = False
+# BCR_ONLY = False
+# ANTIGEN_ONLY = False
+# VERBOSE = True
+# DEBUG = False
+# # NPY_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/data/rfscript/Antigen_embed/CLEANED/NPY'
+# NPY_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/data/output/Jun/NPY'
+# BACK_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/data/rfscript/Antigen_embed/CLEANED/NPY'
+
+
+# In[5]:
+
+
+
+
+# INPUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/data/output/output_Catherin1'
+# NPY_DIR = INPUT_DIR+'/NPY'
+# OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/data/output/output_Catherin1'
+
+
+# In[125]:
+
+
+
+
+
 
 np.random.seed(SEED)
-torch.use_deterministic_algorithms(True, warn_only=True)
+# torch.use_deterministic_algorithms(True, warn_only=True)
 torch.manual_seed(SEED)
 
 
@@ -94,35 +185,58 @@ torch.manual_seed(SEED)
 # OUT_DIR = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example'
 
 
-# In[172]:
+# In[126]:
+
+
+
+
+
+
 if DEBUG:
     print('Entering DEBUG mode.')
 
-if BOTTOMLINE >1000000:
+if BOTTOMLINE1 >1000000:
     print('The bottomline cannot be larger than 1,000,000.')
     exit()
 
 
-# In[71]:
+# In[127]:
+
+
 
 
 os.chdir(CODE_DIR)
 
+# os.chdir(current+'/wrapV')
+# glob('wrapV/*')
+# from Vwrap import embedV
+# os.chdir(current+'/wrapCDR3')
+# from CDR3wrap import embedCDR3
+from wrapV.Vwrap import embedV ##input needs to be list of strings
+from wrapCDR3.CDR3wrap import embedCDR3 ##input needs to be list of strings
 
-# In[72]:
+
+# In[128]:
+
+
+
+# os.chdir(parent)
+
+
+
+# In[129]:
+
+
+
 
 
 
 BACKGROUND = 'data/background/backgroundBCR.csv.gz'
-if args.npy_dir is not None:
-    NPY_DIR = args.npy_dir
-else:
-    NPY_DIR = INPUT_DIR+'/NPY' ###need to add a command to move the pair.npy under results/pred/ to the intermediates/
-MODEL = 'models/model.pth'
+MODEL = 'models/antigenModel.pth'
+MODEL2 = 'models/bcrModel.pth'
+# NPY_DIR = INPUT_DIR+'/NPY'
 INPUT = INPUT_DIR+'/processed_input.csv'
-
-from wrapV.Vwrap import embedV ##input needs to be list of strings
-from wrapCDR3.CDR3wrap import embedCDR3 ##input needs to be list of strings
+##MARK HERE
 
 CHANNEL_ANTIGEN = 600
 CLIP = None
@@ -132,7 +246,11 @@ LAMBDA = 0
 w = 100
 
 
-# In[73]:
+# In[130]:
+
+
+
+
 
 
 print('system version:',sys.version)
@@ -141,7 +259,11 @@ print('device:',device)
 torch.set_printoptions(precision=10)
 
 
-# In[76]:
+# In[131]:
+
+
+
+
 
 
 # def get_now():
@@ -192,7 +314,7 @@ torch.set_printoptions(precision=10)
 def check_npy(df):
     for antigen in df['Antigen_id'].unique():
         if not os.path.exists(NPY_DIR+'/'+antigen+'.pair.npy'):
-            print('The embedding for antigen: '+antigen+' is not found in NPY directory '+ NPY_DIR+', Skipping...')
+            print('The embedding for antigen: '+antigen+' is not found in NPY directory, Skipping...')
             deleted_rows = df[df['Antigen_id']==antigen]
             with open(INPUT_DIR+'/Skipped_entry.txt','a') as report:
                 for _,row in deleted_rows.iterrows():
@@ -226,15 +348,29 @@ def predict_size(len,datatype = 'float32'):
 #    print(f"Tensor size: {size_gb:.2f} GB")
     return tensor_size
 
-def get_antigen_dict(df):
+def get_antigen_dict(df,npy_dir=NPY_DIR):
     antigen_pool = df['Antigen_id'].unique()
     antigen_dict = {}
     for antigen in antigen_pool:
-        antigen_dict[antigen] = np.load(NPY_DIR+'/'+antigen+'.pair.npy').astype(np.float32)/w
+        antigen_dict[antigen] = np.load(npy_dir+'/'+antigen+'.pair.npy').astype(np.float32)/w
     return antigen_dict
 
+def get_bcr_dict(df):
+    BCR_dict = {}
+    for _, row in df.iterrows():
+        key = row['BCR_id']
+        value = (row['BCR_Vh'], row['BCR_CDR3h'])
+        if key not in BCR_dict:
+            BCR_dict[key] = set()
+        BCR_dict[key].add(value)
+    return BCR_dict
 
-# In[81]:
+
+# In[132]:
+
+
+
+
 
 
 class checkDataset(Dataset):
@@ -384,9 +520,13 @@ class checkDataset(Dataset):
         return len(self.your_data_list)
 
 
-# In[83]:
+# In[133]:
 
 
+
+
+
+# to geth rank_antigen among background BCRs
 class rankDataset(Dataset):
     def __init__(self, dataframe, antigen, cdr3_dict, v_dict,subsample_ratio=1/10000,seed=SEED):
         self.seed = seed
@@ -401,13 +541,10 @@ class rankDataset(Dataset):
 #        print(self.lengthen)
 
     def subsample_data(self, dataframe, subsample_ratio):
-        if subsample_ratio < 1.0:
-            # if not subsample_ratio == 1/10000:
-            #     self.seed = None
-            return dataframe.sample(frac=subsample_ratio,random_state=self.seed)
-        else:
-            return dataframe
-
+        if not (0 < subsample_ratio <= 1):
+            raise ValueError("subsample_ratio must be between 0 and 1")
+        n = int(subsample_ratio * len(dataframe))  # Compute number of rows to select
+        return dataframe.iloc[:n]
     def __getitem__(self, idx):
         bcr_dict = self.bcr_pool[idx]
 #         print(idx)
@@ -473,7 +610,168 @@ class rankDataset(Dataset):
         return len(self.bcr_pool)
 
 
-# In[86]:
+# In[134]:
+
+
+
+
+
+###to get rank_bcr with background antigens
+class rankDataset2(Dataset):
+    def __init__(self,bcr_v,bcr_cdr3,antigen_ids,antigen_fpath_dict,subsample_ratio=0.1,seed = SEED):
+        gc.collect()
+        torch.cuda.empty_cache()
+        self.seed = seed
+        random.seed(self.seed)
+        if not (0 < subsample_ratio <= 1):
+            if (subsample_ratio >1):
+                subsample_ratio = 1
+                print('Resetting subsample_ratio to 1')
+            else:
+                raise ValueError("subsample_ratio must be between 0 and 1")
+        n = int(subsample_ratio * len(antigen_ids))  # Compute number of rows to select
+        self.antigen_ids = antigen_ids[:n]
+        self.bcr_v=bcr_v
+        self.bcr_cdr3=bcr_cdr3
+        self.cdr3_dict = {}
+        self.v_dict = {}
+        self.antigen_fpath_dict = antigen_fpath_dict
+        self.antigen_dict={}
+        self.antigen_in = {}
+        # print('The directory for background antigens:',self.antigen_fpath_dict)
+        # self.lens_dict = {}
+    def __getitem__(self,idx):
+        bcr_feat = self.__embedding_BCR(self.bcr_cdr3,self.bcr_v,precise = True)
+        antigen_key = self.antigen_ids[idx]
+        # print('The randomly picked antigen is:'+str(antigen_key))
+        self.__get_antigen_in(antigen_key)
+        # antigen_feat = self.antigen_in[antigen_key]
+#        print('antigen shape',self.antigen_in[antigen_key].shape)
+        pair_feat = self.__comb_embed_gpu(antigen_key,bcr_feat)
+        return pair_feat
+
+    def __comb_embed_gpu(self,antigen_name,BCR_feat):
+#        print('antigen to comb:',antigen_name)
+        lengthen = CHANNEL_ANTIGEN
+        #rint('The current antigen is: ',antigen_name)
+#        print('length get from dict_len:',lengthen)
+        single_antigen_g = self.antigen_in[antigen_name][0]
+        self.antigen_in[antigen_name].cpu()
+        del self.antigen_in[antigen_name]
+#        single_antigen_g = F.normalize(single_antigen_g, p=2, dim=3)
+#        print('shape of antigen from antigen dict:',single_antigen_g.shape)
+#        single_antigen_g = torch.from_numpy(single_antigen).to(device)
+        single_BCR_g = torch.from_numpy(BCR_feat).to(device)
+#        print('single BCR shape:',single_BCR_g.shape)
+#        single_BCR_g = torch.from_numpy(BCR_feat).half().to(device)
+        BCR_t = torch.tile(single_BCR_g,(lengthen,lengthen,1))
+#        print('tiled bcr shape',BCR_t.shape)
+#        print('shape of BCR_tiled:',BCR_t.shape)#empty
+        pair_feat_g = torch.cat((single_antigen_g,BCR_t),dim=2)
+        del single_BCR_g,BCR_t
+        torch.cuda.empty_cache()
+        return pair_feat_g#.half()
+
+    # def __import_antigen(self,antigen_name):
+    #     if not antigen_name in self.antigen_dict:
+    #         antigen_to_in = self.extract_antigen(antigen_name)
+    #     else:
+    #         antigen_to_in = self.antigen_dict[antigen_name]
+    #     return antigen_to_in
+
+    def __toGPU_and_pool(self,antigen_name):
+        # print('pooling and importing the antigen',antigen_name,'to GPU...')
+        antigen_tensor = torch.from_numpy(self.extract_antigen(antigen_name))
+        # print('the size of antigen:',antigen_name,'is:',antigen_tensor.shape)
+        self.antigen_in[antigen_name] = self.pool_antigen(antigen_tensor,CHANNEL_ANTIGEN).to(device)
+
+    def __get_antigen_in(self,antigen_name):
+        if antigen_name not in self.antigen_in:
+            try:
+                self.__toGPU_and_pool(antigen_name)
+            except RuntimeError as e:
+                if "CUDA out of memory" in str(e):
+                    print("Out of memory when importing the anchor antigen. Clear gpu and try again.")
+                    for key in list(self.antigen_in.keys()):
+                        self.antigen_in[key].cpu()
+                        del self.antigen_in[key]
+                    self.antigen_in.clear()
+                    gc.collect()
+                    torch.cuda.empty_cache()
+                    try:
+                        self.__toGPU_and_pool(antigen_name)
+                    except RuntimeError as e:
+                        if "CUDA out of memory" in str(e):
+                            print("Still out of memory after clearing GPU when importing the anchor antigen.")
+                        else:
+                            print("Runtime error during importing the anchor antigen after clearing GPU:", str(e))
+                            raise
+                else:
+                    print("Runtime error during importing the anchor antigen before clearing GPU:", str(e))
+                    raise
+
+
+    def pool_antigen(self,antigen_input,out_n_channel):
+#        lengthen = antigen_input.shape[1]
+        pooling_layer = nn.AdaptiveAvgPool2d((out_n_channel,out_n_channel))
+        output = pooling_layer(antigen_input.permute(0,3,1,2)).permute(0,2,3,1)
+        return output
+
+
+    def extract_antigen(self,antigen_name,verbose=False):
+        if antigen_name in self.antigen_dict:
+            single_antigen = self.antigen_dict[antigen_name]
+        else:
+            try:
+                # print('The directory for background antigens:',self.antigen_fpath_dict)
+                # print('The antigen name:',antigen_name)
+                antigen_import = np.load(str(self.antigen_fpath_dict+'/'+antigen_name+'.pair.npy')).astype(np.float32)/w
+                # if not antigen_import.shape[1] == self.lens_dict[antigen_name]:
+                #     print(Fore.RED + 'antigen ' +str(antigen_name)+' embedding '+str(antigen_import.shape[1])+' is NOT in the correct shape '+str(self.lens_dict[antigen_name])+'!'+ Style.RESET_ALL)
+                #     exit()
+                single_antigen = antigen_import
+#                single_antigen = torch.from_numpy(antigen_import).to(device) ###ON GPU
+#            print(npy.shape)
+                self.antigen_dict[antigen_name] = single_antigen
+                if verbose:
+                    print(Fore.RED + 'New antigen added to dictionary:'+antigen_name+Fore.RESET)
+            except ValueError:
+                print('The embedding of antigen %s cannot be found!' % antigen_name)
+#             if verbose:
+#                 print(Fore.RED + 'New antigen added to dictionary:',antigen_name)
+#                 print(Fore.RED + 'Number of antigens included:',len(self.antigen_dict))
+#                 print(Style.RESET_ALL)
+        return single_antigen
+
+    def __embedding_BCR(self,cdr3_seq,v_seq,precise = False):
+        if cdr3_seq not in self.cdr3_dict:
+#            print('CDR3 not in dictionary!!')
+#            df1 = pd.DataFrame()
+            cdr3_feat,*_ = embedCDR3([cdr3_seq],precise = precise)
+            cdr3_feat = cdr3_feat[0]
+            self.cdr3_dict[cdr3_seq]=cdr3_feat
+        else:
+#            print('CDR3 in dictionary!!')
+            cdr3_feat = self.cdr3_dict[cdr3_seq]
+        if v_seq not in self.v_dict:
+#            print('V not in dictionary!!')
+#            df2 = pd.DataFrame([v_seq])
+            v_feat,*_ = embedV([v_seq],precise = precise)
+            v_feat = v_feat[0]
+            self.v_dict[v_seq]=v_feat
+        else:
+#            print('V in dictionary!!')
+            v_feat = self.v_dict[v_seq]
+        bcr_feat = np.concatenate((cdr3_feat,v_feat))
+        return bcr_feat
+
+    def __len__(self):
+        return len(self.antigen_ids)
+
+
+# In[135]:
+
+
 
 
 
@@ -509,7 +807,9 @@ class SelfAttentionPooling(nn.Module):
         return utter_rep
 
 
-# In[90]:
+# In[136]:
+
+
 
 
 
@@ -591,41 +891,131 @@ class mix_model(nn.Module):
 #        if binary:
         out  = x0
         return(out)
+#
+# class mix_model2(nn.Module):
+#     def __init__(self):
+#         super(mix_model2,self).__init__()
+#         self.model1 = nn.Sequential(
+#             nn.Linear(318,40),#.to(torch.float64),
+#             # in (1,len,len,318)
+#             # out (1,len,len.50)
+#             nn.LeakyReLU(0.1),
+#             nn.Linear(40,30),#.to(torch.float64),
+#             nn.LeakyReLU(0.1),
+#             nn.Linear(30,20),#.to(torch.float64),
+#             # out (1,len,len,20)
+#             nn.LeakyReLU(0.1)
+#         )
+#         self.model2 = SelfAttentionPooling(input_dim=20,hidden_dim=30)
+#         self.model2_1 = SelfAttentionPooling(input_dim=20,hidden_dim=30)
+#         # input_dim = hidden size (number of channels)
+# #        self.model2 = nn.MultiheadAttention(embed_dim=20,num_heads=N_HEADS,batch_first=True)
+#         self.model3 = nn.Sequential(
+#             nn.Linear(20,15),
+#             nn.LeakyReLU(0.1),
+#             nn.Linear(15,1)
+#         )
+# #     def __init__(self):
+# #         super(mix_model,self).__init__()
+# #         self.model1 = nn.Sequential(
+# #             nn.Linear(318,40),#.to(torch.float64),
+# #             # in (1,len,len,318)
+# #             # out (1,len,len.50)
+# #             nn.LeakyReLU(0.1),
+# #             nn.Linear(40,30),#.to(torch.float64),
+# #             nn.LeakyReLU(0.1),
+# #             nn.Linear(30,20),#.to(torch.float64),
+# #             # out (1,len,len,20)
+# #             nn.LeakyReLU(0.1)
+# #         )
+# #         self.model2 = SelfAttentionPooling(input_dim=20,hidden_dim=30)
+# #         self.model2_1 = SelfAttentionPooling(input_dim=20,hidden_dim=30)
+# #         # input_dim = hidden size (number of channels)
+# # #        self.model2 = nn.MultiheadAttention(embed_dim=20,num_heads=N_HEADS,batch_first=True)
+# #         self.model3 = nn.Sequential(
+# #             nn.Linear(20,15),
+# #             nn.LeakyReLU(0.1),
+# #             nn.Linear(15,1)
+# #         )
+#         self.alpha1 = nn.Parameter(torch.randn(1))
+#         self.beta1 = nn.Parameter(torch.randn(1))
+#         self.alpha2 = nn.Parameter(torch.randn(1))
+#         self.beta2 = nn.Parameter(torch.randn(1))
+# #        self.sigmoid = nn.Sigmoid()
+#     def forward(self,x):#,binary = True, is_10X = True): ###because in getitem, return is .cuda(), now input is on gpu
+# #         x = torch.empty(0)
+# #         x = x.to(device)
+# #        x = x.permute(0,2,1,3)
+# #         print('after permute',x.shape)
+#         x = self.model1(x)
+# #         print('after model1',x.shape)
+#         x0 = torch.empty(0)
+#         x0 = x0.to(device)
+#         for i in range(len(x)):
+#             k = x[i]
+#             k = self.model2(k).unsqueeze(0)
+# #             print('after model2',k.shape)
+#             k = self.model2_1(k)
+# #             print('after model2_1',k.shape)
+#             x0 = torch.cat((x0, k), dim=0)
+# #         print('after loop:',x0.shape)
+#         x0 = F.normalize(x0)
+#         x0 = self.model3(x0).squeeze()
+#         # if binary:
+#         out  = x0
+#         # else:
+#             # if is_10X:
+#                 # out = x0*(-math.exp(self.alpha1))+self.beta1
+#             # else:
+#                 # out = x0*(-math.exp(self.alpha2))+self.beta2
+#         return(out)
 
 
-# In[111]:
+# In[137]:
+
+
+
+
 
 
 def background_scores(dataloader,model):
     score_ls = []
     model.eval()
     for batch in dataloader:
-        score = model(batch)
+        score = model(batch.unsqueeze(0))
         score_ls.append(score.item())
     return score_ls
 
 
-# In[125]:
+# In[138]:
 
 
-def check_score(dataloader,model):
-    res = pd.DataFrame(columns=['record_id', 'Antigen', 'BCR_id','Score'])
+
+
+
+
+def check_score(dataloader,model1,model2):
+    res = pd.DataFrame(columns=['record_id', 'Antigen', 'BCR_id','Score_antigen','Score_bcr'])
 #    print(zip(index_idx,antigen_index))
 #    print(b_pair.shape,w_pair.shape)
-    model.eval()
+    model1.eval()
+    model2.eval()
     for batch in dataloader:
         pair, index_idx, antigen_key, bcr_key =batch ##Change the InLoader, when binary is False, w_pair = score
-        out = model(pair)
-    #    if binary:
-        score = out.cpu().detach().tolist()
-        df = pd.DataFrame({'record_id':index_idx,'Antigen':antigen_key,'BCR_id':bcr_key,'Score':score})
+        score1 = model1(pair.unsqueeze(0)).item()
+        score2 = model2(pair.unsqueeze(0)).item()
+        res_dict = {'record_id':index_idx,'Antigen':antigen_key,'BCR_id':bcr_key,'Score_antigen':score1,'Score_bcr':score2}
+        df = pd.DataFrame({key: [value] for key, value in res_dict.items()})
         res = pd.concat([res,df],axis=0,ignore_index=True)
-        if DEBUG:
-            print(res.head())
+        # pd.concat([res,df],axis=0,ignore_index=True)
     return(res)
 
 
-# In[128]:
+# In[139]:
+
+
+
+
 
 
 def locate_rank(number, my_list):
@@ -645,35 +1035,532 @@ def locate_rank(number, my_list):
     return percentage_rank
 
 
+# In[ ]:
+
+
+
+
+
+
+# In[140]:
+
+
+# for bcr_id, bcr_set in bcr_dict.items():
+#     for bcr in bcr_set:
+#         bcr_v,bcr_cdr3 = bcr
+#         bcr_loader = rankDataset2(bcr_v,bcr_cdr3,antigen_ids,BACK_DIR,subsample_ratio=subsample2,seed = SEED)
+#         bcr_score_background = background_scores(bcr_loader,model_mix2)
+#         bcr_score_dict[bcr_id]=bcr_score_background
+
+
 # In[141]:
 
 
-def generate_score_dict(df,score_dict,antigen_dict,cdr3_dict,v_dict,model,subsample=1/10000,seed =SEED):
-    for antigen_id, antigen in antigen_dict.items():
-        background_loader = DataLoader(rankDataset(df, antigen, cdr3_dict, v_dict,subsample_ratio=subsample,seed=seed),BACK_BATCH_SIZE)
-        score_background = background_scores(background_loader,model)
-        score_dict[antigen_id]=score_background
-    return(score_dict)
+
+
+
+
+def generate_score_dict(df,antigen_ids,antigen_dict,bcr_dict,cdr3_dict,v_dict,antigen_fpath_dict,model1,model2,
+                        antigen_score_dict={},bcr_score_dict={},subsample1=1/10000,subsample2=0.1,seed =SEED,antigen_only = False,bcr_only=False):
+    # print('The npy directory for backgroudn antigens:',antigen_fpath_dict)
+    if antigen_only and not bcr_only:###antigen anchor, rank BCRs in background BCRs
+        i = 0
+        for antigen_id, antigen in antigen_dict.items():
+            if VERBOSE:
+                print(f"the {i}/{len(antigen_dict)} Antigen: {antigen_id}")
+            background_loader = rankDataset(df, antigen, cdr3_dict, v_dict,subsample_ratio=subsample1,seed=SEED)
+            antigen_score_background = background_scores(background_loader,model1)
+            antigen_score_dict[antigen_id]=antigen_score_background
+            i += 1
+    elif bcr_only and not antigen_only: ###BCR_anchor, rank antigens in background antigens
+        j= 0
+        for bcr_id, bcr_set in bcr_dict.items():
+            if VERBOSE:
+                print(f"the {j}/{len(bcr_dict)} BCR: {bcr_id}")
+            for bcr in bcr_set:
+                bcr_v,bcr_cdr3 = bcr
+                bcr_loader = rankDataset2(bcr_v,bcr_cdr3,antigen_ids,antigen_fpath_dict,subsample_ratio=subsample2,seed = SEED)
+                bcr_score_background = background_scores(bcr_loader,model2)
+                bcr_score_dict[bcr_id]=bcr_score_background
+            j += 1
+
+    else:
+        i = 0
+        j = 0
+        for antigen_id, antigen in antigen_dict.items():
+            if VERBOSE:
+                print(f"the {i}/{len(antigen_dict)} Antigen: {antigen_id}")
+            background_loader = rankDataset(df, antigen, cdr3_dict, v_dict,subsample_ratio=subsample1,seed=seed)
+            antigen_score_background = background_scores(background_loader,model1)
+            antigen_score_dict[antigen_id]=antigen_score_background
+            i += 1
+        for bcr_id, bcr_set in bcr_dict.items():
+            if VERBOSE:
+                print(f"the {j}/{len(bcr_dict)} BCR: {bcr_id}")
+            for bcr in bcr_set:
+                bcr_v,bcr_cdr3 = bcr
+                bcr_loader = rankDataset2(bcr_v,bcr_cdr3,antigen_ids,antigen_fpath_dict,subsample_ratio=subsample2,seed = SEED)
+                bcr_score_background = background_scores(bcr_loader,model2)
+                bcr_score_dict[bcr_id]=bcr_score_background
+            j += 1
+    return(antigen_score_dict,bcr_score_dict)
+
+
+# In[142]:
+
+
+# antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,bcr_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#                                                             antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+#                                                             subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED,antigen_only = False,bcr_only=True)
 
 
 # In[143]:
 
 
-def calculate_rank(df,score_dict,antigen_dict,len_dict,model):
-    check_loader = DataLoader(checkDataset(df, antigen_dict, NPY_DIR,len_dict),BATCH_SIZE)
-    res_check = check_score(check_loader,model)
-    res_check['Rank'] = res_check.apply(lambda row: locate_rank(row['Score'], score_dict[row['Antigen']]), axis=1)
-    return(res_check)
+def get_subset_dict(df,antigen_dict,bcr_dict):
+    sub_antigen_dict = {key: antigen_dict[key] for key in list(df['Antigen'].unique()) if key in antigen_dict}
+    sub_bcr_dict  = {key: bcr_dict[key] for key in list(df['BCR_id'].unique()) if key in bcr_dict}
+    return(sub_antigen_dict,sub_bcr_dict)
 
 
-# In[74]:
+# In[144]:
+
+
+# df = df_both
+# antigen_score_dict = {}
+# bcr_score_dict = {}
+# sub_antigen_dict,sub_bcr_dict = get_subset_dict(df,antigen_dict,bcr_dict)
+# print(sub_antigen_dict.keys(),sub_bcr_dict.keys())
+# antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,sub_antigen_dict,sub_bcr_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#                                                             antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+#                                                             subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED,antigen_only = False,bcr_only=False)
+# df_updated = calculate_rank(df, antigen_score_dict, bcr_score_dict, antigen_only=False, bcr_only=False)
+# # df_res = rank_check(df_updated,0.1,0.1)
+
+
+# In[145]:
+
+
+# print(df_updated)
+
+
+# In[146]:
+
+
+# res =rank_check(df_updated,0.1,0.1)
+# print(res)
+
+
+# In[147]:
+
+
+# print(df_updated)
+# df_updated=rank_check(df_updated,0.1,0.1)
+# print(df_updated)
+
+
+# In[148]:
+
+
+# # calculate_rank(target,antigen_score_dict,bcr_score_dict,antigen_dict,len_dict,model_mix,model_mix2)
+# check_loader = checkDataset(target, antigen_dict, NPY_DIR,len_dict)
+# res_check = check_score(check_loader,model_mix,model_mix2)
+
+
+# In[221]:
+
+
+def get_check_score(df, antigen_dict,len_dict,model1,model2):
+    check_loader = checkDataset(df, antigen_dict, NPY_DIR,len_dict)
+    res_check = check_score(check_loader,model1,model2)
+    return res_check
+
+def determine_check(row):
+    # Check which columns exist in the row
+    has_check_antigen = 'check_antigen' in row.index
+    has_check_bcr = 'check_bcr' in row.index
+
+    # Case 1: Both 'check_antigen' and 'check_bcr' exist
+    if has_check_antigen and has_check_bcr:
+        if row['check_antigen'] == 'no' and row['check_bcr'] == 'no':
+            return 'both'
+        elif row['check_antigen'] == 'no':
+            return 'antigen'
+        elif row['check_bcr'] == 'no':
+            return 'bcr'
+        else:
+            return 'pass'
+
+    # Case 2: Only 'check_antigen' exists
+    elif has_check_antigen:
+        return 'antigen' if row['check_antigen'] == 'no' else 'pass'
+
+    # Case 3: Only 'check_bcr' exists
+    elif has_check_bcr:
+        return 'bcr' if row['check_bcr'] == 'no' else 'pass'
+
+    # Case 4: Neither column exists (shouldn't happen in practice)
+    else:
+        return 'pass'  # Default to 'pass' if both columns are missing
+
+def rank_check(df, cutoff_antigen,cutoff_bcr,antigen_only=False,bcr_only=False):
+    df = df.copy()  # Avoid modifying the original DataFrame directly
+
+    has_rank_antigen = 'Rank_antigen' in df.columns
+    has_rank_bcr = 'Rank_bcr' in df.columns
+
+    # Remove 'check_antigen' and 'check_bcr' if they already exist
+    df = df.drop(columns=['check_antigen', 'check_bcr', 'check'], errors='ignore')
+
+    # Initialize check columns as 'yes' by default
+    if not bcr_only:
+        df['check_antigen'] = 'yes'
+    if not antigen_only:
+        df['check_bcr'] = 'yes'
+
+    # Case 1: Neither Rank_antigen nor Rank_bcr exists
+    if not has_rank_antigen and not has_rank_bcr:
+        if not bcr_only:
+            df['check_antigen'] = 'no'
+        if not antigen_only:
+            df['check_bcr'] = 'no'
+
+    # Case 2: Rank_antigen missing ? Check Rank_bcr based on Score_bcr
+    elif not has_rank_antigen:
+        if not bcr_only:
+            df['check_antigen'] = 'no'
+        df['check_bcr'] = df['Rank_bcr'].apply(lambda x: 'no' if x <= cutoff_bcr else 'yes')
+
+    # Case 3: Rank_bcr missing ? Check Rank_antigen based on Score_antigen
+    elif not has_rank_bcr:
+        if not antigen_only:
+            df['check_bcr'] = 'no'
+        df['check_antigen'] = df['Rank_antigen'].apply(lambda x: 'no' if x <= cutoff_antigen else 'yes')
+
+    # Case 4: Both Rank_antigen and Rank_bcr exist ? Apply cutoff logic
+    else:
+        df['check_antigen'] = df['Rank_antigen'].apply(lambda x: 'no' if x <= cutoff_antigen else 'yes')
+        df['check_bcr'] = df['Rank_bcr'].apply(lambda x: 'no' if x <= cutoff_bcr else 'yes')
+
+    df['check'] = df.apply(determine_check, axis=1)
+
+    return df  # Ensure the modified DataFrame is returned
+
+
+# In[150]:
+
+
+def split_result(df):
+    if 'check' not in df.columns:
+        raise ValueError("The input DataFrame must contain a 'check' column.")
+    df = df.copy()
+    if 'Rank_antigen' not in df.columns:
+        df['Rank_antigen'] = pd.NA  # Use NA for missing values
+    if 'Rank_bcr' not in df.columns:
+        df['Rank_bcr'] = pd.NA
+    df_both = df[df['check'] == 'both'].copy()
+    df_antigen = df[df['check'] == 'antigen'].copy()
+    df_bcr = df[df['check'] == 'bcr'].copy()
+    df_pass = df[df['check'] == 'pass'].copy()
+    return df_both,df_antigen,df_bcr,df_pass
+
+
+# In[223]:
+
+
+def calculate_rank(res_check,antigen_score_dict,bcr_score_dict,antigen_only=False,bcr_only=False):
+
+
+    if antigen_only and not bcr_only:
+        if 'Rank_antigen' not in res_check.columns:
+            res_check['Rank_antigen'] = pd.NA  # Keeps missing values consistent
+        res_check['Rank_antigen'] = res_check.apply(
+            lambda row: locate_rank(row['Score_antigen'], antigen_score_dict[row['Antigen']])
+            if pd.notna(row['Score_antigen']) and row['Antigen'] in antigen_score_dict else row['Rank_antigen'],
+            axis=1
+        )
+        return res_check
+
+    elif bcr_only and not antigen_only:
+        if 'Rank_bcr' not in res_check.columns:
+            res_check['Rank_bcr'] = pd.NA
+        res_check['Rank_bcr'] = res_check.apply(
+            lambda row: locate_rank(row['Score_bcr'], bcr_score_dict[row['BCR_id']])
+            if pd.notna(row['Score_bcr']) and row['BCR_id'] in bcr_score_dict else row['Rank_bcr'],
+            axis=1
+        )
+        return res_check
+    elif not antigen_only and not bcr_only:
+        if 'Rank_antigen' not in res_check.columns:
+            res_check['Rank_antigen'] = pd.NA
+        if 'Rank_bcr' not in res_check.columns:
+            res_check['Rank_bcr'] = pd.NA
+        res_check['Rank_antigen'] = res_check.apply(
+            lambda row: locate_rank(row['Score_antigen'], antigen_score_dict[row['Antigen']])
+            if pd.notna(row['Score_antigen']) and row['Antigen'] in antigen_score_dict else row['Rank_antigen'],
+            axis=1
+        )
+
+        res_check['Rank_bcr'] = res_check.apply(
+            lambda row: locate_rank(row['Score_bcr'], bcr_score_dict[row['BCR_id']])
+            if pd.notna(row['Score_bcr']) and row['BCR_id'] in bcr_score_dict else row['Rank_bcr'],
+            axis=1
+        )
+#         res_check['max_Rank'] = res_check[['Rank_antigen', 'Rank_bcr']].max(axis=1)
+#         res_check['ave_Rank'] = res_check[['Rank_antigen', 'Rank_bcr']].mean(axis=1)
+        return res_check
+
+
+# In[224]:
+
+
+def pip_score_rank(df,antigen_dict,bcr_dict,df_background,antigen_ids,CDR3h_dict,Vh_dict,model1,model2,
+                  antigen_score_dict={},bcr_score_dict={},subsample1=100,subsample2=0.03,
+                   seed = SEED,antigen_only = False,bcr_only=False):
+    sub_antigen_dict,sub_bcr_dict = get_subset_dict(df,antigen_dict,bcr_dict)
+#     print(sub_antigen_dict.keys(),sub_bcr_dict.keys())
+#     print(antigen_only)
+    antigen_score_dict,bcr_score_dict = generate_score_dict(df_background,antigen_ids,sub_antigen_dict,sub_bcr_dict,CDR3h_dict,Vh_dict,BACK_DIR,model1,model2,
+                                                                antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+                                                                subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED,antigen_only = antigen_only,bcr_only=bcr_only)
+    df_updated = calculate_rank(df, antigen_score_dict, bcr_score_dict, antigen_only=antigen_only, bcr_only=bcr_only)
+    return df_updated#,sub_antigen_dict,antigen_score_dict
+
+
+# In[152]:
+
+
+# subsample2=0.03
+# subsample1=100
+
+
+# In[153]:
+
+
+# cutoff_antigen=cutoffs_dict[subsample1]
+# cutoff_bcr=cutoffs_dict2[subsample2*1000]
+# res = rank_check(res_check,cutoff_antigen,cutoff_bcr)
+# df_both, df_antigen, df_bcr, df_pass = split_result(res)
+# dfs_to_concat = [df_pass]
+# if not df_both.empty:
+#     both_updated=pip_score_rank(df_both,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+#                   antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+#                    seed = SEED,antigen_only = False,bcr_only=False)
+#     dfs_to_concat.append(both_updated)
+# if not df_antigen.empty:
+#     antigen_updated=pip_score_rank(df_antigen,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+#                   antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+#                    seed = SEED,antigen_only = True,bcr_only=False)
+#     dfs_to_concat.append(antigen_updated)
+# if not df_bcr.empty:
+#     bcr_updated=pip_score_rank(df_bcr,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+#                   antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+#                    seed = SEED,antigen_only = False,bcr_only=True)
+#     dfs_to_concat.append(bcr_updated)
+# if dfs_to_concat:
+#     f_res = pd.concat(dfs_to_concat, ignore_index=True)
+# else:
+#     f_res = pd.DataFrame()
+# # subsample1=subsample1*10
+# # subsample2=subsample2*10
+# print(f_res)
+
+
+# In[154]:
+
+
+# antigen_score_dict={}
+# bcr_score_dict={}
+# cutoff_antigen=cutoffs_dict[subsample1]
+# cutoff_bcr=cutoffs_dict2[subsample2*1000]
+# f_res = rank_check(res_check,cutoff_antigen,cutoff_bcr)
+# while ###MARK HERE
+# f_res,antigen_score_dict,bcr_score_dict=one_round_rank(f_res,antigen_score_dict,bcr_score_dict,subsample1,subsample2,seed = SEED,antigen_only = False,bcr_only=False)
+# subsample1=subsample1*10
+# subsample2=subsample2*10
+# f_res=rank_check(f_res,cutoff_antigen,cutoff_bcr)
+
+
+# In[156]:
+
+
+# mask_antigen=res_check['Rank_antigen']>=cutoffs_dict[100]
+# if mask_antigen.any():
+#     output.loc[mask_antigen, ["Rank_antigen"]]=res_check.loc[mask_antigen, ["Rank_antigen"]]
+# output
+
+
+# In[157]:
+
+
+
+
+# def one_round_rank(s_target,f_antigens,output,antigen_score_dict,bcr_score_dict,
+#                    subsample1=100,subsample2=0.01,seed =SEED,antigen_only=False,bcr_only=False):
+#     columns = ["record_id", "Antigen", "BCR_id", "Score_antigen", "Score_bcr"]
+#     output=pd.DataFrame(columns=columns)
+
+#     antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,bcr_dict,CDR3h_dict,Vh_dict,BACK_DIR,model_mix,model_mix2,
+#                                                             antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+#                                                             subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED,
+#                                                             antigen_only = antigen_only,bcr_only=bcr_only)
+#     res = calculate_rank(s_target,antigen_score_dict,bcr_score_dict,f_antigens,len_dict,model_mix,model_mix2,antigen_only = antigen_only,bcr_only=bcr_only)
+#     output[columns]=res[columns]
+#     if VERBOSE:
+#         print('res after ranking is:')
+#         print(res)
+#     if antigen_only and not bcr_only:
+#         mask_antigen = res['Rank_antigen']>=cutoffs_dict[subsample1]
+#         if mask_antigen.any():
+#             output.loc[mask_antigen, ["Rank_antigen"]]=res.loc[mask_antigen,["Rank_antigen"]]
+#             s_target = s_target.loc[~mask_antigen,]
+# #         output = pd.concat([output,res[res['Rank_antigen']>=cutoffs_dict[subsample1]]],axis =0)
+# #         f_res = res[res['Rank_antigen']<cutoffs_dict[subsample1]]
+#     elif bcr_only and not antigen_only:
+#         mask_bcr = res['Rank_bcr']>=cutoffs_dict2[subsample2*1000]
+#         if mask_bcr.any():
+#             output.loc[mask_bcr, ["Rank_bcr"]]=res.loc[mask_bcr,["Rank_bcr"]]
+#             s_target = s_target.loc[~mask_bcr,]
+# #         output = pd.concat([output,res[res['Rank_bcr']>=cutoffs_dict2[subsample2*1000]]],axis =0)
+# #         f_res = res[res['Rank_bcr']<cutoffs_dict2[subsample2*1000]]
+#     else:
+#         mask_antigen = res['Rank_antigen']>=cutoffs_dict[subsample1]
+#         mask_bcr = res['Rank_bcr']>=cutoffs_dict2[subsample2*1000]
+#         if mask_antigen.any():
+#             output.loc[mask_antigen, ["Rank_antigen"]]=res.loc[mask_antigen,["Rank_antigen"]]
+#         if mask_bcr.any():
+#             output.loc[mask_bcr, ["Rank_bcr"]]=res.loc[mask_bcr,["Rank_bcr"]]
+
+# #         output = pd.concat([output,res[(res['Rank_antigen']>=cutoffs_dict[subsample1])&(res['Rank_bcr']>=cutoffs_dict2[subsample2*1000])]],axis =0)
+# #         f_res = res[(res['Rank_antigen']<cutoffs_dict[subsample1])|(res['Rank_bcr']<cutoffs_dict2[subsample2*1000])]
+#     if VERBOSE:
+#         print('The results after this round with',subsample1,'BCRs and',round(subsample2*1115),'Antigens:')
+#         print(output)
+#     percentage_completed = output.shape[0] / target.shape[0] * 100
+#     print(f'Completed {percentage_completed:.2f}% of entries...')
+
+#     f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
+#     s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
+
+#     return(output,f_antigens,s_target,antigen_score_dict,bcr_score_dict)
+
+
+# In[88]:
+
+
+# # list(res_check['BCR_id'].unique())
+# print(f"{Fore.GREEN}Ranking in {subsample1} background BCRs and/or {round(subsample2 * 1000)} background antigens...{Style.RESET_ALL}")
+
+# print(f"{Fore.LIGHTMAGENTA_EX}Entering BOTH channel:\n Antigen: {list(res_check['Antigen'].unique())} \n BCR: {list(res_check['BCR_id'].unique())}{Style.RESET_ALL}")
+# print(f"{Fore.LIGHTCYAN_EX}Entering BOTH channel:\n Antigen: {list(res_check['Antigen'].unique())}{Style.RESET_ALL}")
+# print(f"{Fore.LIGHTYELLOW_EX}Entering BCR channel:\n BCR: {list(res_check['BCR_id'].unique())}{Style.RESET_ALL}")
+
+
+# In[249]:
+
+
+def one_round_rank(df,antigen_score_dict,bcr_score_dict,subsample1,subsample2,seed = SEED,antigen_only = False,bcr_only=False):
+    df_both, df_antigen, df_bcr, df_pass = split_result(df)
+    dfs_to_concat = [df_pass]
+    if not antigen_only and not bcr_only:
+        print(f"{Fore.GREEN}Ranking in {subsample1} background BCRs and/or {round(subsample2 * 1000)} background antigens...{Style.RESET_ALL}")
+        if not df_both.empty:
+            print(f"{Fore.LIGHTMAGENTA_EX}Entering BOTH channel:\n Antigen: {list(df_both['Antigen'].unique())} \n BCR: {list(df_both['BCR_id'].unique())}{Style.RESET_ALL}")
+            both_updated=pip_score_rank(df_both,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+                          antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+                           seed = SEED,antigen_only = False,bcr_only=False)
+            dfs_to_concat.append(both_updated)
+        if not df_antigen.empty:
+            print(f"{Fore.LIGHTCYAN_EX}Entering ANTIGEN channel:\n Antigen: {list(df_antigen['Antigen'].unique())}{Style.RESET_ALL}")
+            antigen_updated=pip_score_rank(df_antigen,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+                          antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+                           seed = SEED,antigen_only = True,bcr_only=False)
+            dfs_to_concat.append(antigen_updated)
+        if not df_bcr.empty:
+            print(f"{Fore.LIGHTYELLOW_EX}Entering BCR channel:\n BCR: {list(df_bcr['BCR_id'].unique())}{Style.RESET_ALL}")
+            bcr_updated=pip_score_rank(df_bcr,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+                          antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+                           seed = SEED,antigen_only = False,bcr_only=True)
+            dfs_to_concat.append(bcr_updated)
+    elif antigen_only:
+        print(f"{Fore.GREEN}Ranking in {subsample1} background BCRs...{Style.RESET_ALL}")
+        if not df_both.empty:
+            print(f"{Fore.LIGHTMAGENTA_EX}Entering BOTH channel:\n Antigen: {list(df_both['Antigen'].unique())} \n BCR: {list(df_both['BCR_id'].unique())}{Style.RESET_ALL}")
+            both_updated=pip_score_rank(df_both,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+                          antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+                           seed = SEED,antigen_only = True,bcr_only=False)
+            dfs_to_concat.append(both_updated)
+        if not df_antigen.empty:
+            print(f"{Fore.LIGHTCYAN_EX}Entering ANTIGEN channel:\n Antigen: {list(df_antigen['Antigen'].unique())}{Style.RESET_ALL}")
+            antigen_updated=pip_score_rank(df_antigen,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+                          antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+                           seed = SEED,antigen_only = True,bcr_only=False)
+            dfs_to_concat.append(antigen_updated)
+    elif bcr_only:
+        print(f"{Fore.GREEN}Ranking in {round(subsample2 * 1000)} background antigens...{Style.RESET_ALL}")
+        if not df_both.empty:
+            print(f"{Fore.LIGHTMAGENTA_EX}Entering BOTH channel:\n Antigen: {list(df_both['Antigen'].unique())} \n BCR: {list(df_both['BCR_id'].unique())}{Style.RESET_ALL}")
+            both_updated=pip_score_rank(df_both,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+                          antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+                           seed = SEED,antigen_only = False,bcr_only=True)
+            dfs_to_concat.append(both_updated)
+        if not df_bcr.empty:
+            print(f"{Fore.LIGHTYELLOW_EX}Entering BCR channel:\n BCR: {list(df_bcr['BCR_id'].unique())}{Style.RESET_ALL}")
+            bcr_updated=pip_score_rank(df_bcr,antigen_dict,bcr_dict,background,antigen_ids,CDR3h_dict,Vh_dict,model_mix,model_mix2,
+                          antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,
+                           seed = SEED,antigen_only = False,bcr_only=True)
+            dfs_to_concat.append(bcr_updated)
+
+    if dfs_to_concat:
+        f_res = pd.concat(dfs_to_concat, ignore_index=True)
+        f_res = f_res.dropna(axis=1,how='all')
+    else:
+        f_res = pd.DataFrame()
+    return f_res,antigen_score_dict,bcr_score_dict
+
+
+# In[246]:
+
+
+
+
+
+# In[159]:
+
+
+
 
 
 target_file = pd.read_csv(INPUT) # required columns 'Vh','CDR3h', optional 'species'
 background = pd.read_csv(BACKGROUND,compression='gzip') # with columns 'Vh','CDR3h','file','species'
 
 
-# In[75]:
+
+
+# In[ ]:
+
+
+
+
+
+
+# ###MARK HERE TO EDIT ####stea
+# file_path = '/project/DPDS/Wang_lab/shared/BCR_antigen/data/rfscript/Antigen_embed/CLEANED/NPY/antigen_list2.txt'
+
+# # Open and read the file
+# with open(file_path, 'r') as file:
+#     lines = file.readlines()
+
+# # Strip newline characters from each line
+# antigen_ids = [line.strip() for line in lines]
+# target_file['Antigen_id']=['Hie/H4Hubei','Hie/H4Hubei','Chen/ova','Chen/ova']
+
+
+# In[ ]:
+
+
+
+
 
 
 # if 'BCR_species' in target_file.columns:
@@ -690,40 +1577,49 @@ background = pd.read_csv(BACKGROUND,compression='gzip') # with columns 'Vh','CDR
 #     print('No species are specified!')
 
 
-# In[178]:
+# In[160]:
+
+
+
+
+
 
 target = check_npy(target_file)
 # target = preprocess(target_file)
 # target.to_csv(INPUT_DIR+'/filtered_input.csv')
 
-# In[79]:
+
+# In[161]:
 
 
-antigen_dict = get_antigen_dict(target)
+
+
+bcr_dict = get_bcr_dict(target)
+for key,value in bcr_dict.items():
+    print(key)
+antigen_dict = get_antigen_dict(target,NPY_DIR)
 for key,value in antigen_dict.items():
     print(key,value.shape)
 
 
-# In[77]:
+# In[162]:
 
 
-if SEED == 1:
-    with open('data/background/default100_V_dict.pkl','rb') as f:
-        Vh_dict = pickle.load(f)
-    with open('data/background/default100_CDR3_dict.pkl','rb') as f:
-        CDR3h_dict = pickle.load(f)
-else:
-    back100 = background.sample(frac=1/10000, random_state=SEED)
-    Vh_dict = build_BCR_dict(back100,'Vh',precise = True)
-    CDR3h_dict = build_BCR_dict(back100,'CDR3h',precise = True)
-if DEBUG:
-    with open(OUT_DIR+'/first100_V_dict.pkl','wb') as f:
-        pickle.dump(Vh_dict, f)
-    with open(OUT_DIR+'/first100_CDR3_dict.pkl','wb') as f:
-        pickle.dump(CDR3h_dict, f)
 
 
-# In[80]:
+
+cutoffs_dict = pd.read_csv('paras/cutoff_table.txt', sep='\t').set_index('backsample')['cutoffs'].to_dict()
+print('threshold to enter the next level of ranking for background bcrs:',cutoffs_dict)
+cutoffs_dict2 = pd.read_csv('paras/cutoff_table2.txt', sep='\t').set_index('backsample')['cutoffs'].to_dict()
+print('threshold to enter the next level of ranking for background antigens:',cutoffs_dict2)
+
+
+
+# In[163]:
+
+
+
+
 
 
 len_dict = target.drop_duplicates(subset='Antigen_id').set_index('Antigen_id')['Antigen_seq'].map(len).to_dict()
@@ -731,7 +1627,12 @@ len_dict = target.drop_duplicates(subset='Antigen_id').set_index('Antigen_id')['
 # for key, value in antigen_dict.items():
 #     len_dict[key]=value.shape[1]
 
-# In[92]:
+
+# In[164]:
+
+
+
+
 
 
 model_mix = mix_model()
@@ -742,7 +1643,26 @@ optimizer = torch.optim.Adam(model_mix.parameters(),lr=LR)
 scheduler = ReduceLROnPlateau(optimizer,mode = 'min',factor=0.1,patience =10,verbose=False,threshold_mode='rel',threshold=1e-5)
 
 
-# In[144]:
+# In[165]:
+
+
+
+
+
+
+model_mix2 = mix_model()
+checkpoint2 = torch.load(MODEL2)
+model_mix2.load_state_dict(checkpoint2)
+model_mix2.to(device)
+optimizer2 = torch.optim.Adam(model_mix2.parameters(),lr=LR)
+scheduler2 = ReduceLROnPlateau(optimizer2,mode = 'min',factor=0.1,patience =10,verbose=False,threshold_mode='rel',threshold=1e-5)
+
+
+# In[ ]:
+
+
+
+
 
 
 # score_dict = generate_score_dict(background,score_dict,antigen_dict,CDR3h_dict,Vh_dict,model_mix)
@@ -753,98 +1673,532 @@ scheduler = ReduceLROnPlateau(optimizer,mode = 'min',factor=0.1,patience =10,ver
 #     score_dict[antigen_id]=score_background
 
 
-# In[126]:
-
-
-# target_dataset = checkDataset(target, antigen_dict, NPY_DIR,len_dict)
-# check_loader = DataLoader(target_dataset,1)
-# res_check = check_score(check_loader,model_mix)
-# res_check['Rank'] = res_check.apply(lambda row: locate_rank(row['Score'], score_dict[row['Antigen']]), axis=1)
-
-
-# In[134]:
-
-
-# df_cutoffs = pd.DataFrame({'backsample': [100, 1000, 10000, 100000],
-#                            'cutoffs': [0.2, 0.1, 0.05, 0.01]})
-# df_cutoffs.to_csv('data/intermediates/able.txt', sep='\t', index=False)
-
-
-# In[183]:
+# In[166]:
 
 
 
 
 
-# In[164]:
+
+antigen_score_dict = {}
+bcr_score_dict = {}
+
+if BOTTOMLINE1==10000 and SEED == 1:
+    with open('data/background/back1w_V_dict.pkl','rb') as f:
+        Vh_dict = pickle.load(f)
+    with open('data/background/back1w_CDR3_dict.pkl','rb') as f:
+        CDR3h_dict = pickle.load(f)
+else:
+    back100 = background.sample(frac=1/10000, random_state=SEED)
+    Vh_dict = build_BCR_dict(back100,'Vh',precise = True)
+    CDR3h_dict = build_BCR_dict(back100,'CDR3h',precise = True)
 
 
-# subratio=1/10000
-# filtered_df = res[res['Rank']<cutoffs_dict[subratio*1000000]]
-# filtered_antigen_dict = {k: v for k, v in antigen_dict.items() if k in filtered_df['Antigen'].values}
-# filtered_target = target[target['record_id'].isin(filtered_df['record_id'])]
+if BOTTOMLINE2==0.3 and SEED == 1:
+    with open("data/background/default300.txt", "r") as file:
+        antigen_ids = [line.strip() for line in file.readlines()]
+else:
+    antigen_files = glob(BACK_DIR+'/*/*pair.npy')
+    antigen_npys = [antigen.split('/')[-2]+'/'+antigen.split('/')[-1] for antigen in antigen_files]
+    # antigen_files[0].split('/')[-2]+'/'+antigen_files[0].split('/')[-1]
+    antigen_ids = [antigen_id.replace('.pair.npy','') for antigen_id in antigen_npys]
+# antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#                                  # antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=1/10000,subsample2=0.1,seed =SEED)
+# if DEBUG:
+#     with open(OUT_DIR+'/first100_V_dict.pkl','wb') as f:
+#         pickle.dump(Vh_dict, f)
+#     with open(OUT_DIR+'/first100_CDR3_dict.pkl','wb') as f:
+#         pickle.dump(CDR3h_dict, f)
 
 
-# In[184]:
+# In[ ]:
+
+
+
+
+# subsample1 = 100
+# subsample2 = 0.01
+# antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,bcr_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#                                                             antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+#                                                             subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED)
+
+
+# In[50]:
+
+
+
+
+
+
 if args.no_rank:
-    check_loader = DataLoader(checkDataset(target, antigen_dict, NPY_DIR,len_dict),1)
-    res_check = check_score(check_loader,model_mix)
+    check_loader = checkDataset(target, antigen_dict, NPY_DIR,len_dict)
+    res_check = check_score(check_loader,model_mix,model_mix2)
     if not args.no_merge:
-        merged = target.merge(res_check, on='record_id', how='left')
-        merged.to_csv(OUT_DIR+'/merged_results_no_rank.csv')
+        merged = target.merge(res_check, on=['record_id','BCR_id'], how='left')
+        merged.to_csv(OUT_DIR+'/merged_results_no_rank.csv',index=False)
         exit()
     else:
-        res_check.to_csv(OUT_DIR+'/binding_results_no_rank.csv')
+        res_check.to_csv(OUT_DIR+'/binding_results_no_rank.csv',index=False)
         exit()
 
-score_dict = {}
+
 if args.export_background:
-    print('Exporting dict for '+str(BOTTOMLINE)+' background BCRs...')
-    score_dict = {}
-    if BOTTOMLINE==10000 & SEED == 1:
-        with open('data/background/back1w_V_dict.pkl','rb') as f:
-            Vh_dict = pickle.load(f)
-        with open('data/background/back1w_CDR3_dict.pkl','rb') as f:
-            CDR3h_dict = pickle.load(f)
-    score_dict = generate_score_dict(background,score_dict,antigen_dict,CDR3h_dict,Vh_dict,model_mix,subsample=BOTTOMLINE/1000000,seed=SEED)
-    with open(OUT_DIR+'/background_score_dict.pkl', 'wb') as outfile:
-        pickle.dump(score_dict, outfile)
-    exit()
+    antigen_score_dict,bcr_score_dict = {},{}
+    # if BOTTOMLINE1==10000 & SEED == 1:
+    #     with open('data/background/back1w_V_dict.pkl','rb') as f:
+    #         Vh_dict = pickle.load(f)
+    #     with open('data/background/back1w_CDR3_dict.pkl','rb') as f:
+    #         CDR3h_dict = pickle.load(f)
+    if not ANTIGEN_ONLY and not BCR_ONLY:
+        antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,bcr_dict,CDR3h_dict,Vh_dict,BACK_DIR,model_mix,model_mix2,
+                                                                antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+                                                                subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED,antigen_only = False,bcr_only=False)
+        print('Exporting dict for '+str(BOTTOMLINE1)+' background BCRs...')
+        with open(OUT_DIR+'/background_antigen_score_dict.pkl', 'wb') as outfile:
+            pickle.dump(antigen_score_dict, outfile)
+        print('Exporting dict for '+str(BOTTOMLINE2*1148)+' background antigens...')
+        with open(OUT_DIR+'/background_bcr_score_dict.pkl', 'wb') as outfile:
+            pickle.dump(bcr_score_dict, outfile)
+        exit()
+    if ANTIGEN_ONLY and not BCR_ONLY:
+        antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,bcr_dict,CDR3h_dict,Vh_dict,BACK_DIR,model_mix,model_mix2,
+                                                                antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+                                                                subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED,antigen_only = True,bcr_only=False)
+        print('Exporting dict for '+str(BOTTOMLINE1)+' background BCRs...')
+        with open(OUT_DIR+'/background_antigen_score_dict.pkl', 'wb') as outfile:
+            pickle.dump(antigen_score_dict, outfile)
+        exit()
+    elif BCR_ONLY and not ANTIGEN_ONLY:
+        antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,bcr_dict,CDR3h_dict,Vh_dict,BACK_DIR,model_mix,model_mix2,
+                                                                antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+                                                                subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED,antigen_only = False,bcr_only=True)
+        print('Exporting dict for '+str(BOTTOMLINE2*1148)+' background antigens...')
+        with open(OUT_DIR+'/background_bcr_score_dict.pkl', 'wb') as outfile:
+            pickle.dump(bcr_score_dict, outfile)
+        exit()
 
-df = pd.read_csv('paras/cutoff_table.txt', sep='\t')
-cutoffs_dict = df.set_index('backsample')['cutoffs'].to_dict()
-print('threshold to enter the next level of ranking:',cutoffs_dict)
 
-subsample = SUBSAMPLE
-s_target =  target
-f_antigens = antigen_dict
-output = pd.DataFrame()
-while len(s_target)>0 and subsample<BOTTOMLINE:
-    print('Ranking in',subsample,'background BCRs...')
-    score_dict = generate_score_dict(background,score_dict,f_antigens,CDR3h_dict,Vh_dict,model_mix,subsample=subsample/1000000,seed=SEED)
-    res = calculate_rank(s_target,score_dict,f_antigens,len_dict,model_mix)
-    output = pd.concat([output,res[res['Rank']>=cutoffs_dict[subsample]]],axis =0)
-    percentage_completed = output.shape[0] / target.shape[0] * 100
-    print(f'Completed {percentage_completed:.2f}% of entries...')
-    f_res = res[res['Rank']<cutoffs_dict[subsample]]
-    f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
-    s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
-    subsample = subsample*10
+    else:
+        print('Exporting dict for '+str(BOTTOMLINE1)+' background BCRs and '+str(BOTTOMLINE2*1148)+' background antigens...')
+        with open(OUT_DIR+'/background_antigen_score_dict.pkl', 'wb') as outfile:
+            pickle.dump(antigen_score_dict, outfile)
+        with open(OUT_DIR+'/background_bcr_score_dict.pkl', 'wb') as outfile:
+            pickle.dump(bcr_score_dict, outfile)
+        exit()
 
-if len(s_target)>0:
-    print('Ranking in',subsample,'background BCRs...')
-    score_dict = generate_score_dict(background,score_dict,f_antigens,CDR3h_dict,Vh_dict,model_mix,subsample=subsample/1000000,seed=SEED)
-    res = calculate_rank(s_target,score_dict,f_antigens,len_dict,model_mix)
-    output = pd.concat([output,res],axis =0)
-    percentage_completed = output.shape[0] / target.shape[0] * 100
-    print(f'Completed {percentage_completed:.2f}% of entries...')
 
-with open(OUT_DIR+'/background_score_dict_'+str(BOTTOMLINE)+'.pkl', 'wb') as outfile:
-    pickle.dump(score_dict, outfile)
-# In[187]:
+
+
+
+# In[169]:
+
+
+
+
+# BOTTOMLINE1=1000
+# BOTTOMLINE2=0.3
+# # DEBUG = True
+# # print(BOTTOMLINE1,BOTTOMLINE2)
+
+
+# In[ ]:
+
+
+
+
+# antigen_score_dict,bcr_score_dict = {},{}
+# if BOTTOMLINE1==10000 & SEED == 1:
+#     with open('data/background/back1w_V_dict.pkl','rb') as f:
+#         Vh_dict = pickle.load(f)
+#     with open('data/background/back1w_CDR3_dict.pkl','rb') as f:
+#         CDR3h_dict = pickle.load(f)
+# antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,bcr_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#                              antigen_score_dict={},bcr_score_dict={},subsample1=BOTTOMLINE1/1000000,subsample2=BOTTOMLINE2,seed =SEED,
+#                              antigen_only = ANTIGEN_ONLY,bcr_only=BCR_ONLY)
+
+# print('Exporting dict for '+str(BOTTOMLINE1)+' background BCRs and '+str(BOTTOMLINE2*1150)+' background antigens...')
+# with open(OUT_DIR+'/background_antigen_score_dict.pkl', 'wb') as outfile:
+#     pickle.dump(antigen_score_dict, outfile)
+# with open(OUT_DIR+'/background_bcr_score_dict.pkl', 'wb') as outfile:
+#     pickle.dump(bcr_score_dict, outfile)
+
+
+# In[ ]:
+
+
+
+
+
+# antigen_score_dict
+# bcr_score_dict
+
+
+# In[ ]:
+
+
+
+
+
+
+# subsample1 = SUBSAMPLE1
+# subsample2 = SUBSAMPLE2
+# s_target =  target
+# f_antigens = antigen_dict
+# output = pd.DataFrame()
+# antigen_score_dict = {}
+# bcr_score_dict = {}
+# output,f_res,f_antigens,s_target,antigen_score_dict,bcr_score_dict=one_round_rank(s_target,f_antigens,output,antigen_score_dict,bcr_score_dict,subsample1=subsample1,subsample2=subsample2,seed=SEED)
+
+
+# In[ ]:
+
+
+
+
+# BOTTOMLINE1 = 1000
+# BOTTOMLINE2 = 0.1
+
+
+# In[170]:
+
+
+
+
+print('subsample1:',SUBSAMPLE1,'subsample2:',SUBSAMPLE2,'BOTTOMLINE1:',BOTTOMLINE1,'BOTTOMLINE2:',BOTTOMLINE2)
+
+
+# In[ ]:
+
+
+
+
+# subsample1 = SUBSAMPLE1
+# subsample2 = SUBSAMPLE2
+# print('the initial subsample for background BCRs is:',subsample1)
+# print('the initial subsample for background antigens is:',subsample2)
+# s_target =  target
+# f_antigens = antigen_dict
+# output = pd.DataFrame()
+# antigen_score_dict = {}
+# bcr_score_dict = {}
+
+
+# In[ ]:
+
+
+
+
+# start_time=time.time()
+# print('Ranking in',subsample1,'background BCRs and/or',str(round(subsample2*1000)),'background antigens...')
+# # antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+# #                              antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1/1000000,subsample2=subsample2,seed =SEED)
+# # res = calculate_rank(s_target,antigen_score_dict,bcr_score_dict,f_antigens,len_dict,model_mix,model_mix2)
+# # output = pd.concat([output,res[(res['Rank_antigen']>=cutoffs_dict[subsample])&(res['Rank_bcr']>=cutoffs_dict[subsample])]],axis =0)
+# # percentage_completed = output.shape[0] / target.shape[0] * 100
+# # print(f'Completed {percentage_completed:.2f}% of entries...')
+# # f_res = res[(res['Rank_antigen']<cutoffs_dict[subsample])|(res['Rank_bcr']<cutoffs_dict[subsample])]
+# # f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
+# # s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
+# # output,f_res,f_antigens,s_target,antigen_score_dict,bcr_score_dict=one_round_rank(s_target,f_antigens,output,antigen_score_dict,bcr_score_dict,subsample1=subsample1,subsample2=subsample2,seed=SEED)
+# output,f_res,f_antigens,s_target,antigen_score_dict,bcr_score_dict=one_round_rank(s_target,f_antigens,output,antigen_score_dict,bcr_score_dict,
+#                                                                                   subsample1=subsample1,subsample2=subsample2,seed=SEED,
+#                                                                                   antigen_only=ANTIGEN_ONLY,bcr_only=BCR_ONLY)
+# print('Processing time for',str(subsample1),'BCRs and/or',str(subsample2*1150),'Antigens is:',str(time.time()-start_time))
+# subsample1 = subsample1*10
+# subsample2 = subsample2*10
+
+
+# In[ ]:
+
+
+
+
+# antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,bcr_dict,CDR3h_dict,Vh_dict,BACK_DIR,model_mix,model_mix2,
+#                                                         antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,
+#                                                         subsample1=subsample1/1000000,subsample2=subsample2,seed = SEED,
+#                                                         antigen_only = False,bcr_only=True)
+
+
+# In[227]:
+
+
+# f_res
+
+
+# In[255]:
+
+
+# BCR_ONLY = True
+# ANTIGEN_ONLY = False
+# f_res
+# # f_res =  rank_check(res_check,0,0,antigen_only=ANTIGEN_ONLY)
+# # i_res,antigen_score_dict,bcr_score_dict=one_round_rank(f_res,antigen_score_dict,bcr_score_dict,subsample1,subsample2,seed = SEED,antigen_only = True)
+
+
+# In[229]:
+
+
+res_check=get_check_score(target,antigen_dict,len_dict,model_mix,model_mix2)
+
+
+# In[256]:
+
+
+subsample1 = SUBSAMPLE1
+subsample2 = SUBSAMPLE2
+print('the initial subsample for background BCRs is:',subsample1)
+print('the initial subsample for background antigens is:',subsample2)
+f_res =  rank_check(res_check,0,0,antigen_only=ANTIGEN_ONLY,bcr_only =BCR_ONLY)
+print(f_res.head())
+if not ANTIGEN_ONLY and not BCR_ONLY:
+    while not (f_res['check']=='pass').all():
+        if subsample1<=BOTTOMLINE1 and subsample2 <= BOTTOMLINE2:
+            start_time=time.time()
+            i_res,antigen_score_dict,bcr_score_dict=one_round_rank(f_res,antigen_score_dict,bcr_score_dict,subsample1,subsample2,seed = SEED,antigen_only = False,bcr_only=False)
+            print(f"{Fore.BLUE}The initial ranks:\n{i_res.loc[:, ~i_res.columns.str.contains('check', case=False)]}{Style.RESET_ALL}")
+            cutoff_antigen=cutoffs_dict[subsample1]
+            cutoff_bcr=cutoffs_dict2[subsample2*1000]
+            print(f"{Fore.LIGHTWHITE_EX}After checking with the cutoff for antigen {Fore.RED}{cutoff_antigen}{Fore.LIGHTWHITE_EX} "
+                  f"and the cutoff for BCR: {Fore.RED}{cutoff_bcr}{Style.RESET_ALL}")
+            f_res=rank_check(i_res,cutoff_antigen,cutoff_bcr)
+            print(f"{Fore.BLUE}{f_res}{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTWHITE_EX}Processing time for {round(subsample1)} BCRs and/or {round(subsample2 * 1148)} Antigens is: {time.time() - start_time:.2f} seconds{Style.RESET_ALL}")
+            percentage_completed = (f_res['check'] == 'pass').mean() * 100
+            print(f'Completed {percentage_completed:.2f}% of entries...')
+            # Print the sample size update message
+            print(f"{Fore.YELLOW}Sample size x10...{Style.RESET_ALL}")
+            subsample1 *= 10
+            subsample2 *= 10
+        elif subsample1<=BOTTOMLINE1 and subsample2 > BOTTOMLINE2:
+            start_time=time.time()
+            i_res,antigen_score_dict,bcr_score_dict=one_round_rank(f_res,antigen_score_dict,bcr_score_dict,subsample1,subsample2,seed = SEED,antigen_only = True,bcr_only=False)
+            print(f"{Fore.BLUE}The initial ranks:\n{i_res.loc[:, ~i_res.columns.str.contains('check', case=False)]}{Style.RESET_ALL}")
+            cutoff_antigen=cutoffs_dict[subsample1]
+            cutoff_bcr=cutoffs_dict2[subsample2*1000]
+            print(f"{Fore.LIGHTWHITE_EX}After checking with the cutoff for antigen {Fore.RED}{cutoff_antigen}{Fore.LIGHTWHITE_EX} "
+                  f"and the cutoff for BCR: {Fore.RED}{cutoff_bcr}{Style.RESET_ALL}")
+            f_res=rank_check(i_res,cutoff_antigen,cutoff_bcr)
+            print(f"{Fore.BLUE}{f_res}{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTWHITE_EX}Processing time for {round(subsample1)} BCRs is: {time.time() - start_time:.2f} seconds{Style.RESET_ALL}")
+            percentage_completed = (f_res['check'] == 'pass').mean() * 100
+            print(f'Completed {percentage_completed:.2f}% of entries...')
+            # Print the sample size update message
+            print(f"{Fore.YELLOW}Sample size x10...{Style.RESET_ALL}")
+            subsample1 *= 10
+        elif subsample1>BOTTOMLINE1 and subsample2 <= BOTTOMLINE2:
+            start_time=time.time()
+            i_res,antigen_score_dict,bcr_score_dict=one_round_rank(f_res,antigen_score_dict,bcr_score_dict,subsample1,subsample2,seed = SEED,antigen_only = False,bcr_only=True)
+            print(f"{Fore.BLUE}The initial ranks:\n{i_res.loc[:, ~i_res.columns.str.contains('check', case=False)]}{Style.RESET_ALL}")
+            cutoff_antigen=cutoffs_dict[subsample1]
+            cutoff_bcr=cutoffs_dict2[subsample2*1000]
+            print(f"{Fore.LIGHTWHITE_EX}After checking with the cutoff for antigen {Fore.RED}{cutoff_antigen}{Fore.LIGHTWHITE_EX} "
+                  f"and the cutoff for BCR: {Fore.RED}{cutoff_bcr}{Style.RESET_ALL}")
+            f_res=rank_check(i_res,cutoff_antigen,cutoff_bcr)
+            print(f"{Fore.BLUE}{f_res}{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTWHITE_EX}Processing time for {round(subsample2 * 1148)} Antigens is: {time.time() - start_time:.2f} seconds{Style.RESET_ALL}")
+            percentage_completed = (f_res['check'] == 'pass').mean() * 100
+            print(f'Completed {percentage_completed:.2f}% of entries...')
+            # Print the sample size update message
+            print(f"{Fore.YELLOW}Sample size x10...{Style.RESET_ALL}")
+            subsample2 *= 10
+        else:
+            print(f"{Fore.RED}Both subsample1 and subsample2 are above their bottom limits. Exiting loop.{Style.RESET_ALL}")
+            break
+    f_res['max_Rank'] = f_res[['Rank_antigen', 'Rank_bcr']].max(axis=1)
+    f_res['ave_Rank'] = f_res[['Rank_antigen', 'Rank_bcr']].mean(axis=1)
+    output=f_res.loc[:, ~f_res.columns.str.contains('check', case=False)]
+    print(output.head())
+    with open(OUT_DIR+'/background_antigen_score_dict_'+str(BOTTOMLINE1)+'BCRs.pkl', 'wb') as outfile:
+        pickle.dump(antigen_score_dict, outfile)
+    with open(OUT_DIR+'/background_bcr_score_dict_'+str(BOTTOMLINE2)+'Antigens.pkl', 'wb') as outfile:
+        pickle.dump(bcr_score_dict, outfile)
+elif ANTIGEN_ONLY and not BCR_ONLY:
+    while not (f_res['check']=='pass').all():
+        if subsample1<=BOTTOMLINE1:
+            start_time=time.time()
+            i_res,antigen_score_dict,bcr_score_dict=one_round_rank(f_res,antigen_score_dict,bcr_score_dict,subsample1,subsample2,seed = SEED,antigen_only = True)
+            print(f"{Fore.BLUE}The initial ranks:\n{i_res.loc[:, ~i_res.columns.str.contains('check', case=False)]}{Style.RESET_ALL}")
+            cutoff_antigen=cutoffs_dict[subsample1]
+#             cutoff_bcr=cutoffs_dict2[subsample2*1000]
+            print(f"{Fore.LIGHTWHITE_EX}After checking with the cutoff for antigen {Fore.RED}{cutoff_antigen}{Style.RESET_ALL}")
+            f_res=rank_check(i_res,cutoff_antigen,cutoff_bcr,antigen_only=True)
+            print(f"{Fore.BLUE}{f_res}{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTWHITE_EX}Processing time for {round(subsample1)} BCRs is: {time.time() - start_time:.2f} seconds{Style.RESET_ALL}")
+            percentage_completed = (f_res['check'] == 'pass').mean() * 100
+            print(f'Completed {percentage_completed:.2f}% of entries...')
+            # Print the sample size update message
+            print(f"{Fore.YELLOW}Sample size x10...{Style.RESET_ALL}")
+            subsample1 *= 10
+        else:
+            print(f"{Fore.RED}Subsample1{subsample1} is above the bottom limit{BOTTOMLINE1}. Exiting loop.{Style.RESET_ALL}")
+            break
+    output=f_res.loc[:, ~f_res.columns.str.contains('check', case=False)]
+    print(output.head())
+    with open(OUT_DIR+'/background_antigen_score_dict_'+str(BOTTOMLINE1)+'BCRs.pkl', 'wb') as outfile:
+        pickle.dump(antigen_score_dict, outfile)
+elif not ANTIGEN_ONLY and BCR_ONLY:
+    while not (f_res['check']=='pass').all():
+        if subsample2 <= BOTTOMLINE2:
+            start_time=time.time()
+            i_res,antigen_score_dict,bcr_score_dict=one_round_rank(f_res,antigen_score_dict,bcr_score_dict,subsample1,subsample2,seed = SEED,bcr_only = True)
+            print(f"{Fore.BLUE}The initial ranks:\n{i_res.loc[:, ~i_res.columns.str.contains('check', case=False)]}{Style.RESET_ALL}")
+#             cutoff_antigen=cutoffs_dict[subsample1]
+            cutoff_bcr=cutoffs_dict2[subsample2*1000]
+            print(f"{Fore.LIGHTWHITE_EX}After checking with the cutoff for BCR: {Fore.RED}{cutoff_bcr}{Style.RESET_ALL}")
+            f_res=rank_check(i_res,cutoff_antigen,cutoff_bcr,bcr_only=True)
+            print(f"{Fore.BLUE}{f_res}{Style.RESET_ALL}")
+            print(f"{Fore.LIGHTWHITE_EX}Processing time for {round(subsample2 * 1148)} Antigens is: {time.time() - start_time:.2f} seconds{Style.RESET_ALL}")
+            percentage_completed = (f_res['check'] == 'pass').mean() * 100
+            print(f'Completed {percentage_completed:.2f}% of entries...')
+            # Print the sample size update message
+            print(f"{Fore.YELLOW}Sample size x10...{Style.RESET_ALL}")
+            subsample2 *= 10
+        else:
+            print(f"{Fore.RED}Subsample2 {subsample2} is above the bottom limit {BOTTOMLINE2}. Exiting loop.{Style.RESET_ALL}")
+            break
+    output=f_res.loc[:, ~f_res.columns.str.contains('check', case=False)]
+    print(output.head())
+    with open(OUT_DIR+'/background_bcr_score_dict_'+str(BOTTOMLINE2)+'Antigens.pkl', 'wb') as outfile:
+        pickle.dump(bcr_score_dict, outfile)
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+
+# In[123]:
+
 
 if args.no_merge:
     output.to_csv(OUT_DIR+'/binding_results.csv',index=False)
 else:
-    merged = target.merge(output, on='record_id', how='left')
+    merged = target.merge(output, on=['record_id','BCR_id'], how='left')
     merged.to_csv(OUT_DIR+'/merged_results.csv',index=False)
+
+
+# In[59]:
+
+
+# subsample1 = SUBSAMPLE1
+# subsample2 = SUBSAMPLE2
+# print('the initial subsample rer background BCRs is:',subsample1)
+# print('the initial subsample for background antigens is:',subsample2)
+# f_res =  res_check
+# # f_antigens = antigen_dict
+# # output = pd.DataFrame()
+# antigen_score_dict = {}
+# bcr_score_dict = {}
+# while not (f_res['check']=='pass').all():
+#     if subsample1<=BOTTOMLINE1 and subsample2 <= BOTTOMLINE2:
+#         start_time=time.time()
+#         print('Ranking in',subsample1,'background BCRs and/or',str(round(subsample2*1000)),'background antigens...')
+#         # antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#         #                              antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1/1000000,subsample2=subsample2,seed =SEED)
+#         # res = calculate_rank(s_target,antigen_score_dict,bcr_score_dict,f_antigens,len_dict,model_mix,model_mix2)
+#         # output = pd.concat([output,res[(res['Rank_antigen']>=cutoffs_dict[subsample])&(res['Rank_bcr']>=cutoffs_dict[subsample])]],axis =0)
+#         # percentage_completed = output.shape[0] / target.shape[0] * 100
+#         # print(f'Completed {percentage_completed:.2f}% of entries...')
+#         # f_res = res[(res['Rank_antigen']<cutoffs_dict[subsample])|(res['Rank_bcr']<cutoffs_dict[subsample])]
+#         # f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
+#         # s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
+#         # output,f_res,f_antigens,s_target,antigen_score_dict,bcr_score_dict=one_round_rank(s_target,f_antigens,output,antigen_score_dict,bcr_score_dict,subsample1=subsample1,subsample2=subsample2,seed=SEED)
+#         output,f_res,f_antigens,s_target,antigen_score_dict,bcr_score_dict=one_round_rank(s_target,f_antigens,output,antigen_score_dict,bcr_score_dict,
+#                                                                                           subsample1=subsample1,subsample2=subsample2,seed=SEED,
+#                                                                                           antigen_only=ANTIGEN_ONLY,bcr_only=BCR_ONLY)
+#         print('Processing time for',str(subsample1),'BCRs and/or',str(subsample2*1148),'Antigens is:',str(time.time()-start_time))
+#         subsample1 = subsample1*10
+#         subsample2 = subsample2*10
+# #         print(subsample1,subsample2)
+#     elif subsample1 > BOTTOMLINE1 and (subsample2*1000) <= BOTTOMLINE2:
+#         while (subsample2*1148) <= BOTTOMLINE2 and len(s_target) > 0:
+#             start_time=time.time()
+
+#             print('Ranking in',str(round(subsample2*1000)),'background antigens...')
+#             output,f_res,f_antigens,s_target,antigen_score_dict,bcr_score_dict=one_round_rank(s_target,f_antigens,output,antigen_score_dict,bcr_score_dict,
+#                                                                                               subsample1=subsample1,subsample2=subsample2,seed=SEED,bcr_only=True)
+#             # antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#             #                              antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1/1000000,subsample2=subsample2,seed =SEED,bcr_only=True)
+#             # res = calculate_rank(s_target,antigen_score_dict,bcr_score_dict,f_antigens,len_dict,model_mix,model_mix2)
+#             # output = pd.concat([output,res[(res['Rank_antigen']>=cutoffs_dict[subsample])&(res['Rank_bcr']>=cutoffs_dict[subsample])]],axis =0)
+#             # percentage_completed = output.shape[0] / target.shape[0] * 100
+#             # print(f'Completed {percentage_completed:.2f}% of entries...')
+#             # f_res = res[(res['Rank_antigen']<cutoffs_dict[subsample])|(res['Rank_bcr']<cutoffs_dict[subsample])]
+#             # f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
+#             # s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
+#             print('Processing time for',str(subsample2*1148),'Antigens is:',str(time.time()-start_time))
+#             subsample2 = subsample2*10
+#     elif subsample1 <= BOTTOMLINE1 and (subsample2*1000) > BOTTOMLINE2:
+#         while subsample1 <= BOTTOMLINE1 and len(s_target) > 0:
+#             print('Ranking in',subsample1,'background BCRs...')
+#             start_time=time.time()
+
+#             # antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#             #                              antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1/1000000,subsample2=subsample2,seed =SEED,antigen_only=True)
+#             # res = calculate_rank(s_target,antigen_score_dict,bcr_score_dict,f_antigens,len_dict,model_mix,model_mix2)
+#             # output = pd.concat([output,res[(res['Rank_antigen']>=cutoffs_dict[subsample])&(res['Rank_bcr']>=cutoffs_dict[subsample])]],axis =0)
+#             # percentage_completed = output.shape[0] / target.shape[0] * 100
+#             # print(f'Completed {percentage_completed:.2f}% of entries...')
+#             # f_res = res[(res['Rank_antigen']<cutoffs_dict[subsample])|(res['Rank_bcr']<cutoffs_dict[subsample])]
+#             # f_antigens = {k: v for k, v in f_antigens.items() if k in f_res['Antigen'].values}
+#             # s_target = s_target[s_target['record_id'].isin(f_res['record_id'])]
+#             output,f_res,f_antigens,s_target,antigen_score_dict,bcr_score_dict=one_round_rank(s_target,f_antigens,output,antigen_score_dict,bcr_score_dict,
+#                                                                                               subsample1=subsample1,subsample2=subsample2,seed=SEED,antigen_only=True)
+#             print('Processing time for',str(subsample1),'BCRs is:',str(time.time()-start_time))
+#             subsample1 = subsample1*10
+#     elif subsample1 > BOTTOMLINE1 and (subsample2*1148) > BOTTOMLINE2:
+#         break
+
+# if len(s_target)>0:
+#     print('Ranking in',str(BOTTOMLINE1),'background BCRs and/or',str(BOTTOMLINE2*1148),'background antigens...')
+#     # antigen_score_dict,bcr_score_dict = generate_score_dict(background,antigen_ids,antigen_dict,CDR3h_dict,Vh_dict,NPY_DIR,model_mix,model_mix2,
+#                                  # antigen_score_dict=antigen_score_dict,bcr_score_dict=bcr_score_dict,subsample1=subsample1,subsample2=subsample2,seed =SEED)
+#     # res = calculate_rank(s_target,antigen_score_dict,bcr_score_dict,f_antigens,len_dict,model_mix,model_mix2)
+#     output = pd.concat([output,f_res],axis =0)
+#     percentage_completed = output.shape[0] / target.shape[0] * 100
+#     print(f'Completed {percentage_completed:.2f}% of entries...')
+
+# if ANTIGEN_ONLY and not BCR_ONLY:
+#     with open(OUT_DIR+'/background_bcr_score_dict_'+str(BOTTOMLINE1)+'BCRs.pkl', 'wb') as outfile:
+#         pickle.dump(bcr_score_dict, outfile)
+# elif BCR_ONLY and not ANTIGEN_ONLY:
+#     with open(OUT_DIR+'/background_antigen_score_dict_'+str(BOTTOMLINE2)+'Antigens.pkl', 'wb') as outfile:
+#         pickle.dump(antigen_score_dict, outfile)
+# else:
+#     with open(OUT_DIR+'/background_antigen_score_dict_'+str(BOTTOMLINE1)+'BCRs_'+str(BOTTOMLINE2)+'Antigens.pkl', 'wb') as outfile:
+#         pickle.dump(antigen_score_dict, outfile)
+#     with open(OUT_DIR+'/background_bcr_score_dict_'+str(BOTTOMLINE1)+'BCRs_'+str(BOTTOMLINE2)+'Antigens.pkl', 'wb') as outfile:
+#         pickle.dump(bcr_score_dict, outfile)
+
+
+# In[ ]:
+
+
+
+
+# bcr_score_dict
+
+
+# In[ ]:
+
+
+
+
+
+# In[ ]:
+
+
+
+
+#     merged = target.merge(output, on=['record_id','BCR_id'], how='left')
+#     merged.to_csv(OUT_DIR+'/merged_results.csv',index=False)
+
+
+# In[ ]:
