@@ -25,7 +25,7 @@ import pickle
 parser = argparse.ArgumentParser(description='Parameters for the interface script.')
 parser.add_argument('--code', type=str, help='the Cmai directory',default = os.path.dirname(os.path.abspath(__file__)))
 parser.add_argument('--input',type = str, help = 'the input files in csv which should include Antigen_id,BCR_Vh,BCR_CDR3h',default = 'data/example/input.csv')
-parser.add_argument('--out',type = str, help = 'the directory for output files. An absolute path is required.',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
+parser.add_argument('--out',type = str, help = 'the directory for output files. An absolute path is required.',default = '/ABSOLUTE/DIR/TO/Cmai/data/example/output')
 parser.add_argument('--env_path', help='the file saving the directory of the Conda environments- python of runEmbed, python of runBind, and RoseTTAFold in order.',default = 'paras/env_path')
 parser.add_argument('--rf_data',type = str, help = 'the database folder for RoseTTAFold',default= '/project/DPDS/Wang_lab/shared/BCR_antigen/data')
 parser.add_argument('--fasta',type = str, help = 'The fasta file entering runEbed. When no sequence included in the input, the separate fasta file of antigens is required',default =None)
