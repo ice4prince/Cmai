@@ -206,76 +206,109 @@ python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check -
 
 Cmai.py is the main interface for users to execute Cmai after installation is successful. 
 
-```shi
-usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT] [--env_path ENV_PATH] [--rf_data RF_DATA]
-               [--fasta FASTA] [--pre_dir PRE_DIR] [--npy_dir NPY_DIR] [--cpu CPU] [--mem MEM] [--use_cpu]
-               [--seed SEED] [--min_size_background_bcr MIN_SIZE_BACKGROUND_BCR]
+```
+usage: Cmai.py [-h] [--code CODE] [--input INPUT] [--out OUT]
+               [--env_path ENV_PATH] [--rf_data RF_DATA] [--fasta FASTA]
+               [--pre_dir PRE_DIR] [--npy_dir NPY_DIR] [--cpu CPU] [--mem MEM]
+               [--use_cpu] [--seed SEED]
+               [--min_size_background_bcr MIN_SIZE_BACKGROUND_BCR]
                [--max_size_background_bcr MAX_SIZE_BACKGROUND_BCR]
                [--min_size_background_antigen MIN_SIZE_BACKGROUND_ANTIGEN]
-               [--max_size_background_antigen MAX_SIZE_BACKGROUND_ANTIGEN] [--export_background] [--add_rank]
-               [--background_score BACKGROUND_SCORE] [--e_values E_VALUES] [--background_npy BACKGROUND_NPY]
-               [--rf_para] [--gen_msa] [--run_rf] [--skip_preprocess] [--skip_extract] [--runEmbed] [--runBind]
-               [--skip_check] [--suffix] [--no_rank] [--verbose] [--no_merge] [--move_npy] [--gen_npy] [--embedBCR]
-               [--bcr_heatmap] [--debug] [--backBCR_only] [--backAntigen_only]
+               [--max_size_background_antigen MAX_SIZE_BACKGROUND_ANTIGEN]
+               [--export_background] [--add_rank]
+               [--background_score BACKGROUND_SCORE] [--e_values E_VALUES]
+               [--background_npy BACKGROUND_NPY] [--rf_para] [--gen_msa]
+               [--run_rf] [--skip_preprocess] [--skip_extract] [--only_check]
+               [--runEmbed] [--runBind] [--skip_check] [--suffix] [--no_rank]
+               [--verbose] [--no_merge] [--move_npy] [--gen_npy] [--embedBCR]
+               [--bcr_heatmap] [--debug] [--Antigen_only] [--BCR_only]
 
 Parameters for the interface script.
 
 optional arguments:
   -h, --help            show this help message and exit
   --code CODE           the Cmai directory
-  --input INPUT         the input files in csv which should include Antigen_id,BCR_Vh,BCR_CDR3h
-  --out OUT             the directory for output files. An absolute path is required.
-  --env_path ENV_PATH   the file saving the directory of the Conda environments- python of runEmbed, python of
-                        runBind, and RoseTTAFold in order.
+  --input INPUT         the input files in csv which should include
+                        Antigen_id,BCR_Vh,BCR_CDR3h
+  --out OUT             the directory for output files. An absolute path is
+                        required.
+  --env_path ENV_PATH   the file saving the directory of the Conda
+                        environments- python of runEmbed, python of runBind,
+                        and RoseTTAFold in order.
   --rf_data RF_DATA     the database folder for RoseTTAFold
-  --fasta FASTA         The fasta file entering runEbed. When no sequence included in the input, the separate fasta
-                        file of antigens is required
-  --pre_dir PRE_DIR     the directory to save the preprocessed data. If not defiend, same with output directory.
-  --npy_dir NPY_DIR     the npy folder if different with "preprocess folder/NPY".
-  --cpu CPU             the maximum of cpus for antigen embedding. If not defined, use the value of paras/rf_para.txt
-  --mem MEM             the maximum of memory in GB for antigen embedding. If not defined, use the value of
-                        paras/rf_para.txt
+  --fasta FASTA         The fasta file entering runEbed. When no sequence
+                        included in the input, the separate fasta file of
+                        antigens is required
+  --pre_dir PRE_DIR     the directory to save the preprocessed data. If not
+                        defiend, same with output directory.
+  --npy_dir NPY_DIR     the npy folder if different with "preprocess
+                        folder/NPY".
+  --cpu CPU             the maximum of cpus for antigen embedding. If not
+                        defined, use the value of paras/rf_para.txt
+  --mem MEM             the maximum of memory in GB for antigen embedding. If
+                        not defined, use the value of paras/rf_para.txt
   --use_cpu             the option to use cpu or gpu.
-  --seed SEED           the seed for the first 100 background BCRs. To use the prepared embeded 100 BCRs, keep the
-                        seed to default 1
+  --seed SEED           the seed for the first 100 background BCRs. To use the
+                        prepared embeded 100 BCRs, keep the seed to default 1
   --min_size_background_bcr MIN_SIZE_BACKGROUND_BCR
-                        the initial and minimum sample size of background BCRs. The default is 100
+                        the initial and minimum sample size of background
+                        BCRs. The default is 100
   --max_size_background_bcr MAX_SIZE_BACKGROUND_BCR
-                        the maximum size for subsample of background BCRs, which should no more than 1000000. The
-                        default is 10000
+                        the maximum size for subsample of background BCRs,
+                        which should no more than 1000000. The default is
+                        10000
   --min_size_background_antigen MIN_SIZE_BACKGROUND_ANTIGEN
-                        the initial sample size of background Antigens. The default is 10
+                        the initial sample size of background Antigens. The
+                        default is 30
   --max_size_background_antigen MAX_SIZE_BACKGROUND_ANTIGEN
-                        the maximum size of subsample of background antigens, which should no more than 100. The
-                        deafult is 100
-  --export_background   Only export the score dict for background BCRs of quantity of the max_size_background_bcr
-                        number, default is False.
-  --add_rank            Only add ranks from background BCR scores to no_ranked results, default is False.
+                        the maximum size of subsample of background antigens,
+                        which should no more than 100. The deafult is 300
+  --export_background   Only export the score dict for background BCRs of
+                        quantity of the max_size_background_bcr number,
+                        default is False.
+  --add_rank            Only add ranks from background BCR scores to no_ranked
+                        results, default is False.
   --background_score BACKGROUND_SCORE
-                        the pkl file of the score dictionary of background BCRs
-  --e_values E_VALUES   E-value cutoff for inclusion in result alignment. Default is '1e-30 1e-10 1e-6 1e-3'
+                        the pkl file of the score dictionary of background
+                        BCRs
+  --e_values E_VALUES   E-value cutoff for inclusion in result alignment.
+                        Default is '1e-30 1e-10 1e-6 1e-3'
   --background_npy BACKGROUND_NPY
-                        the npy folder of background antigens if different with “preprocess folder/NPY”.
-  --rf_para             use the parameters from paras/rf_para.txt for antigen embedding. Default is False
+                        the npy folder of background antigens if different
+                        with the target npy folder.
+  --rf_para             use the parameters from paras/rf_para.txt for antigen
+                        embedding. Default is False
   --gen_msa             only run generating msa and exit. Default is False
-  --run_rf              skip generating msa and running embedding prediction. Default is False
+  --run_rf              skip generating msa and running embedding prediction.
+                        Default is False
   --skip_preprocess     skip preprocess of antigen_embedding. Default is False
-  --skip_extract        skip extracting NPY for antigen embedding. Default is False
+  --skip_extract        skip extracting NPY for antigen embedding. Default is
+                        False
+  --only_check          only run checking and preprocessing. Cannot be used
+                        together with skip_check. Default is False
   --runEmbed            only run antigen embedding. Default is False
   --runBind             only run binding. Default is False
-  --skip_check          skip check and preprocess of input data, only use when it has been done before. Default is
-                        False
-  --suffix              Adding suffix to antigen id. Only use to distinguish same-name antigens. The default is False.
-  --no_rank             Only export the predicted score but no rank in background BCRs, default is False.
+  --skip_check          skip checking and preprocessing of input data, only
+                        use when it has been done before. Default is False
+  --suffix              Adding suffix to antigen id. Only use to distinguish
+                        same-name antigens. The default is False.
+  --no_rank             Only export the predicted score but no rank in
+                        background BCRs, default is False.
   --verbose             Enable verbose output, default is False.
   --no_merge            Unable merging output to input, default is False.
-  --move_npy            only move npy files to the desired directory. Default is False
+  --move_npy            only move npy files to the desired directory. Default
+                        is False
   --gen_npy             extract npy from npz files. Default is False
-  --embedBCR            extract the bcr sequences and embeddings to the folder of preprocessed data. Default is False
-  --bcr_heatmap         export full embedding results including the heatmap comparison. Default is False
-  --debug               Switch to the debug mode and print output step by step. Default is False
-  --backBCR_only        Only get the rank in background BCRs. Default is False
-  --backAntigen_only    Only get the rank in background antigens. Default is False
+  --embedBCR            extract the bcr sequences and embeddings to the folder
+                        of preprocessed data. Default is False
+  --bcr_heatmap         export full embedding results including the heatmap
+                        comparison. Default is False
+  --debug               Switch to the debug mode and print output step by
+                        step. Default is False
+  --Antigen_only        Only get the rank of the anchor antigen in background
+                        BCRs. Default is True
+  --BCR_only            Only get the rank of the anchor BCR in background
+                        antigens. Default is False
 
 ```
 
