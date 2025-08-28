@@ -5,8 +5,8 @@ import os
 
 parser = argparse.ArgumentParser(description='Parameters for the getting bcr embeddings.')
 
-parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
-parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/project/DPDS/Wang_lab/shared/BCR_antigen/code/Cmai/data/example/output')
+parser.add_argument('--input',type = str, help = 'the input folder for the preprocessed input',default = '/ABSOLUTE/DIR/TO/Cmai/data/example/output')
+parser.add_argument('--out',type = str, help = 'the directory for output files',default = '/ABSOLUTE/DIR/TO/Cmai/data/example/output')
 # parser.add_argument('--env_path',type = str, help = 'the runBind environment path',default = '/home2/s205236/.conda/envs/runBind/bin/python')
 parser.add_argument('--verbose',action = 'store_true',help = 'export full outputs of bcr embedding including the heatmaps. Default is False')
 args = parser.parse_args()
