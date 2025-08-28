@@ -184,12 +184,12 @@ The expected runime for processing the test data is around 55m55.012s.
 
 
 ## Pipeline
+Note: if you are using version 1.1, please add '--Antigen_only' to match the version described in the paper at Nature Cancer.
 
 ```sh
-python Cmai.py --input 'data/example/input.csv' --out '/path/to/Cmai/example/data/example/output' --rf_data 'path/to/RoseTTAFold_database'
+python Cmai.py --input 'data/example/input.csv' --out '/path/to/Cmai/example/data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --Antigen_only
 ```
 ## Step-by-step Pipeline
-
 ```sh
 # Antigen Embedding:
 # In 1-step:
@@ -199,7 +199,7 @@ python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' 
 	python Cmai.py --code '/path/to/Cmai' --input 'data/example/binary_example.csv' --out 'data/example/output' --rf_data 'path/to/RoseTTAFold_database'  --runEmbed --run_rf
 
 # Binding Predict:
-python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check --runBind
+python Cmai.py --code '/path/to/Cmai' --out 'data/example/output' --skip_check --runBind --Antigen_only
 ```
 
 ## Usage
@@ -306,7 +306,7 @@ optional arguments:
   --debug               Switch to the debug mode and print output step by
                         step. Default is False
   --Antigen_only        Only get the rank of the anchor antigen in background
-                        BCRs. Default is True
+                        BCRs. Default is False
   --BCR_only            Only get the rank of the anchor BCR in background
                         antigens. Default is False
 
